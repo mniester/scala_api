@@ -64,8 +64,8 @@ abstract class DBBase {
   }
 
   def delProjectsByName(query: ProjectQueryByName): Unit = {
-    val removeProject = cursor.run(projects.filter(_.name === query.name).map(_.deleteTime).update(Pencilcase.stringTimeZonedNow()))
-    val removeTasks = cursor.run(tasks.filter(_.project === query.name).map(_.deleteTime).update(Pencilcase.stringTimeZonedNow()))
+    val removeProject = cursor.run(projects.filter(_.name === query.name).map(_.deleteTime).update(LocalDateTime.now().toString()))
+    val removeTasks = cursor.run(tasks.filter(_.project === query.name).map(_.deleteTime).update(LocalDateTime.now().toString()))
     Await.result(removeProject, Settings.dbWaitingDuration)
     Await.result(removeTasks, Settings.dbWaitingDuration)
   }
@@ -81,7 +81,7 @@ abstract class DBBase {
   }
 
   def delTasksByName(query: TaskQueryByName): Unit = {
-    Await.result(cursor.run(tasks.filter(_.name === query.name).map(_.deleteTime).update(Pencilcase.stringTimeZonedNow())), Settings.dbWaitingDuration)
+    Await.result(cursor.run(tasks.filter(_.name === query.name).map(_.deleteTime).update(LocalDateTime.now().toString())), Settings.dbWaitingDuration)
   }
 }
 

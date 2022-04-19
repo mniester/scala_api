@@ -180,10 +180,10 @@ class UnitTests extends AnyFunSuite {
                                         var dbResult2 = db.getProjectsByName(projectQuery);
                                         assert (dbResult2.length == 0);}
   
-  test("DB - add Project using Facade returns Project with the same name") {db.purge;
+  test("DB - add Project with the same name using Facade; returns Project with the same name") {db.purge;
                                         val project = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
                                         val projectQuery = ProjectQueryByName("Test")
                                         db.addProject(project);
                                         val dbResult = db.addProject(project).get;
-                                        } 
+                                        }
 }                                      
