@@ -83,7 +83,10 @@ abstract class DBBase {
   def delTasksByName(query: TaskQueryByName): Unit = {
     Await.result(cursor.run(tasks.filter(_.name === query.name).map(_.deleteTime).update(Pencilcase.stringTimeZonedNow())), Settings.dbWaitingDuration)
   }
+}
 
+abstract class DBFacade extends DBBase {
+   
   def checkOverlappingTasksInProject(task: TaskModel): Seq[TaskModel] = {
     val tasksOfProject = getTasksByProject(TaskQueryByProject(task.project))
     for (t <- tasksOfProject if task.checkLocalTimeDateOverlap(t)) yield {t}
@@ -103,10 +106,9 @@ abstract class DBBase {
     val projectWithSameName = getProjectsByName(ProjectQueryByName(newProject.name))
     if (projectWithSameName.isEmpty) {addProject(newProject); None} else {Some(projectWithSameName.head)}
   }
-
 }
 
-object SQLite extends DBBase {
+object SQLite extends DBFacade {
   val configFile = ConfigFactory.parseFile(new File(s"${os.pwd}/src/resources/application.conf"))
   val cursor = Database.forConfig(path = "", config = configFile.getConfig("db.sqlite3"))
 
