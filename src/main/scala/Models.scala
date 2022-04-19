@@ -20,11 +20,16 @@ case class ProjectModel(key: Int, name: String, author: String, startTime: Local
     (key, name, author, startTime.toString(), deleteTime)
 }
 
+case class ProjectWithTasksModel(project: ProjectModel, tasks: List[TaskModel]) {
+  lazy val duration = (for (t <- tasks) yield t.duration).sum
+}
+
+
 case class TaskModel(key: Int, name: String, author: String, startTime: LocalDateTime, endTime: LocalDateTime, project: String, time: Int,  volume: Int, comment: String, deleteTime: String) extends  Model {
   
-  def getProjectModel(): ProjectModel = ProjectModel(key = -1, name = project, author = this.author, startTime = this.startTime, deleteTime = "") 
+  def getProjectModel(): ProjectModel = new ProjectModel(key = -1, name = project, author = this.author, startTime = this.startTime, deleteTime = "") 
   
-  lazy val duration =  Duration.between(startTime, endTime).toSeconds()
+  lazy val duration = Duration.between(startTime, endTime).toSeconds()
 
   def toInputTuple(): Tuple10[Int, String, String, String, String, String, Int, Int, String, String] = 
     (key, name, author, startTime.toString(), endTime.toString(), project, time, volume, comment, deleteTime)

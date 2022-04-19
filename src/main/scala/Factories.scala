@@ -27,10 +27,16 @@ object UserFactory {
 object ProjectFactory {
   def apply (key: Int = -1, name: String, author: String, startTime: String,  deleteTime: String = ""): Option[ProjectModel] =
     if ((name.length <= Settings.maxProjectNameLength) && (author.length <= Settings.maxUserNameLength) && CheckISOTimeFormat(startTime)) {
-      Some(ProjectModel(key, name, author, LocalDateTime.parse(startTime), deleteTime))
+      Some(new ProjectModel(key, name, author, LocalDateTime.parse(startTime), deleteTime))
     } else {
       None
     }
+}
+
+object ProjectWithTasksFactory {
+  def apply (project: ProjectModel, tasks: List[TaskModel]): Option[ProjectWithTasksModel] = {
+    Some(ProjectWithTasksModel(project, tasks))
+  }
 }
 
 object TaskFactory {

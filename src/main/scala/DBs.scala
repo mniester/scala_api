@@ -14,6 +14,7 @@ import Settings._
 import Schemas._
 import Models._
 import Queries._ 
+import Factories.ProjectWithTasksFactory
 
 
 abstract class DBBase {
@@ -60,7 +61,7 @@ abstract class DBBase {
 
   def getProjectsByName(query: ProjectQueryByName): Seq[ProjectModel] = {
     val action = cursor.run(projects.filter(_.name === query.name).filter(_.deleteTime.length === 0).result)
-    Await.result(action, Settings.dbWaitingDuration).map(x => ProjectModel(x._1, x._2, x._3, LocalDateTime.parse(x._4), x._5))
+    Await.result(action, Settings.dbWaitingDuration).map(x => new ProjectModel(x._1, x._2, x._3, LocalDateTime.parse(x._4), x._5))
   }
 
   def delProjectsByName(query: ProjectQueryByName): Unit = {
@@ -99,12 +100,21 @@ abstract class DBFacade extends DBBase {
 
   def addTask(newTask: TaskModel): Seq[TaskModel] = {
     val overlappingTasks = checkOverlappingTasksInProject(newTask)
-    if (overlappingTasks.isEmpty) {addNewTask(newTask); Seq()} else overlappingTasks
+    val projectInDB = getProjectsByName(ProjectQueryByName(newTask.project))
+    if (projectInDB.isEmpty) {addNewProject(ProjectModel(newTask.key, newTask.project, newTask.author, newTask.startTime))} 
+    if (overlappingTasks.isEmpty) {addNewTask(newTask); Seq()} else overlappingTasks 
   }
 
   def addProject(newProject: ProjectModel): Option[ProjectModel] = {
     val projectWithSameName = getProjectsByName(ProjectQueryByName(newProject.name))
     if (projectWithSameName.isEmpty) {addNewProject(newProject); None} else {Some(projectWithSameName.head)}
+  }
+
+  def getProjectWithTasks (query: ProjectQueryByName): Option[ProjectWithTasksModel] = {
+    val project = getProjectsByName(ProjectQueryByName(query.name)).head
+    val tasks = getTasksByProject(TaskQueryByProject(query.name)).toList
+    val result = ProjectWithTasksFactory(project, tasks)
+    result
   }
 }
 

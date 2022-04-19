@@ -1,4 +1,5 @@
 import scala.concurrent.Await
+import scala.concurrent.ExecutionContext
 
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -10,6 +11,7 @@ import DBs.SQLite
 import Queries._
 
 class UnitTests extends AnyFunSuite {
+  implicit val execution = ExecutionContext.global
   val db = SQLite
   db.setup()
   test("test ScalaTest") {assert ((true == true) && (false ==  false))}
@@ -186,4 +188,23 @@ class UnitTests extends AnyFunSuite {
                                         db.addProject(project);
                                         val dbResult = db.addProject(project).get;
                                         }
-}                                      
+  
+  test("DB -  getProjectWithTasks") {db.purge;
+    val project = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
+    val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
+    val task2 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
+    db.addProject(project)
+    db.addTask(task1)
+    db.addTask(task2)
+    val result = db.getProjectWithTasks(ProjectQueryByName("Test")).get
+    assert(result.project == project);
+    assert((result.tasks.head.duration + result.tasks.last.duration) == (task1.duration + task2.duration))
+  }
+
+  test("DB - add project using Task") {db.purge;
+    val task = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
+    db.addTask(task)
+    val result = db.getProjectsByName(ProjectQueryByName("Test")).head
+    assert(result.isInstanceOf[ProjectModel])
+  }
+}
