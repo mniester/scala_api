@@ -16,7 +16,7 @@
     - [>] added Facade for adding Project
     - [>] added Facade for adding User
     - [x] separate DB Base from Facade
-    - [ ] get full project
+    - [ ] get full Project
     - [ ] project stats
     - [ ] project filters
     - [ ] project sorting

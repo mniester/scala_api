@@ -35,16 +35,16 @@ abstract class DBBase {
     {val createDB = DBIO.seq((users.schema ++ projects.schema ++ tasks.schema).createIfNotExists)
     Await.result(cursor.run(createDB), Settings.dbWaitingDuration)}
   
-  def addUser (user: UserModel): Unit =
+  def addNewUser (user: UserModel): Unit =
     Await.result(cursor.run(users += user.toInputTuple), Settings.dbWaitingDuration) 
      
-  def addProject (project: ProjectModel): Unit =
+  def addNewProject (project: ProjectModel): Unit =
     Await.result(cursor.run(projects += project.toInputTuple), Settings.dbWaitingDuration)
   
-  def addTask (task: TaskModel): Unit =
+  def addNewTask (task: TaskModel): Unit =
     Await.result(cursor.run(tasks += task.toInputTuple), Settings.dbWaitingDuration)
   
-  def addTasks (newTasks: Seq[TaskModel]): Unit = {
+  def addNewTasks (newTasks: Seq[TaskModel]): Unit = {
     val nt = for (x <- newTasks) yield x.toInputTuple;
     Await.result(cursor.run(tasks ++= nt), Settings.dbWaitingDuration)
   }
@@ -92,19 +92,19 @@ abstract class DBFacade extends DBBase {
     for (t <- tasksOfProject if task.checkLocalTimeDateOverlap(t)) yield {t}
   }
 
-  def addUserFacade(newUser: UserModel): Option[UserModel] = {
+  def addUser(newUser: UserModel): Option[UserModel] = {
     val userWithSameName = getUsersByName(UserQueryByName(newUser.name))
-    if (userWithSameName.isEmpty) {addUser(newUser); None} else {Some(userWithSameName.head)}
+    if (userWithSameName.isEmpty) {super.addNewUser(newUser); None} else {Some(userWithSameName.head)}
   }
 
-  def addTaskFacade(newTask: TaskModel): Seq[TaskModel] = {
+  def addTask(newTask: TaskModel): Seq[TaskModel] = {
     val overlappingTasks = checkOverlappingTasksInProject(newTask)
-    if (overlappingTasks.isEmpty) {addTask(newTask); Seq()} else overlappingTasks
+    if (overlappingTasks.isEmpty) {addNewTask(newTask); Seq()} else overlappingTasks
   }
 
-  def addProjectFacade(newProject: ProjectModel): Option[ProjectModel] = {
+  def addProject(newProject: ProjectModel): Option[ProjectModel] = {
     val projectWithSameName = getProjectsByName(ProjectQueryByName(newProject.name))
-    if (projectWithSameName.isEmpty) {addProject(newProject); None} else {Some(projectWithSameName.head)}
+    if (projectWithSameName.isEmpty) {addNewProject(newProject); None} else {Some(projectWithSameName.head)}
   }
 }
 
