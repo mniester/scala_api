@@ -22,6 +22,7 @@ case class ProjectModel(key: Int, name: String, author: String, startTime: Local
 
 case class ProjectWithTasksModel(project: ProjectModel, tasks: List[TaskModel]) {
   lazy val duration = (for (t <- tasks) yield t.duration).sum
+  lazy val lastUpdate = if (tasks.isEmpty) {project.startTime} else {(for (t <- tasks) yield t.endTime).max} 
 }
 
 

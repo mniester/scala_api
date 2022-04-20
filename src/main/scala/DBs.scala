@@ -116,6 +116,11 @@ abstract class DBFacade extends DBBase {
     val result = ProjectWithTasksFactory(project, tasks)
     result
   }
+
+  def getProjectWithTasksFiltered (query: ProjectQueryByName): Option[ProjectWithTasksModel] = {
+    ???
+  }
+
 }
 
 object SQLite extends DBFacade {

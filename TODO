@@ -8,7 +8,7 @@
 2) [ ] prepare TypeScript test page
 3) [>] Add checking to DB data methods
 4) [ ] Add routes
-5) [v] Data Base
+5) [v] Data Base and Models
     - [x] check overlapping when adding a new task
     - [x] ban adding new task if tasks overlapping
     - [x] no projects with the same name
@@ -17,18 +17,32 @@
     - [>] added Facade for adding User
     - [x] separate DB Base from Facade
     - [x] get full Project
+    - [ ] Duration => Period
+    - [ ] UUID as user ID
+    - [ ] only author can delete data
+    - [ ] only author can modify data
     - [ ] project stats
     - [ ] project filters
     - [ ] project sorting
 6) JSONs
     - [x] JWT coding
-    - [ ] Response - Tasks overlapping
-    - [ ] Response - ok
-    - [ ] Response - too long strings
-    - [ ] Project - Project has already used name
-    - [ ] Project added ok
+    Request
+        - [ ] Add User
+        - [ ] Add Task
+        - [ ] Add Project
+        - [ ] Get Project with Tasks
+    Responses
+        - [ ] Tasks overlapping
+        - [ ] Task added ok
+        - [ ] Task Response - too long strings
+        - [ ] Project has already used name
+        - [ ] Project added ok
+        - [ ] User not in DB
+        - [ ] User has already used name
+        - [ ] User added ok
 7) [x] Choose datetime data type
 8) [z] Bug in test("DB - add, get and remove task")
 9) [z] Generalize gets in DB
 10) [z] Change Queries to String subclass
-11) [ ] Remove Unit - all functions should return something
+11) [-] Remove Unit - all functions should return something
+12) [ ] Separate Config for Secrets
