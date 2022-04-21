@@ -2,6 +2,7 @@ package  Models
 
 import java.time.LocalDateTime
 import java.time.Duration
+import io.jvm.uuid._
 
 import Settings._
 
@@ -10,9 +11,9 @@ abstract class Model {
   def toInputTuple (): Product
 }
 
-case class UserModel(key: Int, name: String) extends  Model {
-  def toInputTuple(): Tuple2[Int, String] =
-    (key, name)
+case class UserModel(key: Int, uuid: String, name: String) extends  Model {
+  def toInputTuple(): Tuple3[Int, String, String] =
+    (key, uuid, name)
 }
 
 case class ProjectModel(key: Int, name: String, author: String, startTime: LocalDateTime, deleteTime: String = "") extends Model {

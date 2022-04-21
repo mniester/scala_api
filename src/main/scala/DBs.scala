@@ -52,7 +52,7 @@ abstract class DBBase {
 
   def getUsersByName(query: UserQueryByName): Seq[UserModel] = {
     val action = cursor.run(users.filter(_.name === query.name).result)
-    Await.result(action, Settings.dbWaitingDuration).map(x => UserModel(x._1, x._2))
+    Await.result(action, Settings.dbWaitingDuration).map(x => UserModel(x._1, x._2, x._3))
   }
 
   def delUsersByName(query: UserQueryByName): Unit = {

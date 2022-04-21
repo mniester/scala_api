@@ -16,12 +16,13 @@ object CheckISOTimeFormat {
 }
 
 object UserFactory {
-  def apply (key: Int = -1, name: String): Option[UserModel] = // this fake key is used only in new inputs, because schemas demand any. 
+  def apply (key: Int = -1, uuid: String, name: String): Option[UserModel] = {// this fake key is used only in new inputs, because schemas demand any. 
     if ((name.length <= Settings.maxUserNameLength) && (name.length >= Settings.minUserNameLength)) {
-      Some(UserModel(key, name))
+      Some(UserModel(key, uuid, name))
     } else {
       None
     }
+  }
 }
 
 object ProjectFactory {

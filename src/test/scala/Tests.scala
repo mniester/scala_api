@@ -3,6 +3,8 @@ import scala.concurrent.ExecutionContext
 
 import org.scalatest.funsuite.AnyFunSuite
 
+import io.jvm.uuid._
+
 import Settings._
 import Models._
 import Factories._
@@ -20,7 +22,7 @@ class UnitTests extends AnyFunSuite {
   test("CheckISOTimeFormat - fail; not proper datetime") {assert (!CheckISOTimeFormat("2222-33-02T22:22:22"))}
   test("CheckISOTimeFormat - fail; string is not a datetime") {assert (!CheckISOTimeFormat("abcd"))}
 
-  test("UserFactory - fail; name too long") {assert (UserFactory(name = "ab" * Settings.maxUserNameLength) == None)}
+  test("UserFactory - fail; name too long") {assert (UserFactory(uuid = UUID.random.toString, name = "ab" * Settings.maxUserNameLength) == None)}
   test("ProjectFactory - fail; name too long") {assert (ProjectFactory(name = "abc" * Settings.maxProjectNameLength, author = "abc", startTime = "2000-01-01T00:01:01") == None)}
   test("ProjectFactory - fail; user name too long") {assert (ProjectFactory(name = "abc", author = "abc" * Settings.maxProjectNameLength, startTime = "2000-01-01T00:01:01") == None)}
   test("ProjectFactory - fail; datetime not ok") {assert (ProjectFactory(name = "abc" * Settings.maxProjectNameLength, author = "abc", startTime = "2000-13-01T00:01:01") == None)}
@@ -41,14 +43,15 @@ class UnitTests extends AnyFunSuite {
                                                         comment = "abc") == None)}
   
   test("DB - add, get and remove user") {db.purge;
-                                        val user = UserFactory(key = 1, name = "Test").get;
+                                        val user = UserFactory(key = 1, uuid = UUID.random.toString, name = "Test").get;
                                         val userQuery = UserQueryByName("Test")
                                         db.addUser(user);
                                         var dbResult = db.getUsersByName(userQuery).last; 
                                         assert (user == dbResult);
                                         db.delUsersByName(userQuery);
                                         var dbResult2 = db.getUsersByName(userQuery);
-                                        assert (dbResult2.length == 0);}
+                                        assert (dbResult2.length == 0);
+                                        }
   
   test("DB - add, get and remove project") {db.purge;
                                         val project = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
@@ -59,21 +62,6 @@ class UnitTests extends AnyFunSuite {
                                         db.delProjectsByName(projectQuery);
                                         var dbResult2 = db.getProjectsByName(projectQuery);
                                         assert (dbResult2.length == 0);}
-
-/* Lower tests sometimes returns this:
-
-  DB - add, get and remove task *** FAILED ***
-  java.lang.IndexOutOfBoundsException: 0 is out of bounds (empty vector)
-  at scala.collection.immutable.Vector0$.ioob(Vector.scala:371)
-  at scala.collection.immutable.Vector0$.apply(Vector.scala:336)
-  at scala.collection.immutable.Vector0$.apply(Vector.scala:334)
-  at UnitTests.$anonfun$new$12(Tests.scala:56)
-  at org.scalatest.OutcomeOf.outcomeOf(OutcomeOf.scala:85)
-  at org.scalatest.OutcomeOf.outcomeOf$(OutcomeOf.scala:83)
-  at org.scalatest.OutcomeOf$.outcomeOf(OutcomeOf.scala:104)
-  at org.scalatest.Transformer.apply(Transformer.scala:22)
-  at org.scalatest.Transformer.apply(Transformer.scala:20)
-  at org.scalatest.funsuite.AnyFunSuiteLike$$anon$1.apply(AnyFunSuiteLike.scala:226)*/
   
   test("DB - add, get and remove task by name") {db.purge;
                                         val task = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
@@ -139,17 +127,18 @@ class UnitTests extends AnyFunSuite {
   }
 
   test("DB - add, get and remove User using Facade OK") {db.purge;
-                                        val user = UserFactory(key = 1, name = "Test").get;
+                                        val user = UserFactory(key = 1, uuid = UUID.random.toString, name = "Test").get;
                                         val userQuery = UserQueryByName("Test")
                                         db.addUser(user);
                                         val dbResult = db.getUsersByName(userQuery).last; 
                                         assert (user == dbResult);
                                         db.delUsersByName(userQuery);
                                         var dbResult2 = db.getUsersByName(userQuery);
-                                        assert (dbResult2.length == 0);}
+                                        assert (dbResult2.length == 0);
+                                        }
   
   test("DB - add User using Facade returns User with the same name") {db.purge;
-                                        val user = UserFactory(key = 1, name = "Test").get;
+                                        val user = UserFactory(key = 1, uuid = UUID.random.toString, name = "Test").get;
                                         val userQuery = UserQueryByName("Test")
                                         db.addUser(user);
                                         val dbResult = db.addUser(user).get;
@@ -161,7 +150,7 @@ class UnitTests extends AnyFunSuite {
                                         db.addTask(task);
                                         val dbResult = db.getTasksByName(taskQuery)(0);
                                         assert (task == dbResult);
-                                      }
+                                        }
 
   test("DB - addTaskFacade - return overlapping task ") {db.purge;
     val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;

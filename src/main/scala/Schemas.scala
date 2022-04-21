@@ -2,12 +2,11 @@ package Schemas
 
 import slick.jdbc.SQLiteProfile.api._
 
-
-
-class UserSchema (tag: Tag) extends Table [(Int, String)](tag, "users") {
+class UserSchema (tag: Tag) extends Table [(Int, String, String)](tag, "users") {
     def key = column[Int]("key", O.PrimaryKey, O.AutoInc)
+    def uuid = column[String]("uuid")
     def name = column[String]("name")
-    def * = (key, name)
+    def * = (key, uuid, name)
 }
 
 class ProjectSchema (tag: Tag) extends Table [(Int, String, String, String, String)] (tag, "projects") {
