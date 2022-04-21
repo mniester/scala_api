@@ -12,7 +12,7 @@ class UserSchema (tag: Tag) extends Table [(Int, String)](tag, "users") {
 
 class ProjectSchema (tag: Tag) extends Table [(Int, String, String, String, String)] (tag, "projects") {
   def key = column[Int]("key", O.PrimaryKey, O.AutoInc)
-  def name = column[String]("name", O.Unique)
+  def name = column[String]("name")
   def author = column[String]("author")
   def startTime = column[String]("start_time")
   def deleteTime = column[String] ("delete_time", O.Default(""))

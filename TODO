@@ -17,7 +17,7 @@
     - [>] added Facade for adding User
     - [x] separate DB Base from Facade
     - [x] get full Project
-    - [ ] Duration => Period
+    - [-] Duration => Period
     - [ ] UUID as user ID
     - [ ] only author can delete data
     - [ ] only author can modify data

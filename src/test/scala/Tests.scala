@@ -186,7 +186,7 @@ class UnitTests extends AnyFunSuite {
                                         val project = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
                                         val projectQuery = ProjectQueryByName("Test")
                                         db.addProject(project);
-                                        val dbResult = db.addProject(project).get;
+                                        val dbResult = db.getProjectsByName(projectQuery)
                                         }
   
   test("DB -  getProjectWithTasks") {db.purge;

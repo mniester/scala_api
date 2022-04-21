@@ -105,9 +105,8 @@ abstract class DBFacade extends DBBase {
     if (overlappingTasks.isEmpty) {addNewTask(newTask); Seq()} else overlappingTasks 
   }
 
-  def addProject(newProject: ProjectModel): Option[ProjectModel] = {
-    val projectWithSameName = getProjectsByName(ProjectQueryByName(newProject.name))
-    if (projectWithSameName.isEmpty) {addNewProject(newProject); None} else {Some(projectWithSameName.head)}
+  def addProject(newProject: ProjectModel): Unit = {
+    addNewProject(newProject)
   }
 
   def getProjectWithTasks (query: ProjectQueryByName): Option[ProjectWithTasksModel] = {
