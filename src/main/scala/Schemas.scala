@@ -2,6 +2,7 @@ package Schemas
 
 import slick.jdbc.SQLiteProfile.api._
 
+
 class UserSchema (tag: Tag) extends Table [(Int, String, String)](tag, "users") {
     def key = column[Int]("key", O.PrimaryKey, O.AutoInc)
     def uuid = column[String]("uuid")

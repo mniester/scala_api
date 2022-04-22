@@ -44,7 +44,7 @@ class UnitTests extends AnyFunSuite {
   
   test("DB - add, get and remove user") {db.purge;
                                         val user = UserFactory(key = 1, uuid = UUID.random.toString, name = "Test").get;
-                                        val userQuery = UserQueryByName("Test")
+                                        val userQuery = "Test"
                                         db.addUser(user);
                                         var dbResult = db.getUsersByName(userQuery).last; 
                                         assert (user == dbResult);
@@ -55,7 +55,7 @@ class UnitTests extends AnyFunSuite {
   
   test("DB - add, get and remove project") {db.purge;
                                         val project = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
-                                        val projectQuery = ProjectQueryByName("Test")
+                                        val projectQuery = "Test"
                                         db.addProject(project);
                                         val dbResult = db.getProjectsByName(projectQuery).last; 
                                         assert (project == dbResult);
@@ -65,7 +65,7 @@ class UnitTests extends AnyFunSuite {
   
   test("DB - add, get and remove task by name") {db.purge;
                                         val task = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
-                                        val taskQuery = TaskQueryByName("Test")
+                                        val taskQuery = "Test"
                                         db.addTask(task);
                                         val dbResult = db.getTasksByName(taskQuery)(0);
                                         assert (task == dbResult);
@@ -76,7 +76,7 @@ class UnitTests extends AnyFunSuite {
 
   test("DB - add, get task by project") {db.purge;
                                         val task = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
-                                        val taskQuery = TaskQueryByProject("Test")
+                                        val taskQuery = "Test"
                                         db.addTask(task);
                                         val dbResult = db.getTasksByProject(taskQuery)(0);
                                         assert (task == dbResult);
@@ -85,8 +85,8 @@ class UnitTests extends AnyFunSuite {
   test("DB - remove Project with Tasks") {db.purge;
                                         val task = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
                                         val project = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
-                                        val taskQuery = TaskQueryByName("Test")
-                                        val projectQuery = ProjectQueryByName("Test")
+                                        val taskQuery = "Test"
+                                        val projectQuery = "Test"
                                         db.addTask(task);
                                         db.addProject(project);
                                         db.delProjectsByName(projectQuery);
@@ -128,7 +128,7 @@ class UnitTests extends AnyFunSuite {
 
   test("DB - add, get and remove User using Facade OK") {db.purge;
                                         val user = UserFactory(key = 1, uuid = UUID.random.toString, name = "Test").get;
-                                        val userQuery = UserQueryByName("Test")
+                                        val userQuery = "Test"
                                         db.addUser(user);
                                         val dbResult = db.getUsersByName(userQuery).last; 
                                         assert (user == dbResult);
@@ -139,14 +139,14 @@ class UnitTests extends AnyFunSuite {
   
   test("DB - add User using Facade returns User with the same name") {db.purge;
                                         val user = UserFactory(key = 1, uuid = UUID.random.toString, name = "Test").get;
-                                        val userQuery = UserQueryByName("Test")
+                                        val userQuery = "Test"
                                         db.addUser(user);
                                         val dbResult = db.addUser(user).get;
                                         }
 
   test("DB - add Task using Facade ok") {db.purge;
                                         val task = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
-                                        val taskQuery = TaskQueryByName("Test")
+                                        val taskQuery = "Test"
                                         db.addTask(task);
                                         val dbResult = db.getTasksByName(taskQuery)(0);
                                         assert (task == dbResult);
@@ -163,7 +163,7 @@ class UnitTests extends AnyFunSuite {
 
   test("DB - add, get and remove Project using Facade OK") {db.purge;
                                         val project = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
-                                        val projectQuery = ProjectQueryByName("Test")
+                                        val projectQuery = "Test"
                                         db.addProject(project);
                                         val dbResult = db.getProjectsByName(projectQuery).last; 
                                         assert (project == dbResult);
@@ -173,7 +173,7 @@ class UnitTests extends AnyFunSuite {
   
   test("DB - add Project with the same name using Facade; returns Project with the same name") {db.purge;
                                         val project = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
-                                        val projectQuery = ProjectQueryByName("Test")
+                                        val projectQuery = "Test"
                                         db.addProject(project);
                                         val dbResult = db.getProjectsByName(projectQuery)
                                         }
@@ -185,7 +185,7 @@ class UnitTests extends AnyFunSuite {
     db.addProject(project)
     db.addTask(task1)
     db.addTask(task2)
-    val result = db.getProjectWithTasks(ProjectQueryByName("Test")).get
+    val result = db.getProjectWithTasks("Test").get
     assert(result.project == project);
     assert((result.tasks.head.duration + result.tasks.last.duration) == (task1.duration + task2.duration))
   }
@@ -193,7 +193,7 @@ class UnitTests extends AnyFunSuite {
   test("DB - add project using Task") {db.purge;
     val task = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
     db.addTask(task)
-    val result = db.getProjectsByName(ProjectQueryByName("Test")).head
+    val result = db.getProjectsByName("Test").head
     assert(result.isInstanceOf[ProjectModel])
   }
 }

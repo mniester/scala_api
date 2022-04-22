@@ -1,8 +1,10 @@
-import DBs.SQLite
+import slick.jdbc.SQLiteProfile.api._
 
-import io.jvm.uuid._
+
+import slick.jdbc.SQLiteProfile.api._
+import slick.lifted.TableQuery
+
 
 object Dev extends App {
-  val x = UUID.random
-  println(x)
+  val x = TableQuery
 }

@@ -1,7 +1,6 @@
 package Strings
 
 import pdi.jwt.{Jwt, JwtAlgorithm}
-import javax.crypto.SecretKey
 
 import Settings._
 
