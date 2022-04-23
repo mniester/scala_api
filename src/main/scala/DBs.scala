@@ -12,8 +12,7 @@ import java.time.LocalDateTime
 
 import Settings._
 import Schemas._
-import Models._
-import Queries._ 
+import DataModels._ 
 import Factories.ProjectWithTasksFactory
 
 
@@ -38,26 +37,32 @@ abstract class DBBase {
     Await.result(cursor.run(createDB), Settings.dbWaitingDuration)}
   
   def addNewUser (user: UserModel): Unit =
-    Await.result(cursor.run(users += user.toInputTuple), Settings.dbWaitingDuration) 
+    Await.result(cursor.run(users += user), Settings.dbWaitingDuration) 
      
   def addNewProject (project: ProjectModel): Unit =
-    Await.result(cursor.run(projects += project.toInputTuple), Settings.dbWaitingDuration)
+    Await.result(cursor.run(projects += project), Settings.dbWaitingDuration)
   
   def addNewTask (task: TaskModel): Unit =
-    Await.result(cursor.run(tasks += task.toInputTuple), Settings.dbWaitingDuration)
+    Await.result(cursor.run(tasks += task), Settings.dbWaitingDuration)
   
   def addNewTasks (newTasks: Seq[TaskModel]): Unit = {
-    val nt = for (x <- newTasks) yield x.toInputTuple;
+    val nt = for (x <- newTasks) yield x;
     Await.result(cursor.run(tasks ++= nt), Settings.dbWaitingDuration)
   }
 
-  // def filterByName(source: TableQuery[UserSchema], filter: String) = {
-  //   source.filter(_.name  === filter)
-  // }
+  def filterByName(source: TableQuery[UserSchema], filter: String) = {
+    source.filter(_.name  === filter)
+  }
+
+  def filterByName(source: Query[UserSchema, _ , Seq], filter: String) = {
+    source.filter(_.name  === filter)
+  }
 
   def getUsersByName(query: String): Seq[UserModel] = {
-    val action = cursor.run(users.filter(_.name === query).result)
-    Await.result(action, Settings.dbWaitingDuration).map(x => UserModel(x._1, x._2, x._3))
+    //val action = cursor.run(users.filter(_.name === query).result)
+    val action1 = filterByName(users, query)
+    val action2 = cursor.run(action1.result)
+    Await.result(action2, Settings.dbWaitingDuration)
   }
 
   def delUsersByName(query: String): Unit = {
@@ -66,7 +71,7 @@ abstract class DBBase {
 
   def getProjectsByName(query: String): Seq[ProjectModel] = {
     val action = cursor.run(projects.filter(_.name === query).filter(_.deleteTime.length === 0).result)
-    Await.result(action, Settings.dbWaitingDuration).map(x => new ProjectModel(x._1, x._2, x._3, LocalDateTime.parse(x._4), x._5))
+    Await.result(action, Settings.dbWaitingDuration)
   }
 
   def delProjectsByName(query: String): Unit = {
@@ -78,12 +83,12 @@ abstract class DBBase {
 
   def getTasksByName(query: String): Seq[TaskModel] = {
     val action = cursor.run(tasks.filter(_.name === query).filter(_.deleteTime.length === 0).result)
-    Await.result(action, Settings.dbWaitingDuration).map(x => TaskModel(x._1, x._2, x._3, LocalDateTime.parse(x._4), LocalDateTime.parse(x._5), x._6, x._7, x._8, x._9, x._10))
+    Await.result(action, Settings.dbWaitingDuration) //.map(x => TaskModel(x._1, x._2, x._3, LocalDateTime.parse(x._4), LocalDateTime.parse(x._5), x._6, x._7, x._8, x._9, x._10))
   }
 
   def getTasksByProject(query: String): Seq[TaskModel] = {
     val action = cursor.run(tasks.filter(_.project === query).filter(_.deleteTime.length === 0).result)
-    Await.result(action, Settings.dbWaitingDuration).map(x => TaskModel(x._1, x._2, x._3, LocalDateTime.parse(x._4), LocalDateTime.parse(x._5), x._6, x._7, x._8, x._9, x._10))
+    Await.result(action, Settings.dbWaitingDuration)// .map(x => TaskModel(x._1, x._2, x._3, LocalDateTime.parse(x._4), LocalDateTime.parse(x._5), x._6, x._7, x._8, x._9, x._10))
   }
 
   def delTasksByName(query: String): Unit = {

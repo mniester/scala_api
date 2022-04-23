@@ -6,11 +6,10 @@ import org.scalatest.funsuite.AnyFunSuite
 import io.jvm.uuid._
 
 import Settings._
-import Models._
+import DataModels._
 import Factories._
 import Strings._
 import DBs.SQLite
-import Queries._
 
 class UnitTests extends AnyFunSuite {
   implicit val execution = ExecutionContext.global

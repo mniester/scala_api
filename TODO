@@ -8,7 +8,7 @@
 2) [ ] prepare TypeScript test page
 3) [>] Add checking to DB data methods
 4) [ ] Add routes
-5) [v] Data Base and Models
+5) [v] Data Base and DataModels
     - [x] check overlapping when adding a new task
     - [x] ban adding new task if tasks overlapping
     - [x] no projects with the same name
