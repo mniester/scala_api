@@ -54,12 +54,7 @@ abstract class DBBase {
     source.filter(_.name  === filter)
   }
 
-  def filterByName(source: Query[UserSchema, _ , Seq], filter: String) = {
-    source.filter(_.name  === filter)
-  }
-
   def getUsersByName(query: String): Seq[UserModel] = {
-    //val action = cursor.run(users.filter(_.name === query).result)
     val action1 = filterByName(users, query)
     val action2 = cursor.run(action1.result)
     Await.result(action2, Settings.dbWaitingDuration)
@@ -125,11 +120,6 @@ abstract class DBFacade extends DBBase {
     val result = ProjectWithTasksFactory(project, tasks)
     result
   }
-
-  // def getProjectWithTasksFiltered (query: ProjectQueryByName): Option[ProjectWithTasksModel] = {
-  //   ???
-  // }
-
 }
 
 object SQLite extends DBFacade {

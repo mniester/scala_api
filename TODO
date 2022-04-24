@@ -46,3 +46,4 @@
 10) [z] Change Queries to String subclass
 11) [-] Remove Unit - all functions should return something
 12) [ ] Separate Config for Secrets
+13) [z] Combinign mutiple filters into one; duck typing
