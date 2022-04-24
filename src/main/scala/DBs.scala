@@ -12,8 +12,8 @@ import java.time.LocalDateTime
 
 import Settings._
 import Schemas._
-import DataModels._ 
-import Factories.ProjectWithTasksFactory
+import DataModels._
+import Factories._
 
 
 
@@ -50,12 +50,12 @@ abstract class DBBase {
     Await.result(cursor.run(tasks ++= nt), Settings.dbWaitingDuration)
   }
 
-  def filterByName(source: TableQuery[UserSchema], filter: String) = {
+  def filterUserByName(source: TableQuery[UserSchema], filter: String) = {
     source.filter(_.name  === filter)
   }
 
-  def getUsersByName(query: String): Seq[UserModel] = {
-    val action1 = filterByName(users, query)
+  def getUserByName(query: String): Seq[UserModel] = {
+    val action1 = filterUserByName(users, query)
     val action2 = cursor.run(action1.result)
     Await.result(action2, Settings.dbWaitingDuration)
   }
@@ -67,7 +67,12 @@ abstract class DBBase {
   def getProjectsByName(query: String): Seq[ProjectModel] = {
     val action = cursor.run(projects.filter(_.name === query).filter(_.deleteTime.length === 0).result)
     Await.result(action, Settings.dbWaitingDuration)
-  } 
+  }
+
+  def getProjectByKey(query: Int): Seq[ProjectModel] = {
+    val action = cursor.run(projects.filter(_.key === query).filter(_.deleteTime.length === 0).result)
+    Await.result(action, Settings.dbWaitingDuration)
+  }  
 
   def delProjectByKey(key: Int): Unit = {
     val removeProject = cursor.run(projects.filter(_.key === key).map(_.deleteTime).update(LocalDateTime.now().toString()))
@@ -99,7 +104,7 @@ abstract class DBFacade extends DBBase {
   }
 
   def addUser(newUser: UserModel): Option[UserModel] = {
-    val userWithSameName = getUsersByName(newUser.name)
+    val userWithSameName = getUserByName(newUser.name)
     if (userWithSameName.isEmpty) {super.addNewUser(newUser); None} else {Some(userWithSameName.head)}
   }
 
@@ -112,19 +117,17 @@ abstract class DBFacade extends DBBase {
     addNewProject(newProject)
   }
 
-  def getProjectWithTasks (query: String): Option[ProjectWithTasksModel] = {
-    val project = getProjectsByName(query).head
+  def getProjectWithTasks (query: Int): Option[ProjectModelwithTasks] = {
+    val project = getProjectByKey(query).head
     val key = project.key
     val tasks = getTasksByProject(key).toList
-    val result = ProjectWithTasksFactory(project, tasks)
-    result
+    ProjectModelwithTasksFactory(project, tasks)
   }
 }
 
 object SQLite extends DBFacade {
   val configFile = ConfigFactory.parseFile(new File(s"${os.pwd}/src/resources/application.conf"))
   val cursor = Database.forConfig(path = "", config = configFile.getConfig("db.sqlite3"))
-
   def resetSequences: Unit = {
     val resetSequences = sqlu"""UPDATE sqlite_sequence SET seq = 0; VACUUM;"""
     Await.result(cursor.run(resetSequences), Settings.dbWaitingDuration)

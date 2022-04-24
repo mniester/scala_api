@@ -45,10 +45,10 @@ class UnitTests extends AnyFunSuite {
                                         val user = UserFactory(key = 1, uuid = UUID.random.toString, name = "Test").get;
                                         val userQuery = "Test"
                                         db.addUser(user);
-                                        var dbResult = db.getUsersByName(userQuery).last; 
+                                        var dbResult = db.getUserByName(userQuery).last; 
                                         assert (user == dbResult);
                                         db.delUsersByName(userQuery);
-                                        var dbResult2 = db.getUsersByName(userQuery);
+                                        var dbResult2 = db.getUserByName(userQuery);
                                         assert (dbResult2.length == 0);
                                         }
   
@@ -129,10 +129,10 @@ class UnitTests extends AnyFunSuite {
                                         val user = UserFactory(key = 1, uuid = UUID.random.toString, name = "Test").get;
                                         val userQuery = "Test"
                                         db.addUser(user);
-                                        val dbResult = db.getUsersByName(userQuery).last; 
+                                        val dbResult = db.getUserByName(userQuery).last; 
                                         assert (user == dbResult);
                                         db.delUsersByName(userQuery);
-                                        var dbResult2 = db.getUsersByName(userQuery);
+                                        var dbResult2 = db.getUserByName(userQuery);
                                         assert (dbResult2.length == 0);
                                         }
   
@@ -178,14 +178,13 @@ class UnitTests extends AnyFunSuite {
                                         }
   
   test("DB -  getProjectWithTasks") {db.purge;
-    val project = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
-    val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
-    val task2 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
-    db.addProject(project)
-    db.addTask(task1)
-    db.addTask(task2)
-    val result = db.getProjectWithTasks("Test").get
-    assert(result.project == project);
-    assert((result.tasks.head.duration + result.tasks.last.duration) == (task1.duration + task2.duration))
-  }
+     val project = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
+     val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
+     val task2 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
+     db.addProject(project)
+     db.addTask(task1)
+     db.addTask(task2)
+     val result = db.getProjectWithTasks(1).get
+     assert((result.tasks.head.duration + result.tasks.last.duration) == (task1.duration + task2.duration))
+   }
 }

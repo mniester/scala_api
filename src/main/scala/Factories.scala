@@ -34,9 +34,9 @@ object ProjectFactory {
     }
 }
 
-object ProjectWithTasksFactory {
-  def apply (project: ProjectModel, tasks: List[TaskModel]): Option[ProjectWithTasksModel] = {
-    Some(ProjectWithTasksModel(project, tasks))
+object ProjectModelwithTasksFactory {
+  def apply (project: ProjectModel, tasks: List[TaskModel]): Option[ProjectModelwithTasks] = {
+    Some(ProjectModelwithTasks(key = project.key, name = project.name, author = project.author, startTime = project.startTime, deleteTime = project.deleteTime, tasks = tasks))
   }
 }
 
