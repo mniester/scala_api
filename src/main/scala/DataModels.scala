@@ -13,7 +13,7 @@ case class ProjectModel(key: Int, name: String, author: String, startTime: Strin
 
 case class ProjectWithTasksModel(project: ProjectModel, tasks: List[TaskModel])
 
-case class TaskModel(key: Int, name: String, author: String, startTime: String, endTime: String, project: String, time: Int,  volume: Int, comment: String, deleteTime: String) {
+case class TaskModel(key: Int, name: String, author: String, startTime: String, endTime: String, project: Int, time: Int,  volume: Int, comment: String, deleteTime: String) {
   
   lazy val startMoment = LocalDateTime.parse(startTime)
   lazy val endMoment = LocalDateTime.parse(endTime)

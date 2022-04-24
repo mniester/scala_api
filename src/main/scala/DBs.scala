@@ -67,23 +67,23 @@ abstract class DBBase {
   def getProjectsByName(query: String): Seq[ProjectModel] = {
     val action = cursor.run(projects.filter(_.name === query).filter(_.deleteTime.length === 0).result)
     Await.result(action, Settings.dbWaitingDuration)
-  }
+  } 
 
-  def delProjectsByName(query: String): Unit = {
-    val removeProject = cursor.run(projects.filter(_.name === query).map(_.deleteTime).update(LocalDateTime.now().toString()))
-    val removeTasks = cursor.run(tasks.filter(_.project === query).map(_.deleteTime).update(LocalDateTime.now().toString()))
+  def delProjectByKey(key: Int): Unit = {
+    val removeProject = cursor.run(projects.filter(_.key === key).map(_.deleteTime).update(LocalDateTime.now().toString()))
+    val removeTasks = cursor.run(tasks.filter(_.project === key).map(_.deleteTime).update(LocalDateTime.now().toString()))
     Await.result(removeProject, Settings.dbWaitingDuration)
     Await.result(removeTasks, Settings.dbWaitingDuration)
   }
 
   def getTasksByName(query: String): Seq[TaskModel] = {
     val action = cursor.run(tasks.filter(_.name === query).filter(_.deleteTime.length === 0).result)
-    Await.result(action, Settings.dbWaitingDuration) //.map(x => TaskModel(x._1, x._2, x._3, LocalDateTime.parse(x._4), LocalDateTime.parse(x._5), x._6, x._7, x._8, x._9, x._10))
+    Await.result(action, Settings.dbWaitingDuration)
   }
 
-  def getTasksByProject(query: String): Seq[TaskModel] = {
-    val action = cursor.run(tasks.filter(_.project === query).filter(_.deleteTime.length === 0).result)
-    Await.result(action, Settings.dbWaitingDuration)// .map(x => TaskModel(x._1, x._2, x._3, LocalDateTime.parse(x._4), LocalDateTime.parse(x._5), x._6, x._7, x._8, x._9, x._10))
+  def getTasksByProject(key: Int): Seq[TaskModel] = {
+    val getTasks = cursor.run(tasks.filter(_.project === key).filter(_.deleteTime.length === 0).result)
+    Await.result(getTasks, Settings.dbWaitingDuration)
   }
 
   def delTasksByName(query: String): Unit = {
@@ -105,8 +105,6 @@ abstract class DBFacade extends DBBase {
 
   def addTask(newTask: TaskModel): Seq[TaskModel] = {
     val overlappingTasks = checkOverlappingTasksInProject(newTask)
-    val projectInDB = getProjectsByName(newTask.project)
-    if (projectInDB.isEmpty) {addNewProject(ProjectModel(newTask.key, newTask.project, newTask.author, newTask.startTime))} 
     if (overlappingTasks.isEmpty) {addNewTask(newTask); Seq()} else overlappingTasks 
   }
 
@@ -116,7 +114,8 @@ abstract class DBFacade extends DBBase {
 
   def getProjectWithTasks (query: String): Option[ProjectWithTasksModel] = {
     val project = getProjectsByName(query).head
-    val tasks = getTasksByProject(query).toList
+    val key = project.key
+    val tasks = getTasksByProject(key).toList
     val result = ProjectWithTasksFactory(project, tasks)
     result
   }

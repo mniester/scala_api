@@ -26,7 +26,7 @@ class TaskSchema (tag: Tag) extends Table [TaskModel] (tag, "tasks") {
   def author = column[String]("author")
   def startTime = column[String]("start_time")
   def endTime = column[String]("end_time")
-  def project = column[String]("project")
+  def project = column[Int]("project")
   def time = column[Int]("time")
   def volume = column[Int] ("volume", O.Default(-1))
   def comment = column[String] ("comment", O.Default(null))

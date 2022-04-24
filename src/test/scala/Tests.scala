@@ -29,7 +29,7 @@ class UnitTests extends AnyFunSuite {
                                                         author = "Test",
                                                         startTime = "2000-01-01T00:01:01",
                                                         endTime = "2000-02-01T00:01:01",
-                                                        project = "project", time = 1,
+                                                        project = 123, time = 1,
                                                         volume = 1, 
                                                         comment = "abc" * Settings.maxTaskCommentLength) == None)}
   
@@ -37,7 +37,7 @@ class UnitTests extends AnyFunSuite {
                                                         author = "Test",
                                                         startTime = "2001-01-01T00:01:01",
                                                         endTime = "2000-02-01T00:01:01",
-                                                        project = "project", time = 1,
+                                                        project = 123, time = 1,
                                                         volume = 1, 
                                                         comment = "abc") == None)}
   
@@ -58,12 +58,13 @@ class UnitTests extends AnyFunSuite {
                                         db.addProject(project);
                                         val dbResult = db.getProjectsByName(projectQuery).last; 
                                         assert (project == dbResult);
-                                        db.delProjectsByName(projectQuery);
+                                        db.delProjectByKey(1);
                                         var dbResult2 = db.getProjectsByName(projectQuery);
-                                        assert (dbResult2.length == 0);}
+                                        assert (dbResult2.length == 0);
+                                      }
   
   test("DB - add, get and remove task by name") {db.purge;
-                                        val task = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
+                                        val task = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 123, time = 1, volume = -1, comment = "Test").get;
                                         val taskQuery = "Test"
                                         db.addTask(task);
                                         val dbResult = db.getTasksByName(taskQuery)(0);
@@ -74,21 +75,20 @@ class UnitTests extends AnyFunSuite {
                                       }
 
   test("DB - add, get task by project") {db.purge;
-                                        val task = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
-                                        val taskQuery = "Test"
+                                        val task = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 123, time = 1, volume = -1, comment = "Test").get;
                                         db.addTask(task);
-                                        val dbResult = db.getTasksByProject(taskQuery)(0);
+                                        val dbResult = db.getTasksByProject(task.project).head;
                                         assert (task == dbResult);
                                       }
 
   test("DB - remove Project with Tasks") {db.purge;
-                                        val task = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
+                                        val task = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
                                         val project = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
                                         val taskQuery = "Test"
                                         val projectQuery = "Test"
                                         db.addTask(task);
                                         db.addProject(project);
-                                        db.delProjectsByName(projectQuery);
+                                        db.delProjectByKey(1);
                                         val projectResult = db.getProjectsByName(projectQuery);
                                         assert (projectResult.isEmpty);
                                         var TaskResult = db.getTasksByName(taskQuery);
@@ -96,30 +96,30 @@ class UnitTests extends AnyFunSuite {
                                       }
   
   test("Task - checkLocalTimeDateOverlap true") {
-    val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
-    val task2 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
+    val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 123, time = 1, volume = -1, comment = "Test").get;
+    val task2 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 123, time = 1, volume = -1, comment = "Test").get;
     assert(task1.checkLocalTimeDateOverlap(task2))
   }
 
   test("Task - checkLocalTimeDateOverlap false") {
-    val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
-    val task2 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2001-01-01T00:01:01", endTime = "2001-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
+    val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 123, time = 1, volume = -1, comment = "Test").get;
+    val task2 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2001-01-01T00:01:01", endTime = "2001-02-01T00:01:01", project = 123, time = 1, volume = -1, comment = "Test").get;
     assert(!task1.checkLocalTimeDateOverlap(task2))
   }
 
   test("DB - checkOverlappingTasksInProject") {db.purge;
-    val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
-    val task2 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
-    val task3 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test1", time = 1, volume = -1, comment = "Test").get;
+    val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
+    val task2 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
+    val task3 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 2, time = 1, volume = -1, comment = "Test").get;
     db.addNewTasks(Seq(task2, task3))
     val result = db.checkOverlappingTasksInProject(task1)
     assert(result.length == 1)
   }
 
   test("DB - checkOverlappingTasksInProject - no found") {db.purge;
-    val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
-    val task2 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2001-01-01T00:01:01", endTime = "2001-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
-    val task3 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test1", time = 1, volume = -1, comment = "Test").get;
+    val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
+    val task2 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2001-01-01T00:01:01", endTime = "2001-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
+    val task3 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 123, time = 1, volume = -1, comment = "Test").get;
     db.addNewTasks(Seq(task2, task3))
     val result = db.checkOverlappingTasksInProject(task1)
     assert(result.length == 0)
@@ -144,19 +144,19 @@ class UnitTests extends AnyFunSuite {
                                         }
 
   test("DB - add Task using Facade ok") {db.purge;
-                                        val task = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
+                                        val task = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 123, time = 1, volume = -1, comment = "Test").get;
                                         val taskQuery = "Test"
                                         db.addTask(task);
                                         val dbResult = db.getTasksByName(taskQuery)(0);
                                         assert (task == dbResult);
                                         }
 
-  test("DB - addTaskFacade - return overlapping task ") {db.purge;
-    val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
-    val task2 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
-    val task3 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test1", time = 1, volume = -1, comment = "Test").get;
+  test("DB - addTask Facade - return overlapping task ") {db.purge;
+    val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
+    val task2 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
+    val task3 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 2, time = 1, volume = -1, comment = "Test").get;
     db.addNewTasks(Seq(task2, task3))
-    val result = db.addTask(task1)(0)
+    val result = db.addTask(task1).head
     assert(result == task2)
   }
 
@@ -166,7 +166,7 @@ class UnitTests extends AnyFunSuite {
                                         db.addProject(project);
                                         val dbResult = db.getProjectsByName(projectQuery).last; 
                                         assert (project == dbResult);
-                                        db.delProjectsByName(projectQuery);
+                                        db.delProjectByKey(1);
                                         var dbResult2 = db.getProjectsByName(projectQuery);
                                         assert (dbResult2.length == 0);}
   
@@ -179,20 +179,13 @@ class UnitTests extends AnyFunSuite {
   
   test("DB -  getProjectWithTasks") {db.purge;
     val project = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
-    val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
-    val task2 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
+    val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
+    val task2 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
     db.addProject(project)
     db.addTask(task1)
     db.addTask(task2)
     val result = db.getProjectWithTasks("Test").get
     assert(result.project == project);
     assert((result.tasks.head.duration + result.tasks.last.duration) == (task1.duration + task2.duration))
-  }
-
-  test("DB - add project using Task") {db.purge;
-    val task = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = "Test", time = 1, volume = -1, comment = "Test").get;
-    db.addTask(task)
-    val result = db.getProjectsByName("Test").head
-    assert(result.isInstanceOf[ProjectModel])
   }
 }

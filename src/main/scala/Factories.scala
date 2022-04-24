@@ -41,7 +41,7 @@ object ProjectWithTasksFactory {
 }
 
 object TaskFactory {
-  def apply (key: Int = -1, name: String, author: String, startTime: String, endTime: String, project: String, time: Int, volume: Int = -1, comment: String = "", deleteTime: String = ""): Option[TaskModel] =
+  def apply (key: Int = -1, name: String, author: String, startTime: String, endTime: String, project: Int, time: Int, volume: Int = -1, comment: String = "", deleteTime: String = ""): Option[TaskModel] =
     if ((comment.length <= Settings.maxTaskCommentLength) && CheckISOTimeFormat(startTime) && CheckISOTimeFormat(endTime) && (LocalDateTime.parse(startTime).isBefore(LocalDateTime.parse(endTime)))) {
       Some(TaskModel(key, name, author, startTime, endTime, project, time, volume, comment, deleteTime))
     } else {
