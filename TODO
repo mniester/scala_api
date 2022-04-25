@@ -18,11 +18,11 @@
     - [x] separate DB Base from Facade
     - [x] get full Project
     - [-] Duration => Period
-    - [ ] UUID as user ID
+    - [x] UUID as user ID
     - [ ] only author can delete data
     - [ ] only author can modify data
     - [ ] project stats
-    - [ ] project filters
+    - [x] project filters
     - [ ] project sorting
 6) JSONs
     - [x] JWT coding

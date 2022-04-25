@@ -190,18 +190,24 @@ class UnitTests extends AnyFunSuite {
 
    test("DB - filtering") {db.purge;
     val project1 = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
-    val project2 = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2002-01-01T00:01:01").get;
-    val project3 = ProjectFactory(key = 1, name = "Other", author = "Test", startTime = "2000-01-01T00:01:01").get;
-    val project4 = ProjectFactory(key = 1, name = "Other", author = "Test", startTime = "2002-01-01T00:01:01").get;
+    val project2 = ProjectFactory(key = 2, name = "Test", author = "Test", startTime = "2002-01-01T00:01:01").get;
+    val project3 = ProjectFactory(key = 3, name = "Other", author = "Test", startTime = "2000-01-01T00:01:01").get;
+    val project4 = ProjectFactory(key = 4, name = "Other", author = "Test", startTime = "2002-01-01T00:01:01").get;
     db.addProject(project1)
     db.addProject(project2)
     db.addProject(project3)
     db.addProject(project4)
     val selectByName = db.getListOfProjects(List("Test"))
-    assert (selectByName.length == 2)
+    assert ((for (x <- selectByName) yield x.key).toSet == Set(1,2))
     val selectSinceMoment = db.getListOfProjects(moment = "2001-01-01T00:01:01")
-    assert (selectSinceMoment.length == 2)
+    assert ((for (x <- selectSinceMoment) yield x.key).toSet == Set(2,4))
     val selectToMoment = db.getListOfProjects(since = false, moment = "2001-01-01T00:01:01")
-    assert (selectSinceMoment.length == 2)
+    assert ((for (x <- selectToMoment) yield x.key).toSet == Set(1,3))
+    db.delProjectByKey(1)
+    db.delProjectByKey(4)
+    val selectNonDeleted = db.getListOfProjects()
+    assert ((for (x <- selectNonDeleted) yield x.key).toSet == Set(2,3))
+    val selectDeleted = db.getListOfProjects(deleted = true)
+    assert ((for (x <- selectDeleted) yield x.key).toSet == Set(1,4))
    }
 }
