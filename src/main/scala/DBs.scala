@@ -124,10 +124,10 @@ abstract class DBFacade extends DBBase {
     ProjectModelwithTasksFactory(project, tasks)
   }
 
-  def getListOfProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean, deleted: Boolean = false): Seq[ProjectModel] = {
+  def getListOfProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false): Seq[ProjectModel] = {
     val filtered1 = if (!listOfNames.isEmpty) { projects.filter(alpha => alpha.name inSet listOfNames) } else {projects}
-    val filtered2 = if (since) {filtered1.filter(beta => beta.startTime > moment)} else {filtered1.filter(gamma => gamma.startTime < moment)}
-    val filtered3 = if (deleted) {filtered2.filter(delta => delta.deleteTime.length > 0)} else  {filtered2.filter(delta => delta.deleteTime.length > 0)}
+    val filtered2 = if (moment.length > 0) {if (since) {filtered1.filter(beta => beta.startTime > moment)} else {filtered1.filter(gamma => gamma.startTime < moment)}} else {filtered1}
+    val filtered3 = if (deleted) {filtered2.filter(delta => delta.deleteTime.length > 0)} else  {filtered2.filter(delta => delta.deleteTime.length === 0)}
     Await.result(cursor.run(filtered3.result), atMost = Settings.dbWaitingDuration)
   }
 }

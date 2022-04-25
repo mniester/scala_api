@@ -178,13 +178,30 @@ class UnitTests extends AnyFunSuite {
                                         }
   
   test("DB -  getProjectWithTasks") {db.purge;
-     val project = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
-     val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
-     val task2 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
-     db.addProject(project)
-     db.addTask(task1)
-     db.addTask(task2)
-     val result = db.getProjectWithTasks(1).get
-     assert((result.tasks.head.duration + result.tasks.last.duration) == (task1.duration + task2.duration))
+    val project = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
+    val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
+    val task2 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
+    db.addProject(project)
+    db.addTask(task1)
+    db.addTask(task2)
+    val result = db.getProjectWithTasks(1).get
+    assert((result.tasks.head.duration + result.tasks.last.duration) == (task1.duration + task2.duration))
+   }
+
+   test("DB - filtering") {db.purge;
+    val project1 = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
+    val project2 = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2002-01-01T00:01:01").get;
+    val project3 = ProjectFactory(key = 1, name = "Other", author = "Test", startTime = "2000-01-01T00:01:01").get;
+    val project4 = ProjectFactory(key = 1, name = "Other", author = "Test", startTime = "2002-01-01T00:01:01").get;
+    db.addProject(project1)
+    db.addProject(project2)
+    db.addProject(project3)
+    db.addProject(project4)
+    val selectByName = db.getListOfProjects(List("Test"))
+    assert (selectByName.length == 2)
+    val selectSinceMoment = db.getListOfProjects(moment = "2001-01-01T00:01:01")
+    assert (selectSinceMoment.length == 2)
+    val selectToMoment = db.getListOfProjects(since = false, moment = "2001-01-01T00:01:01")
+    assert (selectSinceMoment.length == 2)
    }
 }
