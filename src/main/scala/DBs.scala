@@ -54,24 +54,24 @@ abstract class DBBase {
     source.filter(_.name  === filter)
   }
 
-  def getUserByName(query: String): Seq[UserModel] = {
+  def getUserByName(query: String): List[UserModel] = {
     val action1 = filterUserByName(users, query)
     val action2 = cursor.run(action1.result)
-    Await.result(action2, Settings.dbWaitingDuration)
+    Await.result(action2, Settings.dbWaitingDuration).toList
   }
 
   def delUsersByName(query: String): Unit = {
     Await.result(cursor.run(users.filter(_.name === query).delete), Settings.dbWaitingDuration)
   }
 
-  def getProjectsByName(query: String): Seq[ProjectModel] = {
+  def getProjectsByName(query: String): List[ProjectModel] = {
     val action = cursor.run(projects.filter(_.name === query).filter(_.deleteTime.length === 0).result)
-    Await.result(action, Settings.dbWaitingDuration)
+    Await.result(action, Settings.dbWaitingDuration).toList
   }
 
-  def getProjectByKey(query: Int): Seq[ProjectModel] = {
+  def getProjectByKey(query: Int): List[ProjectModel] = {
     val action = cursor.run(projects.filter(_.key === query).filter(_.deleteTime.length === 0).result)
-    Await.result(action, Settings.dbWaitingDuration)
+    Await.result(action, Settings.dbWaitingDuration).toList
   }  
 
   def delProjectByKey(key: Int): Unit = {
@@ -81,14 +81,14 @@ abstract class DBBase {
     Await.result(removeTasks, Settings.dbWaitingDuration)
   }
 
-  def getTasksByName(query: String): Seq[TaskModel] = {
+  def getTasksByName(query: String): List[TaskModel] = {
     val action = cursor.run(tasks.filter(_.name === query).filter(_.deleteTime.length === 0).result)
-    Await.result(action, Settings.dbWaitingDuration)
+    Await.result(action, Settings.dbWaitingDuration).toList
   }
 
-  def getTasksByProject(key: Int): Seq[TaskModel] = {
+  def getTasksByProject(key: Int): List[TaskModel] = {
     val getTasks = cursor.run(tasks.filter(_.project === key).filter(_.deleteTime.length === 0).result)
-    Await.result(getTasks, Settings.dbWaitingDuration)
+    Await.result(getTasks, Settings.dbWaitingDuration).toList
   }
 
   def delTasksByName(query: String): Unit = {
@@ -98,9 +98,9 @@ abstract class DBBase {
 
 abstract class DBFacade extends DBBase {
    
-  def checkOverlappingTasksInProject(task: TaskModel): Seq[TaskModel] = {
+  def checkOverlappingTasksInProject(task: TaskModel): List[TaskModel] = {
     val tasksOfProject = getTasksByProject(task.project)
-    for (t <- tasksOfProject if task.checkLocalTimeDateOverlap(t)) yield {t}
+    (for (t <- tasksOfProject if task.checkLocalTimeDateOverlap(t)) yield t).toList
   }
 
   def addUser(newUser: UserModel): Option[UserModel] = {
@@ -108,9 +108,9 @@ abstract class DBFacade extends DBBase {
     if (userWithSameName.isEmpty) {super.addNewUser(newUser); None} else {Some(userWithSameName.head)}
   }
 
-  def addTask(newTask: TaskModel): Seq[TaskModel] = {
+  def addTask(newTask: TaskModel): List[TaskModel] = {
     val overlappingTasks = checkOverlappingTasksInProject(newTask)
-    if (overlappingTasks.isEmpty) {addNewTask(newTask); Seq()} else overlappingTasks 
+    if (overlappingTasks.isEmpty) {addNewTask(newTask); Nil} else overlappingTasks 
   }
 
   def addProject(newProject: ProjectModel): Unit = {
@@ -124,11 +124,15 @@ abstract class DBFacade extends DBBase {
     ProjectModelwithTasksFactory(project, tasks)
   }
 
+
   def getListOfProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false): Seq[ProjectModel] = {
     val filtered1 = if (!listOfNames.isEmpty) { projects.filter(alpha => alpha.name inSet listOfNames) } else {projects}
     val filtered2 = if (moment.length > 0) {if (since) {filtered1.filter(beta => beta.startTime > moment)} else {filtered1.filter(gamma => gamma.startTime < moment)}} else {filtered1}
     val filtered3 = if (deleted) {filtered2.filter(delta => delta.deleteTime.length > 0)} else  {filtered2.filter(delta => delta.deleteTime.length === 0)}
     Await.result(cursor.run(filtered3.result), atMost = Settings.dbWaitingDuration)
+  }
+  def addTasksToProject (seqOfProjects: List[ProjectModel]): List[ProjectModelwithTasks]  = {
+    (for (project <- seqOfProjects) yield ProjectModelwithTasksFactory(project, getTasksByProject(project.key)).get).toList
   }
 }
 
