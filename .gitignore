@@ -2,4 +2,5 @@ project
 target
 .metals
 .bloop
+.bsp
 test.db

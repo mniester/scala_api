@@ -214,4 +214,18 @@ class UnitTests extends AnyFunSuite {
     val result = db.addTasksToProject(List(project))
     assert ((result.head.key == project.key) && (result.head.startTime == project.startTime))
   }
+
+  test("DBFacade.addProject, DBFacade.addTest, DBFacade.getListOfProjects") {db.purge;
+    val projectWithTasks = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
+    val projectWithoutTasks = ProjectFactory(key = 2, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
+    val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
+    val task2 = TaskFactory(key = 2, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
+    db.addProject(projectWithTasks)
+    db.addProject(projectWithoutTasks)
+    db.addNewTasks(List(task1, task2))
+    val result = db.getListOfProjects()
+    assert(result.length == 2)
+    assert(result.head.tasks.length == 2)
+    assert(result.last.tasks.length == 0)
+   }
 }

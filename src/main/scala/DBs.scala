@@ -117,22 +117,28 @@ abstract class DBFacade extends DBBase {
     addNewProject(newProject)
   }
 
-  def getProjectWithTasks (query: Int): Option[ProjectModelwithTasks] = {
+  def getProjectWithTasks (query: Int): Option[ProjectModelWithTasks] = {
     val project = getProjectByKey(query).head
     val key = project.key
     val tasks = getTasksByProject(key).toList
-    ProjectModelwithTasksFactory(project, tasks)
+    ProjectModelWithTasksFactory(project, tasks)
   }
 
-
-  def getListOfProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false): Seq[ProjectModel] = {
+  def filterProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false): Query[ProjectSchema, ProjectModel, Seq] = {
     val filtered1 = if (!listOfNames.isEmpty) { projects.filter(alpha => alpha.name inSet listOfNames) } else {projects}
     val filtered2 = if (moment.length > 0) {if (since) {filtered1.filter(beta => beta.startTime > moment)} else {filtered1.filter(gamma => gamma.startTime < moment)}} else {filtered1}
-    val filtered3 = if (deleted) {filtered2.filter(delta => delta.deleteTime.length > 0)} else  {filtered2.filter(delta => delta.deleteTime.length === 0)}
-    Await.result(cursor.run(filtered3.result), atMost = Settings.dbWaitingDuration)
+    if (deleted) {filtered2.filter(delta => delta.deleteTime.length > 0)} else  {filtered2.filter(delta => delta.deleteTime.length === 0)}
   }
-  def addTasksToProject (seqOfProjects: List[ProjectModel]): List[ProjectModelwithTasks]  = {
-    (for (project <- seqOfProjects) yield ProjectModelwithTasksFactory(project, getTasksByProject(project.key)).get).toList
+
+  def getListOfProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false): List[ProjectModelWithTasks] = {
+    val filteredProjects = filterProjects (listOfNames, moment, since, deleted)
+    val projects = Await.result(cursor.run(filteredProjects.result), Settings.dbWaitingDuration).toList
+    addTasksToProject(projects)
+  }
+
+  def addTasksToProject (seqOfProjects: List[ProjectModel]): List[ProjectModelWithTasks] = {
+    val xxx = for (project <- seqOfProjects) yield (ProjectModelWithTasksFactory(project, getTasksByProject(project.key)).get)
+    xxx
   }
 }
 

@@ -22,7 +22,7 @@ case class ProjectModel (key: Int,
                                                       startTime: String, 
                                                       deleteTime: String)
 
-case class ProjectModelwithTasks (key: Int, 
+case class ProjectModelWithTasks (key: Int, 
                                   name: String, 
                                   author: String, 
                                   startTime: String, 
@@ -32,7 +32,10 @@ case class ProjectModelwithTasks (key: Int,
                                                               name: String, 
                                                               author: String, 
                                                               startTime: String, 
-                                                              deleteTime: String)
+                                                              deleteTime: String) {
+  lazy val duration = (for (task <- this.tasks) yield task.duration).sum
+  }; 
+                                                              
 
 
 case class TaskModel(key: Int, name: String, author: String, startTime: String, endTime: String, project: Int, time: Int,  volume: Int, comment: String, deleteTime: String) {
