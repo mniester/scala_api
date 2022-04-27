@@ -41,14 +41,24 @@ class UnitTests extends AnyFunSuite {
                                                         volume = 1, 
                                                         comment = "abc") == None)}
   
-  test("DBFacade.addUser, DBFacade,delUserByName") {db.purge;
+  test("DBFacade.addUser, DBFacade.delUserByName") {db.purge;
                                         val user = UserFactory(key = 1, uuid = UUID.random.toString, name = "Test").get;
                                         val userQuery = "Test"
                                         db.addUser(user);
                                         var dbResult = db.getUserByName(userQuery).last; 
                                         assert (user == dbResult);
-                                        db.delUsersByName(userQuery);
+                                        db.delUserByName(userQuery);
                                         var dbResult2 = db.getUserByName(userQuery);
+                                        assert (dbResult2.length == 0);
+                                        }
+  
+  test("DBFacade.addUser, DBFacade.getUserByKey, DBFacade.delUserByKey") {db.purge;
+                                        val user = UserFactory(key = 1, uuid = UUID.random.toString, name = "Test").get;
+                                        db.addUser(user);
+                                        var dbResult = db.getUserByKey(1).head; 
+                                        assert (user == dbResult);
+                                        db.delUserByKey(1);
+                                        var dbResult2 = db.getUserByKey(1);
                                         assert (dbResult2.length == 0);
                                         }
   
@@ -132,7 +142,7 @@ class UnitTests extends AnyFunSuite {
                                         db.addUser(user);
                                         val dbResult = db.getUserByName(userQuery).last; 
                                         assert (user == dbResult);
-                                        db.delUsersByName(userQuery);
+                                        db.delUserByName(userQuery);
                                         var dbResult2 = db.getUserByName(userQuery);
                                         assert (dbResult2.length == 0);
                                         }

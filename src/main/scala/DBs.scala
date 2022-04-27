@@ -50,18 +50,22 @@ abstract class DBBase {
     Await.result(cursor.run(tasks ++= nt), Settings.dbWaitingDuration)
   }
 
-  def filterUserByName(source: TableQuery[UserSchema], filter: String) = {
-    source.filter(_.name  === filter)
-  }
-
   def getUserByName(query: String): List[UserModel] = {
-    val action1 = filterUserByName(users, query)
-    val action2 = cursor.run(action1.result)
-    Await.result(action2, Settings.dbWaitingDuration).toList
+    val action = cursor.run(users.filter(_.name  === query).result)
+    Await.result(action, Settings.dbWaitingDuration).toList
   }
 
-  def delUsersByName(query: String): Unit = {
+  def getUserByKey(query: Int): Seq[UserModel] = {
+    val action = cursor.run(users.filter(_.key === query).result)
+    Await.result(action, Settings.dbWaitingDuration)
+  }
+
+  def delUserByName(query: String): Unit = {
     Await.result(cursor.run(users.filter(_.name === query).delete), Settings.dbWaitingDuration)
+  }
+
+  def delUserByKey(query: Int): Unit = {
+    Await.result(cursor.run(users.filter(_.key === query).delete), Settings.dbWaitingDuration)
   }
 
   def getProjectsByName(query: String): List[ProjectModel] = {
