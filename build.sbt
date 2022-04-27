@@ -1,6 +1,6 @@
 
 scalaVersion := "2.13.8"
-name := "Rest API"
+name := "RestAPI"
 organization := "misza"
 version := "1.0"
 val AkkaVersion = "2.6.8"

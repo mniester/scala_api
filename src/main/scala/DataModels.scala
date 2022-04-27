@@ -43,7 +43,7 @@ case class TaskModel(key: Int, name: String, author: String, startTime: String, 
   
   lazy val startMoment = LocalDateTime.parse(startTime)
   lazy val endMoment = LocalDateTime.parse(endTime)
-  lazy val duration = Duration.between(startMoment, endMoment).toSeconds()
+  lazy val duration = Duration.between(startMoment, endMoment).getSeconds()
 
   def checkLocalTimeDateOverlap (otherTask: TaskModel): Boolean =
     !this.endMoment.isBefore(otherTask.startMoment)
