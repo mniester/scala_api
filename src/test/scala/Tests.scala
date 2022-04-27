@@ -215,7 +215,7 @@ class UnitTests extends AnyFunSuite {
     assert ((result.head.key == project.key) && (result.head.startTime == project.startTime))
   }
 
-  test("DBFacade.addProject, DBFacade.addTest, DBFacade.getListOfProjects") {db.purge;
+  test("DBFacade.addProject, DBFacade.addNewTasks, DBFacade.getListOfProjects") {db.purge;
     val projectWithTasks = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
     val projectWithoutTasks = ProjectFactory(key = 2, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
     val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
@@ -228,4 +228,21 @@ class UnitTests extends AnyFunSuite {
     assert(result.head.tasks.length == 2)
     assert(result.last.tasks.length == 0)
    }
+  test("DBFacade.sortProjects") {
+    val projectWithTasks = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
+    val projectWithoutTasks = ProjectFactory(key = 2, name = "Test", author = "Test", startTime = "1999-01-01T00:01:01").get;
+    val task1 = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2002-01-01T00:01:01", endTime = "2002-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
+    val task2 = TaskFactory(key = 2, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, time = 1, volume = -1, comment = "Test").get;
+    db.addProject(projectWithTasks)
+    db.addProject(projectWithoutTasks)
+    db.addNewTasks(List(task1, task2))
+    val sortByUpdate = db.getListOfProjects(sortingFactor = "update")
+    assert ((sortByUpdate.last.key == 1) && (sortByUpdate.head.key == 2))
+    val sortByUpdateDesc = db.getListOfProjects(sortingFactor = "update", sortingAsc = false)
+    assert ((sortByUpdate.last.key == 2) && (sortByUpdate.head.key == 1))
+    // val sortByCreate = db.getListOfProjects(sortingFactor = "create")
+    // assert ((sortByUpdate.last.key == 1) && (sortByUpdate.head.key == 2))
+    // val sortByCreateDesc = db.getListOfProjects(sortingFactor = "create", sortingAsc = false)
+    // assert ((sortByUpdate.last.key == 2) && (sortByUpdate.head.key == 1))
+  }
 }

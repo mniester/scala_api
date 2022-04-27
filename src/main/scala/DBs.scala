@@ -126,7 +126,7 @@ abstract class DBFacade extends DBBase {
     ProjectModelWithTasksFactory(project, tasks)
   }
 
-  def filterProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false): ProjectQuery = {
+  def filterProjects (listOfNames: List[String], moment: String, since: Boolean, deleted: Boolean): ProjectQuery = {
     val filtered1 = if (!listOfNames.isEmpty) { projects.filter(alpha => alpha.name inSet listOfNames) } else {projects}
     val filtered2 = if (moment.length > 0) {if (since) {filtered1.filter(beta => beta.startTime > moment)} else {filtered1.filter(gamma => gamma.startTime < moment)}} else {filtered1}
     if (deleted) {filtered2.filter(delta => delta.deleteTime.length > 0)} else  {filtered2.filter(delta => delta.deleteTime.length === 0)}
@@ -137,18 +137,24 @@ abstract class DBFacade extends DBBase {
     xxx
   }
 
-  def getListOfProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false): List[ProjectModelWithTasks] = {
+  def getListOfProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false, sortingFactor: String = null, sortingAsc: Boolean = true): List[ProjectModelWithTasks] = {
     val filteredProjects = filterProjects (listOfNames, moment, since, deleted)
-    //val sortedProjects = sort
     val projects = Await.result(cursor.run(filteredProjects.result), Settings.dbWaitingDuration).toList
-    addTasksToProject(projects)
+    sortProjects(addTasksToProject(projects), sortingFactor, asc = sortingAsc)
   }
 
-  def sortProjects (projectsQuery: ProjectQuery, time: String = "", factor: String, asc: Boolean = true) {
-    factor match {
-      case "update" => None
-      case "create" => None
-    }
+  def sortProjects (projects:  List[ProjectModelWithTasks], sortingFactor: String, asc: Boolean): List[ProjectModelWithTasks] = {
+    sortingFactor match {
+      case "update" => asc match {
+        case true => projects.sortBy(_.lastUpdate)
+        case false => projects.sortBy(_.lastUpdate).reverse
+        }
+      case "create" => asc match {
+        case true =>  projects.sortBy(_.startTime)
+        case false => projects.sortBy(_.startTime).reverse
+        }
+      case _ => projects
+      }
   }
 }
 
