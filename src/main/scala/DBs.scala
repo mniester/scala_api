@@ -81,8 +81,8 @@ abstract class DBBase {
     Await.result(removeTasks, Settings.dbWaitingDuration)
   }
 
-  def getTasksByName(query: String): List[TaskModel] = {
-    val action = cursor.run(tasks.filter(_.name === query).filter(_.deleteTime.length === 0).result)
+  def getTaskByKey(query: Int): List[TaskModel] = {
+    val action = cursor.run(tasks.filter(_.key === query).filter(_.deleteTime.length === 0).result)
     Await.result(action, Settings.dbWaitingDuration).toList
   }
 
@@ -91,8 +91,8 @@ abstract class DBBase {
     Await.result(getTasks, Settings.dbWaitingDuration).toList
   }
 
-  def delTasksByName(query: String): Unit = {
-    Await.result(cursor.run(tasks.filter(_.name === query).map(_.deleteTime).update(LocalDateTime.now().toString())), Settings.dbWaitingDuration)
+  def delTaskByKey(query: Int): Unit = {
+    Await.result(cursor.run(tasks.filter(_.key === query).map(_.deleteTime).update(LocalDateTime.now().toString())), Settings.dbWaitingDuration)
   }
 }
 
@@ -133,14 +133,7 @@ abstract class DBFacade extends DBBase {
   }
 
   def addTasksToProject (seqOfProjects: List[ProjectModel]): List[ProjectModelWithTasks] = {
-    val xxx = for (project <- seqOfProjects) yield (ProjectModelWithTasksFactory(project, getTasksByProject(project.key)).get)
-    xxx
-  }
-
-  def getListOfProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false, sortingFactor: String = null, sortingAsc: Boolean = true): List[ProjectModelWithTasks] = {
-    val filteredProjects = filterProjects (listOfNames, moment, since, deleted)
-    val projects = Await.result(cursor.run(filteredProjects.result), Settings.dbWaitingDuration).toList
-    sortProjects(addTasksToProject(projects), sortingFactor, asc = sortingAsc)
+    for (project <- seqOfProjects) yield (ProjectModelWithTasksFactory(project, getTasksByProject(project.key)).get)
   }
 
   def sortProjects (projects:  List[ProjectModelWithTasks], sortingFactor: String, asc: Boolean): List[ProjectModelWithTasks] = {
@@ -155,6 +148,12 @@ abstract class DBFacade extends DBBase {
         }
       case _ => projects
       }
+    }
+  
+  def getListOfProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false, sortingFactor: String = null, sortingAsc: Boolean = true): List[ProjectModelWithTasks] = {
+    val filteredProjects = filterProjects (listOfNames, moment, since, deleted)
+    val projects = Await.result(cursor.run(filteredProjects.result), Settings.dbWaitingDuration).toList
+    sortProjects(addTasksToProject(projects), sortingFactor, asc = sortingAsc)
   }
 }
 

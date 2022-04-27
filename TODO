@@ -23,7 +23,7 @@
     - [ ] only author can modify data
     - [ ] project stats
     - [x] project filters
-    - [ ] project sorting
+    - [x] project sorting
 6) JSONs
     - [x] JWT coding
     Request

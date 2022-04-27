@@ -4,3 +4,4 @@ target
 .bloop
 .bsp
 test.db
+.bsp/sbt.json
