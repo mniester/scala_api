@@ -98,6 +98,8 @@ abstract class DBBase {
 
 abstract class DBFacade extends DBBase {
    
+  type ProjectQuery = Query[ProjectSchema,ProjectModel,Seq]
+
   def checkOverlappingTasksInProject(task: TaskModel): List[TaskModel] = {
     val tasksOfProject = getTasksByProject(task.project)
     (for (t <- tasksOfProject if task.checkLocalTimeDateOverlap(t)) yield t).toList
@@ -124,21 +126,29 @@ abstract class DBFacade extends DBBase {
     ProjectModelWithTasksFactory(project, tasks)
   }
 
-  def filterProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false): Query[ProjectSchema, ProjectModel, Seq] = {
+  def filterProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false): ProjectQuery = {
     val filtered1 = if (!listOfNames.isEmpty) { projects.filter(alpha => alpha.name inSet listOfNames) } else {projects}
     val filtered2 = if (moment.length > 0) {if (since) {filtered1.filter(beta => beta.startTime > moment)} else {filtered1.filter(gamma => gamma.startTime < moment)}} else {filtered1}
     if (deleted) {filtered2.filter(delta => delta.deleteTime.length > 0)} else  {filtered2.filter(delta => delta.deleteTime.length === 0)}
   }
 
+  def addTasksToProject (seqOfProjects: List[ProjectModel]): List[ProjectModelWithTasks] = {
+    val xxx = for (project <- seqOfProjects) yield (ProjectModelWithTasksFactory(project, getTasksByProject(project.key)).get)
+    xxx
+  }
+
   def getListOfProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false): List[ProjectModelWithTasks] = {
     val filteredProjects = filterProjects (listOfNames, moment, since, deleted)
+    //val sortedProjects = sort
     val projects = Await.result(cursor.run(filteredProjects.result), Settings.dbWaitingDuration).toList
     addTasksToProject(projects)
   }
 
-  def addTasksToProject (seqOfProjects: List[ProjectModel]): List[ProjectModelWithTasks] = {
-    val xxx = for (project <- seqOfProjects) yield (ProjectModelWithTasksFactory(project, getTasksByProject(project.key)).get)
-    xxx
+  def sortProjects (projectsQuery: ProjectQuery, time: String = "", factor: String, asc: Boolean = true) {
+    factor match {
+      case "update" => None
+      case "create" => None
+    }
   }
 }
 

@@ -34,6 +34,7 @@ case class ProjectModelWithTasks (key: Int,
                                                               startTime: String, 
                                                               deleteTime: String) {
   lazy val duration = (for (task <- this.tasks) yield task.duration).sum
+  lazy val lastUpdate = if (tasks.isEmpty) {startTime} else (for (t <- tasks) yield t.startTime).max
   }; 
                                                               
 
