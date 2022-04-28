@@ -14,7 +14,7 @@ class UserSchema (tag: Tag) extends Table [UserModel](tag, "users") {
 class ProjectSchema (tag: Tag) extends Table [ProjectModel] (tag, "projects") {
   def key = column[Int]("key", O.PrimaryKey, O.AutoInc)
   def name = column[String]("name", O.Unique)
-  def author = column[String]("author")
+  def author = column[Int]("author")
   def startTime = column[String]("start_time")
   def deleteTime = column[String] ("delete_time", O.Default(""))
   def * = (key, name, author, startTime, deleteTime) <> (ProjectModel.tupled, ProjectModel.unapply)
@@ -23,7 +23,7 @@ class ProjectSchema (tag: Tag) extends Table [ProjectModel] (tag, "projects") {
 class TaskSchema (tag: Tag) extends Table [TaskModel] (tag, "tasks") {
   def key = column[Int]("key", O.PrimaryKey, O.AutoInc)
   def name = column[String]("name")
-  def author = column[String]("author")
+  def author = column[Int]("author")
   def startTime = column[String]("start_time")
   def endTime = column[String]("end_time")
   def project = column[Int]("project")

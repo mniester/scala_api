@@ -26,8 +26,8 @@ object UserFactory {
 }
 
 object ProjectFactory {
-  def apply (key: Int = -1, name: String, author: String, startTime: String,  deleteTime: String = ""): Option[ProjectModel] =
-    if ((name.length <= Settings.maxProjectNameLength) && (author.length <= Settings.maxUserNameLength) && CheckISOTimeFormat(startTime)) {
+  def apply (key: Int = -1, name: String, author: Int, startTime: String,  deleteTime: String = ""): Option[ProjectModel] =
+    if ((name.length <= Settings.maxProjectNameLength) && CheckISOTimeFormat(startTime)) {
       Some(new ProjectModel(key, name, author, startTime, deleteTime))
     } else {
       None
@@ -41,7 +41,7 @@ object ProjectModelWithTasksFactory {
 }
 
 object TaskFactory {
-  def apply (key: Int = -1, name: String, author: String, startTime: String, endTime: String, project: Int, time: Int, volume: Int = -1, comment: String = "", deleteTime: String = ""): Option[TaskModel] =
+  def apply (key: Int = -1, name: String, author: Int, startTime: String, endTime: String, project: Int, time: Int, volume: Int = -1, comment: String = "", deleteTime: String = ""): Option[TaskModel] =
     if ((comment.length <= Settings.maxTaskCommentLength) && CheckISOTimeFormat(startTime) && CheckISOTimeFormat(endTime) && (LocalDateTime.parse(startTime).isBefore(LocalDateTime.parse(endTime)))) {
       Some(TaskModel(key, name, author, startTime, endTime, project, time, volume, comment, deleteTime))
     } else {
