@@ -73,6 +73,10 @@ abstract class DBBase {
     Await.result(action, Settings.dbWaitingDuration).toList
   }
 
+  def changeProjectName(projectKey: Int, newName: String) = {
+    val action = cursor.run(projects.filter(_.key === projectKey).map(_.name).update(newName))
+  }
+
   def getProjectByKey(query: Int): List[ProjectModel] = {
     val action = cursor.run(projects.filter(_.key === query).filter(_.deleteTime.length === 0).result)
     Await.result(action, Settings.dbWaitingDuration).toList
@@ -159,10 +163,6 @@ abstract class DBFacade extends DBBase {
     val filteredProjects = filterProjects (listOfNames, moment, since, deleted)
     val projects = Await.result(cursor.run(filteredProjects.result), Settings.dbWaitingDuration).toList
     sortProjects(addTasksToProject(projects), sortingFactor, asc = sortingAsc)
-  }
-
-  def changeProjectName(user: UserModel, projectKey: Int, newName: String) = {
-    ???
   }
 }
 
