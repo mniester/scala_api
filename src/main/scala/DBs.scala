@@ -132,9 +132,9 @@ abstract class DBFacade extends DBBase {
   }
 
   def filterProjects (listOfNames: List[String], moment: String, since: Boolean, deleted: Boolean): ProjectQuery = {
-    val filtered1 = if (!listOfNames.isEmpty) { projects.filter(alpha => alpha.name inSet listOfNames) } else {projects}
-    val filtered2 = if (moment.length > 0) {if (since) {filtered1.filter(beta => beta.startTime > moment)} else {filtered1.filter(gamma => gamma.startTime < moment)}} else {filtered1}
-    if (deleted) {filtered2.filter(delta => delta.deleteTime.length > 0)} else  {filtered2.filter(delta => delta.deleteTime.length === 0)}
+    val filteredByName = if (!listOfNames.isEmpty) { projects.filter(alpha => alpha.name inSet listOfNames) } else {projects}
+    val filteredByTime = if (moment.length > 0) {if (since) {filteredByName.filter(beta => beta.startTime > moment)} else {filteredByName.filter(gamma => gamma.startTime < moment)}} else {filteredByName}
+    if (deleted) {filteredByTime.filter(delta => delta.deleteTime.length > 0)} else {filteredByTime.filter(delta => delta.deleteTime.length === 0)}
   }
 
   def addTasksToProject (seqOfProjects: List[ProjectModel]): List[ProjectModelWithTasks] = {
