@@ -13,7 +13,7 @@ class UserSchema (tag: Tag) extends Table [UserModel](tag, "users") {
 
 class ProjectSchema (tag: Tag) extends Table [ProjectModel] (tag, "projects") {
   def key = column[Int]("key", O.PrimaryKey, O.AutoInc)
-  def name = column[String]("name")
+  def name = column[String]("name", O.Unique)
   def author = column[String]("author")
   def startTime = column[String]("start_time")
   def deleteTime = column[String] ("delete_time", O.Default(""))

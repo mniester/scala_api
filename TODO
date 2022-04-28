@@ -24,6 +24,7 @@
     - [ ] project stats
     - [x] project filters
     - [x] project sorting
+    - [ ] add to Seq toOption method
 6) JSONs
     - [x] JWT coding
     Request

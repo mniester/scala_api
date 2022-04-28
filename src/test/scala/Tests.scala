@@ -72,6 +72,14 @@ class UnitTests extends AnyFunSuite {
                                         var dbResult2 = db.getProjectsByName(projectQuery);
                                         assert (dbResult2.length == 0);
                                       }
+
+  test("DBFacade.addProject (twice with the same name)") {db.purge;
+                                        val project = ProjectFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01").get;
+                                        val resultNoRepeat = db.addProject(project);
+                                        assert (resultNoRepeat == Nil)
+                                        val resultWithRepeat = db.addProject(project);
+                                        assert (resultWithRepeat.head == project)
+                                      }
   
   test("DBFacade.addTask, DBFacade.delTaskByKey, DBFacade.getTaskByKey") {db.purge;
                                         val task = TaskFactory(key = 1, name = "Test", author = "Test", startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 123, time = 1, volume = -1, comment = "Test").get;

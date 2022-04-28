@@ -119,8 +119,9 @@ abstract class DBFacade extends DBBase {
     if (overlappingTasks.isEmpty) {addNewTask(newTask); Nil} else overlappingTasks 
   }
 
-  def addProject(newProject: ProjectModel): Unit = {
-    addNewProject(newProject)
+  def addProject(newProject: ProjectModel): List[ProjectModel] = {
+    val projectWithTheSameName = getProjectsByName(newProject.name)
+    if (projectWithTheSameName.isEmpty) {addNewProject(newProject); Nil} else {projectWithTheSameName}
   }
 
   def getProjectWithTasks (query: Int): Option[ProjectModelWithTasks] = {
@@ -158,6 +159,10 @@ abstract class DBFacade extends DBBase {
     val filteredProjects = filterProjects (listOfNames, moment, since, deleted)
     val projects = Await.result(cursor.run(filteredProjects.result), Settings.dbWaitingDuration).toList
     sortProjects(addTasksToProject(projects), sortingFactor, asc = sortingAsc)
+  }
+
+  def changeProjectName(user: UserModel, projectKey: Int, newName: String) = {
+    ???
   }
 }
 
