@@ -15,6 +15,7 @@ package object Settings {
   
   val maxTaskCommentLength = source.getConfig("length").getInt("maxTaskCommentLength")
   val minTaskCommentLength = source.getConfig("length").getInt("minTaskCommentLength")
+  val maxCharsInPage = source.getConfig("length").getInt("maxCharsInPage") 
   
   val JWTKey = source.getConfig("secrets").getString("JWTKey")
   val dbWaitingDuration = Duration(source.getConfig("wait").getInt("db.quantity"), source.getConfig("wait").getString("db.unit"))

@@ -1,12 +1,5 @@
-import slick.jdbc.SQLiteProfile.api._
-
-
-import slick.jdbc.SQLiteProfile.api._
-import slick.lifted.TableQuery
-
-import DBs._
-import Factories._
+import Settings._
 
 object Dev extends App {
-  val x = 1
+  println(Settings.maxCharsInPage)
 }

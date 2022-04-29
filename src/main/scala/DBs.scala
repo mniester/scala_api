@@ -9,6 +9,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 import slick.basic.BasicBackend
 import slick.jdbc.SQLiteProfile.api._
 import java.time.LocalDateTime
+import scala.collection.mutable.ArrayBuffer
 
 import Settings._
 import Schemas._
@@ -124,7 +125,7 @@ abstract class DBFacade extends DBBase {
   }
 
   def replaceTask(newTask: TaskModel): List[TaskModel] = {
-    val overlappingTasks = checkOverlappingTasksInProject(newTask)
+    val overlappingTasks = checkOverlappingTasksInProject(newTask) // input is Task with the same key and other data
     if (overlappingTasks.isEmpty) {delTaskByKey(newTask.key); addNewTask(newTask); Nil} else overlappingTasks 
   }
 
@@ -164,10 +165,18 @@ abstract class DBFacade extends DBBase {
       }
     }
   
-  def getListOfProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false, sortingFactor: String = null, sortingAsc: Boolean = true): List[ProjectModelWithTasks] = {
+  def pagination(projects: List[ProjectModelWithTasks], page: Int): List[ProjectModelWithTasks] = {
+    val result = new ArrayBuffer
+    //for (p <- projects) {}
+    result.toList
+    projects
+  } 
+  
+  def getListOfProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false, sortingFactor: String = null, sortingAsc: Boolean = true, page: Int = 1): List[ProjectModelWithTasks] = {
     val filteredProjects = filterProjects (listOfNames, moment, since, deleted)
     val projects = Await.result(cursor.run(filteredProjects.result), Settings.dbWaitingDuration).toList
-    sortProjects(addTasksToProject(projects), sortingFactor, asc = sortingAsc)
+    val sortedProjects = sortProjects(addTasksToProject(projects), sortingFactor, asc = sortingAsc)
+    pagination(sortedProjects, page)
   }
 }
 

@@ -12,19 +12,24 @@
     - [x] check overlapping when adding a new task
     - [x] ban adding new task if tasks overlapping
     - [x] no projects with the same name
-    - [>] added Facade for adding Task
-    - [>] added Facade for adding Project
-    - [>] added Facade for adding User
+    - [>] added Facade for adding Task => merged into one object
+    - [>] added Facade for adding Project => merged into one object
+    - [>] added Facade for adding User => merged into one object
     - [x] separate DB Base from Facade
     - [x] get full Project
     - [-] Duration => Period
+    - [ ] When there can be only one answer (project, User) List => Option
+    - [ ] remove project key from task, when it is a part of Project List
     - [x] UUID as user ID
     - [ ] only author can delete data
     - [ ] only author can modify data
     - [ ] project stats
     - [x] project filters
     - [x] project sorting
+    - [x] task replacing
     - [ ] add to Seq toOption method
+    - [ ] user or author or alias
+    - [ ] Separate Input and Output data models
 6) JSONs
     - [x] JWT coding
     Request
