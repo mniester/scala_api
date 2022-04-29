@@ -123,6 +123,11 @@ abstract class DBFacade extends DBBase {
     if (overlappingTasks.isEmpty) {addNewTask(newTask); Nil} else overlappingTasks 
   }
 
+  def replaceTask(newTask: TaskModel): List[TaskModel] = {
+    val overlappingTasks = checkOverlappingTasksInProject(newTask)
+    if (overlappingTasks.isEmpty) {delTaskByKey(newTask.key); addNewTask(newTask); Nil} else overlappingTasks 
+  }
+
   def addProject(newProject: ProjectModel): List[ProjectModel] = {
     val projectWithTheSameName = getProjectsByName(newProject.name)
     if (projectWithTheSameName.isEmpty) {addNewProject(newProject); Nil} else {projectWithTheSameName}
