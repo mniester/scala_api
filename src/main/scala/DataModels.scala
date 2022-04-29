@@ -48,5 +48,5 @@ case class TaskModel(key: Int, name: String, author: Int, startTime: String, end
   def numberOfChars[DB <: DBFacade](db: DB): Int =  key.toString.length + name.length +  db.getUserByKey(author).head.name.toString.length + startTime.length + endTime.length + volume.toString.length + comment.length + deleteTime.length
 
   def checkLocalTimeDateOverlap (otherTask: TaskModel): Boolean =
-    !this.endMoment.isBefore(otherTask.startMoment)
+    !this.endMoment.isBefore(otherTask.startMoment) && !otherTask.endMoment.isBefore(this.startMoment)
 }

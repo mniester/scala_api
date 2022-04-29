@@ -125,7 +125,7 @@ abstract class DBFacade extends DBBase {
   }
 
   def replaceTask(newTask: TaskModel): List[TaskModel] = {
-    val overlappingTasks = checkOverlappingTasksInProject(newTask) // input is Task with the same key and other data
+    val overlappingTasks = checkOverlappingTasksInProject(newTask).filterNot(_.key == newTask.key)
     if (overlappingTasks.isEmpty) {delTaskByKey(newTask.key); addNewTask(newTask); Nil} else overlappingTasks 
   }
 
