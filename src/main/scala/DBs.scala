@@ -137,10 +137,8 @@ abstract class DBFacade extends DBBase {
   }
 
   def getProjectWithTasks (query: Int): Option[ProjectModelWithTasks] = {
-    val project = getProjectByKey(query).head
-    val key = project.key
-    val tasks = getTasksByProject(key).toList
-    ProjectModelWithTasksFactory(project, tasks)
+    Some(getProjectByKey(query)
+      .flatMap(project => ProjectModelWithTasksFactory(project, getTasksByProject(project.key))).head)
   }
 
   def filterProjects (listOfNames: List[String], moment: String, since: Boolean, deleted: Boolean): ProjectQuery = {
