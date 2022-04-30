@@ -27,7 +27,6 @@
     - [x] project filters
     - [x] project sorting
     - [x] task replacing
-    - [ ] add to Seq toOption method
     - [ ] user or author or alias
     - [ ] Separate Input and Output data models
 6) JSONs
@@ -47,9 +46,13 @@
         - [ ] User has already used name
         - [ ] User added ok
 7) [x] Choose datetime data type
-8) [z] Bug in test("DB - add, get and remove task")
+8) [z, >] Bug in test("DB - add, get and remove task")
 9) [z] Generalize gets in DB
-10) [z] Change Queries to String subclass
+10) [z, -] Change Queries to String subclass
 11) [-] Remove Unit - all functions should return something
 12) [ ] Separate Config for Secrets
-13) [z] Combinign mutiple filters into one; duck typing
+13) [z] Combining mutiple filters into one; duck typing
+14) [z] replace if/else constructions in DBFacade.getListOfProjects by case/match (data types and methods)
+15) [z] replace if/else constructions in DBFacade.filterProjects by case/match (pattern matching results data flow resembling tree graph,
+which do not resemble actual flow)
+16) [ ] assure that all test are working in te same manner

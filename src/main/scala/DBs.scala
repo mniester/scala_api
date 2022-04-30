@@ -9,7 +9,6 @@ import com.typesafe.config.{Config, ConfigFactory}
 import slick.basic.BasicBackend
 import slick.jdbc.SQLiteProfile.api._
 import java.time.LocalDateTime
-import scala.collection.mutable.ArrayBuffer
 
 import Settings._
 import Schemas._
@@ -166,8 +165,11 @@ abstract class DBFacade extends DBBase {
     }
   
   def pagination(projects: List[ProjectModelWithTasks], page: Int): List[ProjectModelWithTasks] = {
-    val result = new ArrayBuffer
-    result.toList
+    // def recurent(projects: List[ProjectModelWithTasks], currentPage: List[ProjectModelWithTasks], pageCounter: Int, searchedPage: Int): List[ProjectModelWithTasks] = {
+    //   if (pageCounter == searchedPage) {
+    //     currentPage
+    //   } else if ((for (x <- currentPage) yield x.numberOfChars).sum + projects.head)
+    // }
     projects
   } 
   

@@ -27,9 +27,8 @@ class TaskSchema (tag: Tag) extends Table [TaskModel] (tag, "tasks") {
   def startTime = column[String]("start_time")
   def endTime = column[String]("end_time")
   def project = column[Int]("project")
-  def time = column[Int]("time")
   def volume = column[Int] ("volume", O.Default(-1))
   def comment = column[String] ("comment", O.Default(null))
   def deleteTime = column[String] ("delete_time", O.Default(null))
-  def * = (key, name, author, startTime, endTime, project, time, volume, comment, deleteTime) <> (TaskModel.tupled, TaskModel.unapply)
+  def * = (key, name, author, startTime, endTime, project, volume, comment, deleteTime) <> (TaskModel.tupled, TaskModel.unapply)
 }
