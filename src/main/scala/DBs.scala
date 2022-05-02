@@ -14,6 +14,7 @@ import Settings._
 import Schemas._
 import DataModels._
 import Factories._
+import scala.collection.mutable.ArrayBuffer
 
 
 
@@ -167,25 +168,13 @@ abstract class DBFacade extends DBBase {
   def pagination(projects: List[ProjectModelWithTasks], searchedPage: Int): List[ProjectModelWithTasks] = {
     val lowerBound = Settings.maxCharsInPage * (searchedPage - 1)
     val higherBound = lowerBound + Settings.maxCharsInPage
-    
-    def recurrent (projects: List[ProjectModelWithTasks], output: List[ProjectModelWithTasks], pageCounter: Int): List[ProjectModelWithTasks] = {
-      def charsInOutput: Int = (for (x <- output) yield x.numberOfChars).sum
-      def charsInHead: Int = projects.head.numberOfChars
-      def isPageFull: Boolean = if ((charsInOutput + charsInHead) < Settings.maxCharsInPage) {true} else {false} 
-      if 
-        ((projects == Nil) || (isPageFull && (pageCounter == searchedPage))) {output} 
-      else {if (charsInHead > Settings.maxCharsInPage) {List(projects.head)} 
-        else
-        {if ((projects.head.numberOfChars + charsInOutput) < Settings.maxCharsInPage) 
-          {recurrent(projects.tail, output :+ projects.head, pageCounter)} 
-        else 
-          {recurrent(projects.tail, Nil, pageCounter + 1)}}
-      }
-    }
-    
-    //val result = 
-    recurrent(projects, Nil, 0)
-    //result
+    projects
+        .map(project => project.numberOfChars)
+        .scan(0)((prevNumber, nextNumber) => prevNumber + nextNumber)
+        .zip(projects)
+        .dropWhile(d => d._1 < lowerBound)
+        .takeWhile(e => e._1 <= higherBound)
+        .map(f => f._2)
   } 
   
   def getListOfProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false, sortingFactor: String = null, sortingAsc: Boolean = true, searchedPage: Int = 1): List[ProjectModelWithTasks] = {

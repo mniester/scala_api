@@ -281,6 +281,7 @@ class UnitTests extends AnyFunSuite {
     assert(result.length == 2)
     assert(((result.head.tasks.length == 2) || (result.head.tasks.length == 0)) && ((result.head.tasks.length == 2) || (result.head.tasks.length == 0)))
    }
+
   test("DBFacade.sortProjects") {db.purge;
     val projectWithTasks = ProjectFactory(key = 1, name = "Test", author = 1, startTime = "2000-01-01T00:01:01").get;
     val projectWithoutTasks = ProjectFactory(key = 2, name = "Other", author = 1, startTime = "2001-01-01T00:01:01").get;
@@ -297,5 +298,20 @@ class UnitTests extends AnyFunSuite {
     assert ((sortByUpdate.last.key == 1) && (sortByUpdate.head.key == 2))
     val sortByCreateDesc = db.getListOfProjects(sortingFactor = "create", sortingAsc = false)
     assert ((sortByUpdateDesc.last.key == 2) && (sortByUpdateDesc.head.key == 1))
+  }
+  
+  test("DBFacade.pagination"){db.purge;
+    for (x <- (1 to 100)) {val project = ProjectFactory(key = x, name = x.toString, author = x, startTime = "2000-01-01T00:01:01").get;
+                          val task = TaskFactory(key = x, 
+                                                name = x.toString, 
+                                                author = x, 
+                                                startTime = "2002-01-01T00:01:01", 
+                                                endTime = "2002-02-01T00:01:01", 
+                                                project = x, 
+                                                volume = -1, 
+                                                comment = ("x" * (Settings.maxTaskCommentLength - 150))).get;
+                          db.addProject(project); db.addTask(task)}
+      val result = db.getListOfProjects(searchedPage = 6)
+      assert (result.length == (Settings.maxCharsInPage / result.head.numberOfChars))
   }
 }
