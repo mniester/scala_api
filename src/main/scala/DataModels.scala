@@ -35,7 +35,7 @@ case class ProjectModelWithTasks (key: Int,
                                                               deleteTime: String) {
   lazy val duration = (for (task <- this.tasks) yield task.duration).sum
   lazy val lastUpdate = if (tasks.isEmpty) {startTime} else (for (t <- tasks) yield t.startTime).max
-  def numberOfChars[DB <: DBFacade](db: DB): Int = key.toString.length + name.length + db.getUserByKey(author).head.name.toString.length + startTime.length + deleteTime.length + (for (task <- tasks) yield task.numberOfChars(db)).sum
+  val numberOfChars: Int = key.toString.length + name.length + Settings.maxCharsInPage + startTime.length + deleteTime.length + (for (task <- tasks) yield task.numberOfChars).sum
   }; 
                                                               
 
@@ -45,7 +45,7 @@ case class TaskModel(key: Int, name: String, author: Int, startTime: String, end
   lazy val startMoment = LocalDateTime.parse(startTime)
   lazy val endMoment = LocalDateTime.parse(endTime)
   lazy val duration = Duration.between(startMoment, endMoment).getSeconds()
-  def numberOfChars[DB <: DBFacade](db: DB): Int =  key.toString.length + name.length +  db.getUserByKey(author).head.name.toString.length + startTime.length + endTime.length + volume.toString.length + comment.length + deleteTime.length
+  val numberOfChars: Int = key.toString.length + name.length +  Settings.maxCharsInPage + startTime.length + endTime.length + volume.toString.length + comment.length + deleteTime.length
 
   def checkLocalTimeDateOverlap (otherTask: TaskModel): Boolean =
     !this.endMoment.isBefore(otherTask.startMoment) && !otherTask.endMoment.isBefore(this.startMoment)
