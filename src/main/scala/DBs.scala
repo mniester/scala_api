@@ -164,20 +164,24 @@ abstract class DBFacade extends DBBase {
       }
     }
   
-  def pagination(projects: List[ProjectModelWithTasks], page: Int): List[ProjectModelWithTasks] = {
-    val lowerBound = Settings.maxCharsInPage * (page - 1)
+  def pagination(projects: List[ProjectModelWithTasks], searchedPage: Int): List[ProjectModelWithTasks] = {
+    val lowerBound = Settings.maxCharsInPage * (searchedPage - 1)
     val higherBound = lowerBound + Settings.maxCharsInPage
     
-    // def recurrent (projects: List[ProjectModelWithTasks], output: List[ProjectModelWithTasks])
+    def recurrent (projects: List[ProjectModelWithTasks], output: List[ProjectModelWithTasks], pageCounter: Int): List[ProjectModelWithTasks] = {
+      def charsInOutput: Int = (for (x <- output) yield x.numberOfChars).sum
+      def isPageFull: Boolean = if ((charsInOutput + projects.head.numberOfChars) < Settings.maxCharsInPage) {true} else {false} 
+      if ((projects == Nil) || (isPageFull && (pageCounter == searchedPage))) {output} else {if ((projects.head.numberOfChars + charsInOutput) < Settings.maxCharsInPage) {recurrent(projects.tail, output :+ projects.head, pageCounter)} else {recurrent(projects.tail, Nil, pageCounter + 1)}}
+    }
     
-    projects
+    recurrent(projects, Nil, 0)
   } 
   
-  def getListOfProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false, sortingFactor: String = null, sortingAsc: Boolean = true, page: Int = 1): List[ProjectModelWithTasks] = {
+  def getListOfProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false, sortingFactor: String = null, sortingAsc: Boolean = true, searchedPage: Int = 1): List[ProjectModelWithTasks] = {
     val filteredProjects = filterProjects (listOfNames, moment, since, deleted)
     val projects = Await.result(cursor.run(filteredProjects.result), Settings.dbWaitingDuration).toList
     val sortedProjects = sortProjects(addTasksToProject(projects), sortingFactor, asc = sortingAsc)
-    pagination(sortedProjects, page)
+    pagination(sortedProjects, searchedPage)
   }
 }
 
