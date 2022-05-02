@@ -170,11 +170,22 @@ abstract class DBFacade extends DBBase {
     
     def recurrent (projects: List[ProjectModelWithTasks], output: List[ProjectModelWithTasks], pageCounter: Int): List[ProjectModelWithTasks] = {
       def charsInOutput: Int = (for (x <- output) yield x.numberOfChars).sum
-      def isPageFull: Boolean = if ((charsInOutput + projects.head.numberOfChars) < Settings.maxCharsInPage) {true} else {false} 
-      if ((projects == Nil) || (isPageFull && (pageCounter == searchedPage))) {output} else {if ((projects.head.numberOfChars + charsInOutput) < Settings.maxCharsInPage) {recurrent(projects.tail, output :+ projects.head, pageCounter)} else {recurrent(projects.tail, Nil, pageCounter + 1)}}
+      def charsInHead: Int = projects.head.numberOfChars
+      def isPageFull: Boolean = if ((charsInOutput + charsInHead) < Settings.maxCharsInPage) {true} else {false} 
+      if 
+        ((projects == Nil) || (isPageFull && (pageCounter == searchedPage))) {output} 
+      else {if (charsInHead > Settings.maxCharsInPage) {List(projects.head)} 
+        else
+        {if ((projects.head.numberOfChars + charsInOutput) < Settings.maxCharsInPage) 
+          {recurrent(projects.tail, output :+ projects.head, pageCounter)} 
+        else 
+          {recurrent(projects.tail, Nil, pageCounter + 1)}}
+      }
     }
     
+    //val result = 
     recurrent(projects, Nil, 0)
+    //result
   } 
   
   def getListOfProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false, sortingFactor: String = null, sortingAsc: Boolean = true, searchedPage: Int = 1): List[ProjectModelWithTasks] = {
