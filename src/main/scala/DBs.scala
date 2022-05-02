@@ -165,11 +165,11 @@ abstract class DBFacade extends DBBase {
     }
   
   def pagination(projects: List[ProjectModelWithTasks], page: Int): List[ProjectModelWithTasks] = {
-    // def recurent(projects: List[ProjectModelWithTasks], currentPage: List[ProjectModelWithTasks], pageCounter: Int, searchedPage: Int): List[ProjectModelWithTasks] = {
-    //   if (pageCounter == searchedPage) {
-    //     currentPage
-    //   } else if ((for (x <- currentPage) yield x.numberOfChars).sum + projects.head)
-    // }
+    val lowerBound = Settings.maxCharsInPage * (page - 1)
+    val higherBound = lowerBound + Settings.maxCharsInPage
+    
+    // def recurrent (projects: List[ProjectModelWithTasks], output: List[ProjectModelWithTasks])
+    
     projects
   } 
   

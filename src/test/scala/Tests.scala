@@ -46,11 +46,29 @@ class UnitTests extends AnyFunSuite {
     db.addUser(user)
     val task = TaskFactory(name = "1",
                           author = 1,
-                          startTime = "1",
-                          endTime = "2000-02-01T00:01:01",
+                          startTime = "2000-02-01T00:01:01",
+                          endTime = "2001-02-01T00:01:01",
                           project = 123,
                           volume = 1, 
-                          comment = "abc" * Settings.maxTaskCommentLength)
+                          comment = "abc").get
+    assert (task.numberOfChars < 100)
+  }
+
+  test("Project.numberOfChars") {db.purge;
+    val user = UserFactory(uuid = "1", name = "a").get
+    db.addUser(user)
+    val project = ProjectFactory(key = 1, name = "Test", author = 1, startTime = "2000-01-01T00:01:01").get;
+    val task = TaskFactory(name = "1",
+                          author = 1,
+                          startTime = "2000-02-01T00:01:01",
+                          endTime = "2001-02-01T00:01:01",
+                          project = 123,
+                          volume = 1, 
+                          comment = "abc").get
+    db.addProject(project)
+    db.addTask(task)
+    val result = db.getProjectWithTasks(1).head
+    assert (result.numberOfChars < 200)
   }
   
   test("DBFacade.addUser, DBFacade.delUserByName") {db.purge;
