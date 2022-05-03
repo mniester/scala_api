@@ -111,6 +111,14 @@ class UnitTests extends AnyFunSuite {
                                         assert (resultWithRepeat.head == project)
                                       }
   
+  test("DBFacade.checkIfUserIsAuthor - Project") {db.purge;
+                                        val project = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
+                                        db.addProject(project);
+                                        assert (db.checkIfUserIsAuthor(project))
+                                        val project2 = ProjectFactory(key = 1, name = "Test", user = 2, startTime = "2000-01-01T00:01:01").get;
+                                        assert (!db.checkIfUserIsAuthor(project2))
+  }
+  
   test("DBFacade.addTask, DBFacade.delTaskByKey, DBFacade.getTaskByKey") {db.purge;
                                         val task = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 123, volume = -1, comment = "Test").get;
                                         val taskQuery = task.key
@@ -121,7 +129,13 @@ class UnitTests extends AnyFunSuite {
                                         var dbResult2 = db.getTaskByKey(taskQuery);
                                         assert (dbResult2.isEmpty);
                                       }
-  
+  test("DBFacade.checkIfUserIsAuthor - Task") {db.purge;
+                                        val task = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 123, volume = -1, comment = "Test").get;
+                                        db.addTask(task);
+                                        assert (db.checkIfUserIsAuthor(task))
+                                        val task2 = TaskFactory(key = 1, name = "Test", user = 2, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 123, volume = -1, comment = "Test").get;
+                                        assert (!db.checkIfUserIsAuthor(task2))
+  }
   test("DBFacade.replaceTask") {db.purge;
     val task1 = TaskFactory(key = 1, name = "Old", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 123,    volume = -1, comment = "Test").get;
     val task2 = TaskFactory(key = task1.key, name = "New", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = task1.project, volume = -1, comment = "Test").get;

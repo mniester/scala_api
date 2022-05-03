@@ -185,6 +185,13 @@ abstract class DBFacade extends DBBase {
     val sortedProjects = sortProjects(addTasksToProject(projects), sortingFactor, asc = sortingAsc)
     pagination(sortedProjects, searchedPage)
   }
+  def checkIfUserIsAuthor(data: TaskModel): Boolean = {
+    if (data.user == getTaskByKey(data.key).head.user) {true} else {false} 
+  }
+  
+  def checkIfUserIsAuthor(data: ProjectModel): Boolean = {
+    if (data.user == getProjectByKey(data.key).head.user) {true} else {false} 
+  }
 }
 
 object SQLite extends DBFacade {

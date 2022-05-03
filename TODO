@@ -21,8 +21,9 @@
     - [ ] When there can be only one answer (project, User) List => Option
     - [ ] remove project key from task, when it is a part of Project List
     - [x] UUID as user ID
-    - [ ] only user can delete data
+    - [>] only user can delete data
     - [ ] only user can modify data
+    - [x] checking data author (Task, Project)
     - [ ] project stats
     - [x] project filters
     - [x] project sorting
