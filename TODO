@@ -21,13 +21,13 @@
     - [ ] When there can be only one answer (project, User) List => Option
     - [ ] remove project key from task, when it is a part of Project List
     - [x] UUID as user ID
-    - [ ] only author can delete data
-    - [ ] only author can modify data
+    - [ ] only user can delete data
+    - [ ] only user can modify data
     - [ ] project stats
     - [x] project filters
     - [x] project sorting
     - [x] task replacing
-    - [ ] user or author or alias
+    - [ ] user or user or alias
     - [x] pagination
     - [ ] Separate Input and Output data models
 6) JSONs

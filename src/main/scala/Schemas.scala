@@ -14,21 +14,21 @@ class UserSchema (tag: Tag) extends Table [UserModel](tag, "users") {
 class ProjectSchema (tag: Tag) extends Table [ProjectModel] (tag, "projects") {
   def key = column[Int]("key", O.PrimaryKey, O.AutoInc)
   def name = column[String]("name", O.Unique)
-  def author = column[Int]("author")
+  def user = column[Int]("user")
   def startTime = column[String]("start_time")
   def deleteTime = column[String] ("delete_time", O.Default(""))
-  def * = (key, name, author, startTime, deleteTime) <> (ProjectModel.tupled, ProjectModel.unapply)
+  def * = (key, name, user, startTime, deleteTime) <> (ProjectModel.tupled, ProjectModel.unapply)
 }
 
 class TaskSchema (tag: Tag) extends Table [TaskModel] (tag, "tasks") {
   def key = column[Int]("key", O.PrimaryKey, O.AutoInc)
   def name = column[String]("name")
-  def author = column[Int]("author")
+  def user = column[Int]("user")
   def startTime = column[String]("start_time")
   def endTime = column[String]("end_time")
   def project = column[Int]("project")
   def volume = column[Int] ("volume", O.Default(-1))
   def comment = column[String] ("comment", O.Default(null))
   def deleteTime = column[String] ("delete_time", O.Default(null))
-  def * = (key, name, author, startTime, endTime, project, volume, comment, deleteTime) <> (TaskModel.tupled, TaskModel.unapply)
+  def * = (key, name, user, startTime, endTime, project, volume, comment, deleteTime) <> (TaskModel.tupled, TaskModel.unapply)
 }

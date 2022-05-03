@@ -7,30 +7,30 @@ import io.jvm.uuid._
 import DBs.DBFacade
 
 
-abstract class AbstractProjectModel (key: Int, name: String, author: Int, startTime: String, deleteTime: String = "")
+abstract class AbstractProjectModel (key: Int, name: String, user: Int, startTime: String, deleteTime: String = "")
 
 case class UserModel(key: Int, uuid: String, name: String)
 
 case class ProjectModel (key: Int, 
                         name: String, 
-                        author: Int, 
+                        user: Int, 
                         startTime: String, 
                         deleteTime: String = "") 
                         extends AbstractProjectModel (key: Int, 
                                                       name: String, 
-                                                      author: Int, 
+                                                      user: Int, 
                                                       startTime: String, 
                                                       deleteTime: String)
 
 case class ProjectModelWithTasks (key: Int, 
                                   name: String, 
-                                  author: Int, 
+                                  user: Int, 
                                   startTime: String, 
                                   deleteTime: String = "",
                                   tasks: List[TaskModel])
                                   extends AbstractProjectModel (key: Int, 
                                                               name: String, 
-                                                              author: Int, 
+                                                              user: Int, 
                                                               startTime: String, 
                                                               deleteTime: String) {
   lazy val duration = (for (task <- this.tasks) yield task.duration).sum
@@ -40,7 +40,7 @@ case class ProjectModelWithTasks (key: Int,
                                                               
 
 
-case class TaskModel(key: Int, name: String, author: Int, startTime: String, endTime: String, project: Int, volume: Int, comment: String, deleteTime: String) {
+case class TaskModel(key: Int, name: String, user: Int, startTime: String, endTime: String, project: Int, volume: Int, comment: String, deleteTime: String) {
   
   lazy val startMoment = LocalDateTime.parse(startTime)
   lazy val endMoment = LocalDateTime.parse(endTime)
