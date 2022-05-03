@@ -168,13 +168,15 @@ abstract class DBFacade extends DBBase {
   def pagination(projects: List[ProjectModelWithTasks], searchedPage: Int): List[ProjectModelWithTasks] = {
     val lowerBound = Settings.maxCharsInPage * (searchedPage - 1)
     val higherBound = lowerBound + Settings.maxCharsInPage
-    projects
+    def totalNumberOfChars (projects: List[ProjectModelWithTasks]) = (for (p <- projects) yield p.numberOfChars).sum
+    val result = projects
         .map(project => project.numberOfChars)
         .scan(0)((prevNumber, nextNumber) => prevNumber + nextNumber)
         .zip(projects)
         .dropWhile(d => d._1 < lowerBound)
         .takeWhile(e => e._1 <= higherBound)
         .map(f => f._2)
+    if (totalNumberOfChars(result) < higherBound) {result} else {result.init}
   } 
   
   def getListOfProjects (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false, sortingFactor: String = null, sortingAsc: Boolean = true, searchedPage: Int = 1): List[ProjectModelWithTasks] = {

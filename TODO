@@ -28,6 +28,7 @@
     - [x] project sorting
     - [x] task replacing
     - [ ] user or author or alias
+    - [x] pagination
     - [ ] Separate Input and Output data models
 6) JSONs
     - [x] JWT coding

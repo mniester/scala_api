@@ -311,7 +311,7 @@ class UnitTests extends AnyFunSuite {
                                                 volume = -1, 
                                                 comment = ("x" * (Settings.maxTaskCommentLength - 150))).get;
                           db.addProject(project); db.addTask(task)}
-      val result = db.getListOfProjects(searchedPage = 6)
+      val result = db.getListOfProjects(searchedPage = 1)
       assert (result.length == (Settings.maxCharsInPage / result.head.numberOfChars))
   }
 }
