@@ -75,7 +75,7 @@ abstract class DBBase {
   }
 
   def changeProjectName(projectKey: Int, newName: String) = {
-    val action = cursor.run(projects.filter(_.key === projectKey).map(_.name).update(newName))
+    cursor.run(projects.filter(_.key === projectKey).map(_.name).update(newName))
   }
 
   def getProjectByKey(query: Int): List[ProjectModel] = {
@@ -185,12 +185,27 @@ abstract class DBFacade extends DBBase {
     val sortedProjects = sortProjects(addTasksToProject(projects), sortingFactor, asc = sortingAsc)
     pagination(sortedProjects, searchedPage)
   }
+
   def checkIfUserIsAuthor(data: TaskModel): Boolean = {
     if (data.user == getTaskByKey(data.key).head.user) {true} else {false} 
+  }
+
+  def modifyTask(task: TaskModel): List[TaskModel] = {
+    if (checkIfUserIsAuthor(task)) {replaceTask(task)} else {Nil}
   }
   
   def checkIfUserIsAuthor(data: ProjectModel): Boolean = {
     if (data.user == getProjectByKey(data.key).head.user) {true} else {false} 
+  }
+
+  def delProject(project: ProjectModel): Unit =
+    if (checkIfUserIsAuthor(project)) {delProjectByKey(project.key)}
+  
+  def checkIfUserIsAuthor(projectKey: Int): Boolean = {
+    if (projectKey == getProjectByKey(projectKey).head.user) {true} else {false} 
+  } 
+  def checkAndChangeProjectName(projectKey: Int, newName: String) = {
+    if (checkIfUserIsAuthor(projectKey)) {changeProjectName(projectKey, newName)}
   }
 }
 
