@@ -69,7 +69,7 @@ abstract class DBBase {
     Await.result(cursor.run(users.filter(_.key === query).delete), Settings.dbWaitingDuration)
   }
 
-  def getProjectsByName(query: String): List[ProjectModel] = {
+  def getProjectByName(query: String): List[ProjectModel] = {
     val action = cursor.run(projects.filter(_.name === query).filter(_.deleteTime.length === 0).result)
     Await.result(action, Settings.dbWaitingDuration).toList
   }
@@ -132,7 +132,7 @@ abstract class DBFacade extends DBBase {
   }
 
   def addProject(newProject: ProjectModel): List[ProjectModel] = {
-    val projectWithTheSameName = getProjectsByName(newProject.name)
+    val projectWithTheSameName = getProjectByName(newProject.name)
     if (projectWithTheSameName.isEmpty) {addNewProject(newProject); Nil} else {projectWithTheSameName}
   }
 

@@ -96,10 +96,10 @@ class UnitTests extends AnyFunSuite {
                                         val project = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
                                         val projectQuery = "Test"
                                         db.addProject(project);
-                                        val dbResult = db.getProjectsByName(projectQuery).last; 
+                                        val dbResult = db.getProjectByName(projectQuery).last; 
                                         assert (project == dbResult);
                                         db.delProjectByKey(1);
-                                        var dbResult2 = db.getProjectsByName(projectQuery);
+                                        var dbResult2 = db.getProjectByName(projectQuery);
                                         assert (dbResult2.length == 0);
                                       }
 
@@ -160,7 +160,7 @@ class UnitTests extends AnyFunSuite {
                                         db.addTask(task);
                                         db.addProject(project);
                                         db.delProjectByKey(1);
-                                        val projectResult = db.getProjectsByName(projectQuery);
+                                        val projectResult = db.getProjectByName(projectQuery);
                                         assert (projectResult.isEmpty);
                                         var TaskResult = db.getTaskByKey(taskQuery);
                                         assert (TaskResult.isEmpty);
@@ -237,10 +237,10 @@ class UnitTests extends AnyFunSuite {
                                         val project = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
                                         val projectQuery = "Test"
                                         db.addProject(project);
-                                        val dbResult = db.getProjectsByName(projectQuery).last; 
+                                        val dbResult = db.getProjectByName(projectQuery).last; 
                                         assert (project == dbResult);
                                         db.delProjectByKey(1);
-                                        var dbResult2 = db.getProjectsByName(projectQuery);
+                                        var dbResult2 = db.getProjectByName(projectQuery);
                                         assert (dbResult2.length == 0);}
   
   test("DBFacade.addProject, DBFacade.addTask, DBFacade.addTask, DBFacade.getProjectWithTasks") {db.purge;
