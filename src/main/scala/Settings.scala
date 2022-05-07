@@ -19,4 +19,7 @@ package object Settings {
   
   val JWTKey = source.getConfig("secrets").getString("JWTKey")
   val dbWaitingDuration = Duration(source.getConfig("wait").getInt("db.quantity"), source.getConfig("wait").getString("db.unit"))
+
+  val localHostName = source.getConfig("server").getString("localHostName")
+  val port = source.getConfig("server").getInt("port")
 }

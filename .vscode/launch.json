@@ -13,6 +13,12 @@
         {
             "type": "scala",
             "request": "launch",
+            "name": "Routes Tests",
+            "testClass": "RoutesTests"
+        },
+        {
+            "type": "scala",
+            "request": "launch",
             "name": "Server",
             "mainClass": "Server",
             "args": ["-cp src/main/resources/app.conf"],
