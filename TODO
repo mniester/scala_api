@@ -7,7 +7,19 @@
 1) [x] Move waiting duration to Settings 
 2) [ ] prepare TypeScript test page
 3) [>] Add checking to DB data methods
-4) [ ] Add routes
+4) [v] Add routes
+    - [ ] GET user
+    - [ ] POST user
+    - [ ] DELETE user
+    - [ ] GET Task
+    - [ ] POST Task
+    - [ ] PUT Task
+    - [ ] DELETE Task
+    - [ ] GET Project
+    - [ ] POST Project
+    - [ ] PUT Project
+    - [ ] DELETE Project
+    - [ ] GET ProjectsWithTasks
 5) [v] Data Base and DataModels
     - [x] check overlapping when adding a new task
     - [x] ban adding new task if tasks overlapping
@@ -37,7 +49,7 @@
         - [ ] Add User
         - [ ] Add Task
         - [ ] Add Project
-        - [ ] Get Project with Tasks
+        - [-] Get Project with Tasks
     Responses
         - [ ] Tasks overlapping
         - [ ] Task added ok

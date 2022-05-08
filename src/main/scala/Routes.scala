@@ -1,97 +1,100 @@
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
+import spray.json._
 
-object Routes {
-  val hello =
-    path("hello") {
-      get {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "Hi!"}"""))
-    }
-  }
+import Strings.JWTCoder
+import DataModels._
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import akka.http.scaladsl.server.PathMatcher
 
+
+trait JsonProtocols extends DefaultJsonProtocol {
+  implicit val userFormat = jsonFormat3(UserModel)
+}
+
+object Routes extends JsonProtocols with SprayJsonSupport {
+  
   val user =
     path("user") {
-      get {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "user"}"""))
-      }
+      parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
     }
+
 
   val userPost =
     path("user") {
       post {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "user_post"}"""))
-        //complete(StatusCodes.Created)
+        parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
       }
     }
 
   val userDelete =
     path("user") {
       delete {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "user_delete"}"""))
+        parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
       }
     }
   
   val task =
     path("task") {
       get {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "task"}"""))
+        parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
       }
     }
   
   val taskPost =
     path("task") {
       post {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "task_post"}"""))
+        parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
       }
     }
   
   val taskDelete =
     path("task") {
       delete {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "task_delete"}"""))
+        parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
       }
     }
 
   val taskPut =
     path("task") {
       put {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "task_put"}"""))
+        parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
       }
     }
 
   val project =
     path("project") {
       get {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "project"}"""))
+        parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
       }
     }
   
   val projectPost =
     path("project") {
       post {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "project_post"}"""))
+        parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
       }
     }
   
   val projectDelete =
     path("project") {
       delete {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "project_delete"}"""))
+        parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
       }
     }
 
   val projectPut =
     path("project") {
       put {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "project_put"}"""))
+        parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
       }
     }
   
   val projectsList =
     path("projectslist") {
       get {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "projectsList"}"""))
+        parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
       }
     }
   
