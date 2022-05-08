@@ -15,7 +15,7 @@ object Server {
 
     val bindingFuture = Http().newServerAt(localHostName, port).bind(allRoutes)
 
-    println(s"Server now online. Please navigate to http://localhost:8080/hello\nPress RETURN to stop...")
+    println(s"Server now online. Press RETURN to stop...")
     StdIn.readLine()
     bindingFuture
       .flatMap(_.unbind())

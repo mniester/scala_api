@@ -17,17 +17,18 @@ object Routes {
       }
     }
 
-  val userNew =
-    path("user/new") {
+  val userPost =
+    path("user") {
       post {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "user/new"}"""))
+        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "user_post"}"""))
+        //complete(StatusCodes.Created)
       }
     }
 
   val userDelete =
-    path("user/delete") {
+    path("user") {
       delete {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "user/delete"}"""))
+        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "user_delete"}"""))
       }
     }
   
@@ -38,24 +39,24 @@ object Routes {
       }
     }
   
-  val taskNew =
-    path("task/new") {
+  val taskPost =
+    path("task") {
       post {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "task/new"}"""))
+        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "task_post"}"""))
       }
     }
   
   val taskDelete =
-    path("task/delete") {
+    path("task") {
       delete {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "task/delete"}"""))
+        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "task_delete"}"""))
       }
     }
 
-  val taskModify =
-    path("task/modify") {
+  val taskPut =
+    path("task") {
       put {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "task/modify"}"""))
+        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "task_put"}"""))
       }
     }
 
@@ -66,34 +67,33 @@ object Routes {
       }
     }
   
-  val projectNew =
-    path("project/New") {
+  val projectPost =
+    path("project") {
       post {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "project/New"}"""))
+        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "project_post"}"""))
       }
     }
   
   val projectDelete =
-    path("project/delete") {
+    path("project") {
       delete {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "project/delete"}"""))
+        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "project_delete"}"""))
       }
     }
 
-  val projectModify =
-    path("project/modify") {
+  val projectPut =
+    path("project") {
       put {
-        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "project/modify"}"""))
+        complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "project_put"}"""))
       }
     }
   
   val projectsList =
-    path("projects") {
+    path("projectslist") {
       get {
         complete(HttpEntity(ContentTypes.`application/json`, """{"Hello!": "projectsList"}"""))
       }
     }
   
-  val allRoutes = concat(user, userNew, userDelete, task, taskNew, taskDelete, taskModify, project, projectNew, projectDelete, projectModify, projectsList)
-  val allGets = concat(user, task, project, projectsList)
+  val allRoutes = concat(user, userPost, userDelete, task, taskPost, taskDelete, taskPut, project, projectPost, projectDelete, projectPut, projectsList)
 }
