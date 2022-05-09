@@ -7,7 +7,7 @@ val AkkaVersion = "2.6.8"
 val AkkaHttpVersion = "10.2.9"
 
 libraryDependencies ++= Seq("org.scalactic" %% "scalactic" % "3.2.10",
-                            "org.scalatest" %% "scalatest" % "3.2.10" % "test",
+                            "org.scalatest" %% "scalatest" % "3.2.10" % Test,
                             "org.xerial" % "sqlite-jdbc" % "3.36.0.3",
                             "com.typesafe.slick" %% "slick" % "3.3.3",
                             "org.slf4j" % "slf4j-nop" % "1.6.4",
@@ -19,5 +19,6 @@ libraryDependencies ++= Seq("org.scalactic" %% "scalactic" % "3.2.10",
                             "com.github.jwt-scala" %% "jwt-core" % "9.0.5",
                             "io.jvm.uuid" %% "scala-uuid" % "0.3.1",
                             "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion,
-                            "com.typesafe.akka" %% "akka-http-testkit" % AkkaHttpVersion % "test"
+                            "com.typesafe.akka" %% "akka-http-testkit" % AkkaHttpVersion % Test,
+                             "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion % Test
                             )
