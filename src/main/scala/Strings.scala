@@ -8,8 +8,8 @@ object JWTCoder {
   private val jwtkey = Settings.JWTKey
   private val alg = JwtAlgorithm.HS256
   
-  def encode (token: String) = {
-    Jwt.encode(token, jwtkey, alg)
+  def encode (data: String) = {
+    Jwt.encode(data, jwtkey, alg)
   }
 
   def decode (token: String) = {

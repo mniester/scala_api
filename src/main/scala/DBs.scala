@@ -26,7 +26,7 @@ abstract class DBBase {
   lazy val tasks = TableQuery[TaskSchema]
   def resetSequences: Unit
 
-  def purge (): Unit = {
+  def reset (): Unit = {
     cursor.run(users.filter(_.name.length > 0).delete)
     cursor.run(projects.filter(_.name.length > 0).delete)
     cursor.run(tasks.filter(_.name.length > 0).delete)

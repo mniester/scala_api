@@ -41,7 +41,7 @@ class UnitTests extends AnyFunSuite {
                                                         volume = 1, 
                                                         comment = "abc") == None)}
   
-  test("Task.numberOfChars") {db.purge;
+  test("Task.numberOfChars") {db.reset;
     val user = UserFactory(uuid = "1", name = "a").get
     db.addUser(user)
     val task = TaskFactory(name = "1",
@@ -54,7 +54,7 @@ class UnitTests extends AnyFunSuite {
     assert (task.numberOfChars < 100)
   }
 
-  test("Project.numberOfChars") {db.purge;
+  test("Project.numberOfChars") {db.reset;
     val user = UserFactory(uuid = "1", name = "a").get
     db.addUser(user)
     val project = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
@@ -62,16 +62,16 @@ class UnitTests extends AnyFunSuite {
                           user = 1,
                           startTime = "2000-02-01T00:01:01",
                           endTime = "2001-02-01T00:01:01",
-                          project = 123,
+                          project = 1,
                           volume = 1, 
                           comment = "abc").get
     db.addProject(project)
     db.addTask(task)
-    val result = db.getProjectWithTasks(1).head
-    assert (result.numberOfChars < 200)
+    val result = db.getProjectWithTasks(1).get
+    assert ((result.numberOfChars < 200) && (result.numberOfChars > 30))
   }
   
-  test("DBFacade.addUser, DBFacade.delUserByName") {db.purge;
+  test("DBFacade.addUser, DBFacade.delUserByName") {db.reset;
                                         val user = UserFactory(key = 1, uuid = UUID.random.toString, name = "Test").get;
                                         val userQuery = "Test"
                                         db.addUser(user);
@@ -82,7 +82,7 @@ class UnitTests extends AnyFunSuite {
                                         assert (dbResult2.length == 0);
                                         }
   
-  test("DBFacade.addUser, DBFacade.getUserByKey, DBFacade.delUserByKey") {db.purge;
+  test("DBFacade.addUser, DBFacade.getUserByKey, DBFacade.delUserByKey") {db.reset;
                                         val user = UserFactory(key = 1, uuid = UUID.random.toString, name = "Test").get;
                                         db.addUser(user);
                                         var dbResult = db.getUserByKey(1).head; 
@@ -92,7 +92,7 @@ class UnitTests extends AnyFunSuite {
                                         assert (dbResult2.length == 0);
                                         }
   
-  test("DBFacade.addProject, DBFacade.delProjectByKey, DBFacade.db.getProjectsByName") {db.purge;
+  test("DBFacade.addProject, DBFacade.delProjectByKey, DBFacade.db.getProjectsByName") {db.reset;
                                         val project = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
                                         val projectQuery = "Test"
                                         db.addProject(project);
@@ -103,7 +103,7 @@ class UnitTests extends AnyFunSuite {
                                         assert (dbResult2.length == 0);
                                       }
 
-  test("DBFacade.addProject (twice with the same name)") {db.purge;
+  test("DBFacade.addProject (twice with the same name)") {db.reset;
                                         val project = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
                                         val resultNoRepeat = db.addProject(project);
                                         assert (resultNoRepeat == Nil)
@@ -111,7 +111,7 @@ class UnitTests extends AnyFunSuite {
                                         assert (resultWithRepeat.head == project)
                                       }
   
-  test("DBFacade.checkIfUserIsAuthor - Project") {db.purge;
+  test("DBFacade.checkIfUserIsAuthor - Project") {db.reset;
                                         val project = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
                                         db.addProject(project);
                                         assert (db.checkIfUserIsAuthor(project))
@@ -119,7 +119,7 @@ class UnitTests extends AnyFunSuite {
                                         assert (!db.checkIfUserIsAuthor(project2))
   }
   
-  test("DBFacade.addTask, DBFacade.delTaskByKey, DBFacade.getTaskByKey") {db.purge;
+  test("DBFacade.addTask, DBFacade.delTaskByKey, DBFacade.getTaskByKey") {db.reset;
                                         val task = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 123, volume = -1, comment = "Test").get;
                                         val taskQuery = task.key
                                         db.addTask(task);
@@ -129,14 +129,14 @@ class UnitTests extends AnyFunSuite {
                                         var dbResult2 = db.getTaskByKey(taskQuery);
                                         assert (dbResult2.isEmpty);
                                       }
-  test("DBFacade.checkIfUserIsAuthor - Task") {db.purge;
+  test("DBFacade.checkIfUserIsAuthor - Task") {db.reset;
                                         val task = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 123, volume = -1, comment = "Test").get;
                                         db.addTask(task);
                                         assert (db.checkIfUserIsAuthor(task))
                                         val task2 = TaskFactory(key = 1, name = "Test", user = 2, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 123, volume = -1, comment = "Test").get;
                                         assert (!db.checkIfUserIsAuthor(task2))
   }
-  test("DBFacade.replaceTask") {db.purge;
+  test("DBFacade.replaceTask") {db.reset;
     val task1 = TaskFactory(key = 1, name = "Old", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 123,    volume = -1, comment = "Test").get;
     val task2 = TaskFactory(key = task1.key, name = "New", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = task1.project, volume = -1, comment = "Test").get;
     db.addTask(task1);
@@ -145,14 +145,14 @@ class UnitTests extends AnyFunSuite {
     assert ((task2.key + 1) == result.key && (result.name == "New"))
   }
 
-  test("DBFacade.addTask, DBFacade.getTasksByProject") {db.purge;
+  test("DBFacade.addTask, DBFacade.getTasksByProject") {db.reset;
                                         val task = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 123, volume = -1, comment = "Test").get;
                                         db.addTask(task);
                                         val dbResult = db.getTasksByProject(task.project).head;
                                         assert (task == dbResult);
                                       }
 
-  test("DBFacade.addTask, DBFacace.addProject, DBFacade.delProjectByKey, DBFacade.getProjectByName, DBFacade.getTaskByKey") {db.purge;
+  test("DBFacade.addTask, DBFacace.addProject, DBFacade.delProjectByKey, DBFacade.getProjectByName, DBFacade.getTaskByKey") {db.reset;
                                         val task = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, volume = -1, comment = "Test").get;
                                         val project = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
                                         val taskQuery = task.key
@@ -179,7 +179,7 @@ class UnitTests extends AnyFunSuite {
     assert(!task1.checkLocalTimeDateOverlap(task2))
   }
 
-  test("DB.checkOverlappingTasksInProject - found") {db.purge;
+  test("DB.checkOverlappingTasksInProject - found") {db.reset;
     val task1 = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, volume = -1, comment = "Test").get;
     val task2 = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, volume = -1, comment = "Test").get;
     val task3 = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 2, volume = -1, comment = "Test").get;
@@ -188,7 +188,7 @@ class UnitTests extends AnyFunSuite {
     assert(result.length == 1)
   }
 
-  test("DB.checkOverlappingTasksInProject - no found") {db.purge;
+  test("DB.checkOverlappingTasksInProject - no found") {db.reset;
     val task1 = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, volume = -1, comment = "Test").get;
     val task2 = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2001-01-01T00:01:01", endTime = "2001-02-01T00:01:01", project = 1, volume = -1, comment = "Test").get;
     val task3 = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 123, volume = -1, comment = "Test").get;
@@ -197,7 +197,7 @@ class UnitTests extends AnyFunSuite {
     assert(result.length == 0)
   }
 
-  test("DBFacade.addUser, DBFacade.getUserByName, DBFacade.delUsersByName - OK") {db.purge;
+  test("DBFacade.addUser, DBFacade.getUserByName, DBFacade.delUsersByName - OK") {db.reset;
                                         val user = UserFactory(key = 1, uuid = UUID.random.toString, name = "Test").get;
                                         val userQuery = "Test"
                                         db.addUser(user);
@@ -208,7 +208,7 @@ class UnitTests extends AnyFunSuite {
                                         assert (dbResult2.length == 0);
                                         }
   
-  test("DBFacade.addUser (twice with same name)") {db.purge;
+  test("DBFacade.addUser (twice with same name)") {db.reset;
                                         val user = UserFactory(key = 1, uuid = UUID.random.toString, name = "Test").get;
                                         val userQuery = "Test"
                                         db.addUser(user);
@@ -216,7 +216,7 @@ class UnitTests extends AnyFunSuite {
                                         assert (dbResult == user)
                                         }
 
-  test("DBFacade.addTask using Facade ok") {db.purge;
+  test("DBFacade.addTask using Facade ok") {db.reset;
                                         val task = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 123,    volume = -1, comment = "Test").get;
                                         val taskQuery = task.key
                                         db.addTask(task);
@@ -224,7 +224,7 @@ class UnitTests extends AnyFunSuite {
                                         assert (task == dbResult);
                                         }
 
-  test("DBFacade.addNewTasks, DBFacade.addTask (return overlapping task)") {db.purge;
+  test("DBFacade.addNewTasks, DBFacade.addTask (return overlapping task)") {db.reset;
     val task1 = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, volume = -1, comment = "Test").get;
     val task2 = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, volume = -1, comment = "Test").get;
     val task3 = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 2, volume = -1, comment = "Test").get;
@@ -233,7 +233,7 @@ class UnitTests extends AnyFunSuite {
     assert(result == task2)
   }
 
-  test("DBFacade.addProject, DBFacade.delProjectByKey, DBFacade.getProjectsByName") {db.purge;
+  test("DBFacade.addProject, DBFacade.delProjectByKey, DBFacade.getProjectsByName") {db.reset;
                                         val project = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
                                         val projectQuery = "Test"
                                         db.addProject(project);
@@ -243,7 +243,7 @@ class UnitTests extends AnyFunSuite {
                                         var dbResult2 = db.getProjectByName(projectQuery);
                                         assert (dbResult2.length == 0);}
   
-  test("DBFacade.addProject, DBFacade.addTask, DBFacade.addTask, DBFacade.getProjectWithTasks") {db.purge;
+  test("DBFacade.addProject, DBFacade.addTask, DBFacade.addTask, DBFacade.getProjectWithTasks") {db.reset;
     val project = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
     val task1 = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, volume = -1, comment = "Test").get;
     val task2 = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, volume = -1, comment = "Test").get;
@@ -254,7 +254,7 @@ class UnitTests extends AnyFunSuite {
     assert((result.tasks.head.duration + result.tasks.last.duration) == (task1.duration + task2.duration))
    }
 
-  test("DBFacade.getListOfProjects (different variants)") {db.purge;
+  test("DBFacade.getListOfProjects (different variants)") {db.reset;
     val project1 = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
     val project2 = ProjectFactory(key = 2, name = "Other", user = 1, startTime = "2002-01-01T00:01:01").get;
     db.addProject(project1)
@@ -274,7 +274,7 @@ class UnitTests extends AnyFunSuite {
     assert (selectDeleted.head.key == 2)
    }
 
-  test("DBFacade - addTasksToProject") {db.purge;
+  test("DBFacade - addTasksToProject") {db.reset;
     val project = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
     val task = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, volume = -1, comment = "Test").get;
     db.addProject(project)
@@ -283,7 +283,7 @@ class UnitTests extends AnyFunSuite {
     assert ((result.head.key == project.key) && (result.head.startTime == project.startTime))
   }
 
-  test("DBFacade.addProject, DBFacade.addNewTasks, DBFacade.getListOfProjects") {db.purge;
+  test("DBFacade.addProject, DBFacade.addNewTasks, DBFacade.getListOfProjects") {db.reset;
     val projectWithTasks = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
     val projectWithoutTasks = ProjectFactory(key = 2, name = "Other", user = 1, startTime = "2000-01-01T00:01:01").get;
     val task1 = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, volume = -1, comment = "Test").get;
@@ -296,7 +296,7 @@ class UnitTests extends AnyFunSuite {
     assert(((result.head.tasks.length == 2) || (result.head.tasks.length == 0)) && ((result.head.tasks.length == 2) || (result.head.tasks.length == 0)))
    }
 
-  test("DBFacade.sortProjects") {db.purge;
+  test("DBFacade.sortProjects") {db.reset;
     val projectWithTasks = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
     val projectWithoutTasks = ProjectFactory(key = 2, name = "Other", user = 1, startTime = "2001-01-01T00:01:01").get;
     val task1 = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2002-01-01T00:01:01", endTime = "2002-02-01T00:01:01", project = 1, volume = -1, comment = "Test").get;
@@ -313,7 +313,7 @@ class UnitTests extends AnyFunSuite {
     val sortByCreateDesc = db.getListOfProjects(sortingFactor = "create", sortingAsc = false)
     assert ((sortByUpdateDesc.last.key == 2) && (sortByUpdateDesc.head.key == 1))
   }
-  test("DBFacade.pagination"){db.purge;
+  test("DBFacade.pagination"){db.reset;
     for (x <- (1 to 100)) {val project = ProjectFactory(key = x, name = x.toString, user = x, startTime = "2000-01-01T00:01:01").get;
                           val task = TaskFactory(key = x, 
                                                 name = x.toString, 
