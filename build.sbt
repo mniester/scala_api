@@ -17,4 +17,6 @@ libraryDependencies ++= Seq("org.scalactic" %% "scalactic" % "3.2.10",
                             "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
                             "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
                             "com.github.jwt-scala" %% "jwt-core" % "9.0.5",
-                            "io.jvm.uuid" %% "scala-uuid" % "0.3.1")
+                            "io.jvm.uuid" %% "scala-uuid" % "0.3.1",
+                            "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion
+                            )

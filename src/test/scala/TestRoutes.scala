@@ -8,13 +8,5 @@ import Settings._
 import Routes._
 
 object RoutesTests {
-  implicit val system = ActorSystem()
-  import system.dispatcher
-  val request = HttpRequest(
-  method = HttpMethods.POST,
-  uri = localHostName + "/" + "users/new",
-  entity = HttpEntity(ContentTypes.`text/plain(UTF-8)`, "data")
-  )
-  val response: Future[HttpResponse] = Http().singleRequest(request)
-  println(response)
+  ???
 }

@@ -6,6 +6,7 @@ import io.jvm.uuid._
 
 import DBs.DBFacade
 
+case class JWTModel(key: Int, uuid: String, name: String)
 
 abstract class AbstractProjectModel (key: Int, name: String, user: Int, startTime: String, deleteTime: String = "")
 

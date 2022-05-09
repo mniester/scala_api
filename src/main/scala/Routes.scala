@@ -2,12 +2,11 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import spray.json._
-
-import Strings.JWTCoder
-import DataModels._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.server.PathMatcher
 
+import Strings.JWTCoder
+import DataModels._
 
 trait JsonProtocols extends DefaultJsonProtocol {
   implicit val userFormat = jsonFormat3(UserModel)
@@ -16,10 +15,9 @@ trait JsonProtocols extends DefaultJsonProtocol {
 object Routes extends JsonProtocols with SprayJsonSupport {
   
   val user =
-    path("user") {
-      parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
+     {
+      (pathPrefix("user") & get & pathSuffix(Segment)) {jwt => complete(jwt)}
     }
-
 
   val userPost =
     path("user") {
