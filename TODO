@@ -9,17 +9,41 @@
 3) [>] Add checking to DB data methods
 4) [v] Add routes
     - [ ] GET user
+        - [ ] OK
+        - [ ] fail/user do not exist
     - [ ] POST user
+        - [ ] OK/return new entry
+        - [ ] fail
     - [ ] DELETE user
+        - [ ] OK
+        - [ ] fail
     - [ ] GET Task
+        - [ ] OK
+        - [ ] fail
     - [ ] POST Task
+        - [ ] OK/return new entry
+        - [ ] fail
     - [ ] PUT Task
+        - [ ] OK/return new/modified entry
+        - [ ] fail
     - [ ] DELETE Task
+        - [ ] OK/return deleted entry
+        - [ ] fail
     - [ ] GET Project
+        - [ ] OK/return entry
+        - [ ] fail
     - [ ] POST Project
+        - [ ] OK/return entry
+        - [ ] fail
     - [ ] PUT Project
+        - [ ] OK/return entry
+        - [ ] fail
     - [ ] DELETE Project
+        - [ ] OK/return deleted entry
+        - [ ] fail
     - [ ] GET ProjectsWithTasks
+        - [ ] OK/return project with lists of task (nested)
+        - [ ] fail
 5) [v] Data Base and DataModels
     - [x] check overlapping when adding a new task
     - [x] ban adding new task if tasks overlapping
@@ -45,20 +69,35 @@
     - [ ] Separate Input and Output data models
 6) JSONs
     - [x] JWT coding
-    Request
+    - [ ] Requests
         - [ ] Add User
         - [ ] Add Task
         - [ ] Add Project
         - [-] Get Project with Tasks
-    Responses
-        - [ ] Tasks overlapping
-        - [ ] Task added ok
-        - [ ] Task Response - too long strings
-        - [ ] Project has already used name
-        - [ ] Project added ok
-        - [ ] User not in DB
-        - [ ] User has already used name
-        - [ ] User added ok
+    - [ ] Responses
+        - [ ] Users
+            - [ ] ok
+            - [ ] Errors
+                - [ ] GET not in DB
+                - [ ] POST has already used name
+                - [ ] POST Name too long
+                - [ ] POST Name too short
+        - [ ] Tasks
+            - [ ] Ok
+            - [ ] Errors
+                - [ ] tasks are overlapping
+                - [ ] Datetimes are not properly formatted
+                - [ ] start datetime is earlier than end datetime
+                - [ ] Too long strings
+        - [ ] Projects
+            - [ ] ok
+            - [ ] Errors
+                - [ ] POST has already used name
+                - [ ] POST do not have properly formatted datetime
+                - [ ] POST Name too long
+                - [ ] POST Name too short
+        - [ ] Project with tasks
+            - [ ] ok
 7) [x] Choose datetime data type
 8) [z, >] Bug in test("DB - add, get and remove task")
 9) [z] Generalize gets in DB
