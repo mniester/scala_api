@@ -51,14 +51,22 @@ abstract class DBBase {
     Await.result(cursor.run(tasks ++= nt), Settings.dbWaitingDuration)
   }
 
-  def getUserByName(query: String): List[UserModel] = {
+  def getUserByName(query: String): Option[UserModel] = {
     val action = cursor.run(users.filter(_.name  === query).result)
-    Await.result(action, Settings.dbWaitingDuration).toList
+    val result = Await.result(action, Settings.dbWaitingDuration).toList
+    result match {
+      case Nil => None
+      case _ => Some(result.head)
+    }
   }
 
-  def getUserByKey(query: Int): Seq[UserModel] = {
+  def getUserByKey(query: Int): Option[UserModel] = {
     val action = cursor.run(users.filter(_.key === query).result)
-    Await.result(action, Settings.dbWaitingDuration)
+    val result = Await.result(action, Settings.dbWaitingDuration)
+    result match {
+      case Nil => None
+      case _ => Some(result.head)
+    }
   }
 
   def delUserByName(query: String): Unit = {
@@ -78,9 +86,13 @@ abstract class DBBase {
     cursor.run(projects.filter(_.key === projectKey).map(_.name).update(newName))
   }
 
-  def getProjectByKey(query: Int): List[ProjectModel] = {
+  def getProjectByKey(query: Int): Option[ProjectModel] = {
     val action = cursor.run(projects.filter(_.key === query).filter(_.deleteTime.length === 0).result)
-    Await.result(action, Settings.dbWaitingDuration).toList
+    val result = Await.result(action, Settings.dbWaitingDuration).toList
+    result match {
+      case Nil => None
+      case _ => Some(result.head)
+    }
   }  
 
   def delProjectByKey(key: Int): Unit = {
@@ -90,9 +102,13 @@ abstract class DBBase {
     Await.result(removeTasks, Settings.dbWaitingDuration)
   }
 
-  def getTaskByKey(query: Int): List[TaskModel] = {
+  def getTaskByKey(query: Int): Option[TaskModel] = {
     val action = cursor.run(tasks.filter(_.key === query).filter(_.deleteTime.length === 0).result)
-    Await.result(action, Settings.dbWaitingDuration).toList
+    val result = Await.result(action, Settings.dbWaitingDuration).toList
+    result match {
+      case Nil => None
+      case _ => Some(result.head)
+    }
   }
 
   def getTasksByProject(key: Int): List[TaskModel] = {

@@ -45,6 +45,7 @@
         - [ ] OK/return project with lists of task (nested)
         - [ ] fail
 5) [v] Data Base and DataModels
+    - [ ] replace get by getOrElse
     - [x] check overlapping when adding a new task
     - [x] ban adding new task if tasks overlapping
     - [x] no projects with the same name
@@ -54,7 +55,7 @@
     - [x] separate DB Base from Facade
     - [x] get full Project
     - [-] Duration => Period
-    - [ ] When there can be only one answer (project, User) List => Option
+    - [x] When there can be only one answer (project, User) List => Option
     - [ ] remove project key from task, when it is a part of Project List
     - [x] UUID as user ID
     - [>] only user can delete data
@@ -66,7 +67,7 @@
     - [x] task replacing
     - [ ] user or user or alias
     - [x] pagination
-    - [ ] Separate Input and Output data models
+    - [-] Separate Input and Output data models
 6) JSONs
     - [x] JWT coding
     - [ ] Requests
@@ -108,4 +109,4 @@
 14) [z] replace if/else constructions in DBFacade.getListOfProjects by case/match (data types and methods)
 15) [z] replace if/else constructions in DBFacade.filterProjects by case/match (pattern matching results data flow resembling tree graph,
 which do not resemble actual flow)
-16) [ ] assure that all test are working in te same manner
+16) [ ] remove race condition in test
