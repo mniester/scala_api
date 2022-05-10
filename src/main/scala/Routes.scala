@@ -10,6 +10,8 @@ import DataModels._
 
 trait JsonProtocols extends DefaultJsonProtocol {
   implicit val userFormat = jsonFormat3(UserModel)
+  implicit val projectFormat = jsonFormat5(ProjectModel)
+  implicit val taskFormat = jsonFormat9(TaskModel)
 }
 
 object Routes extends JsonProtocols with SprayJsonSupport {
@@ -38,7 +40,7 @@ object Routes extends JsonProtocols with SprayJsonSupport {
       }
     }
   
-  val task =
+  val taskGet =
     path("task") {
       get {
         parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
@@ -66,7 +68,7 @@ object Routes extends JsonProtocols with SprayJsonSupport {
       }
     }
 
-  val project =
+  val projectGet =
     path("project") {
       get {
         parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
@@ -101,5 +103,5 @@ object Routes extends JsonProtocols with SprayJsonSupport {
       }
     }
   
-  val allRoutes = concat(testRoute, userGet, userPost, userDelete, task, taskPost, taskDelete, taskPut, project, projectPost, projectDelete, projectPut, projectsList)
+  val allRoutes = concat(testRoute, userGet, userPost, userDelete, taskGet, taskPost, taskDelete, taskPut, projectGet, projectPost, projectDelete, projectPut, projectsList)
 }
