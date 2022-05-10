@@ -5,8 +5,10 @@ import spray.json._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.server.PathMatcher
 
+
 import Strings.JWTCoder
 import DataModels._
+import DBs.SQLite
 
 trait JsonProtocols extends DefaultJsonProtocol {
   implicit val userFormat = jsonFormat3(UserModel)
@@ -14,17 +16,32 @@ trait JsonProtocols extends DefaultJsonProtocol {
   implicit val taskFormat = jsonFormat9(TaskModel)
 }
 
-object Routes extends JsonProtocols with SprayJsonSupport {
+object isStringNumber {
+  def apply(string: String): Boolean = {
+    string.forall(Character.isDigit)
+  }
+}
 
-   val testRoute =
+object Routes extends JsonProtocols with SprayJsonSupport {
+  val db = SQLite
+  db.setup()
+  val testRoute =
      {
       (pathPrefix("test") & get & pathSuffix(Segment)) {jwt => complete(jwt)}
     }
   
   val userGet =
-     {
-      (pathPrefix("user") & get & pathSuffix(Segment)) {jwt => complete(jwt)}
+    {
+      (pathPrefix("user") & get & pathSuffix(Segment)) 
+        {number => isStringNumber(number) match {
+          case true => complete(number)
+          case _ => complete("bbb")
+        }
+      }
+    //{number => complete(db.getUserByKey(number.toInt).get) { result: UserModel => complete(result.toJson)}
     }
+    
+    
 
   val userPost =
     path("user") {

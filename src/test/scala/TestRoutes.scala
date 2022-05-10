@@ -41,6 +41,9 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
   val codedTask2 = JWTCoder.encode(task2.toJson.toString())
   db.setup()
   db.reset()
+  db.addUser(user)
+  db.addProject(project)
+  db.addNewTasks(List(task1, task2))
 
   "Service" should "respond to single IP query" in {
   
