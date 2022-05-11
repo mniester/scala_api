@@ -109,4 +109,5 @@
 14) [z] replace if/else constructions in DBFacade.getListOfProjects by case/match (data types and methods)
 15) [z] replace if/else constructions in DBFacade.filterProjects by case/match (pattern matching results data flow resembling tree graph,
 which do not resemble actual flow)
-16) [ ] remove race condition in test
+16) [ ] remove race condition in tests
+17) [ ] check why reset do not remove projects

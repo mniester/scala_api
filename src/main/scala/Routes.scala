@@ -10,7 +10,10 @@ import Strings.JWTCoder
 import DataModels._
 import DBs.SQLite
 
+case class ResponseMessage(code: Int, message: String)
+
 trait JsonProtocols extends DefaultJsonProtocol {
+  implicit val responseMessageFormat = jsonFormat2(ResponseMessage)
   implicit val userFormat = jsonFormat3(UserModel)
   implicit val projectFormat = jsonFormat5(ProjectModel)
   implicit val taskFormat = jsonFormat9(TaskModel)
@@ -34,11 +37,13 @@ object Routes extends JsonProtocols with SprayJsonSupport {
     {
       (pathPrefix("user") & get & pathSuffix(Segment)) 
         {number => isStringNumber(number) match {
-          case true => complete(number)
-          case _ => complete("bbb")
+          case false => complete(HttpResponse(StatusCodes.BadRequest, entity = "Only Numbers are allowed"))
+          case true => db.getUserByKey(number.toInt).getOrElse(null) match {
+            case user: UserModel => complete(HttpResponse(StatusCodes.OK, entity = user.toJson.toString))
+            case null => complete(HttpResponse(StatusCodes.BadRequest, entity = new ResponseMessage(404, "User not found").toJson.toString))
+          }
         }
       }
-    //{number => complete(db.getUserByKey(number.toInt).get) { result: UserModel => complete(result.toJson)}
     }
     
     

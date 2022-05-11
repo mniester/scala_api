@@ -2,13 +2,10 @@ package  DataModels
 
 import java.time.LocalDateTime
 import java.time.Duration
-import io.jvm.uuid._
 
 import DBs.DBFacade
 
 case class JWTModel(key: Int, uuid: String, name: String)
-
-//case class ErrorModel
 
 abstract class AbstractProjectModel (key: Int, name: String, user: Int, startTime: String, deleteTime: String = "")
 
