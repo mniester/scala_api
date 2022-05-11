@@ -37,10 +37,10 @@ object Routes extends JsonProtocols with SprayJsonSupport {
     {
       (get & pathPrefix("user") & pathSuffix(Segment)) 
         {number => isStringNumber(number) match {
-          case false => complete(HttpResponse(StatusCodes.BadRequest, entity =  new ResponseMessage(404, "Only Numbers are allowed").toJson.toString))
+          case false => complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.BadRequest.intValue, "Only Numbers are allowed").toJson.toString)))
           case true => db.getUserByKey(number.toInt).getOrElse(null) match {
-            case user: UserModel => complete(HttpResponse(StatusCodes.OK, entity = user.toJson.toString))
-            case null => complete(HttpResponse(StatusCodes.BadRequest, entity = new ResponseMessage(404, "User not found").toJson.toString))
+            case user: UserModel => complete(HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, user.toJson.toString)))
+            case null => complete(HttpResponse(StatusCodes.NotFound, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.NotFound.intValue, "User not found").toJson.toString)))
           }
         }
       }
@@ -127,7 +127,7 @@ object Routes extends JsonProtocols with SprayJsonSupport {
   // val projectsList = {
   //   (get & pathPrefix("projectslist") & path("names" / Segment / "moment" / Segment / "since" / Segment))
   //     {
-  //       ???
+  //       ccc: (String, String, String) => complete(ccc.toString)
   //     } 
   // }
   
