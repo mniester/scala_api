@@ -35,9 +35,9 @@ object Routes extends JsonProtocols with SprayJsonSupport {
   
   val userGet =
     {
-      (pathPrefix("user") & get & pathSuffix(Segment)) 
+      (get & pathPrefix("user") & pathSuffix(Segment)) 
         {number => isStringNumber(number) match {
-          case false => complete(HttpResponse(StatusCodes.BadRequest, entity = "Only Numbers are allowed"))
+          case false => complete(HttpResponse(StatusCodes.BadRequest, entity =  new ResponseMessage(404, "Only Numbers are allowed").toJson.toString))
           case true => db.getUserByKey(number.toInt).getOrElse(null) match {
             case user: UserModel => complete(HttpResponse(StatusCodes.OK, entity = user.toJson.toString))
             case null => complete(HttpResponse(StatusCodes.BadRequest, entity = new ResponseMessage(404, "User not found").toJson.toString))
@@ -46,8 +46,6 @@ object Routes extends JsonProtocols with SprayJsonSupport {
       }
     }
     
-    
-
   val userPost =
     path("user") {
       post {
@@ -117,6 +115,21 @@ object Routes extends JsonProtocols with SprayJsonSupport {
         parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
       }
     }
+  
+  // val projectsList = {
+  //   (pathPrefix("projectslist") & get & parameters("aaa", "bbb"))
+  //     {
+  //       (ccc: String, vvv: String) => complete(ccc.concat(vvv))
+  //     } 
+  // }
+
+  // (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false, sortingFactor: String = null, sortingAsc: Boolean = true, searchedPage: Int = 1):
+  // val projectsList = {
+  //   (get & pathPrefix("projectslist") & path("names" / Segment / "moment" / Segment / "since" / Segment))
+  //     {
+  //       ???
+  //     } 
+  // }
   
   val projectsList =
     path("projectslist") {

@@ -314,9 +314,8 @@ class UnitTests extends AnyFunSuite {
     assert ((sortByUpdateDesc.last.key == 2) && (sortByUpdateDesc.head.key == 1))
   }
   test("DBFacade.pagination"){db.reset;
-    for (x <- (1 to 100)) {val project = ProjectFactory(key = x, name = x.toString, user = x, startTime = "2000-01-01T00:01:01").get;
-                          val task = TaskFactory(key = x, 
-                                                name = x.toString, 
+    for (x <- (1 to 100)) {val project = ProjectFactory(name = x.toString, user = x, startTime = "2000-01-01T00:01:01").get;
+                          val task = TaskFactory(name = x.toString, 
                                                 user = x, 
                                                 startTime = "2002-01-01T00:01:01", 
                                                 endTime = "2002-02-01T00:01:01", 
@@ -327,4 +326,5 @@ class UnitTests extends AnyFunSuite {
       val result = db.getListOfProjects(searchedPage = 1)
       assert (result.length == (Settings.maxCharsInPage / result.head.numberOfChars))
   }
+  test("Cleaning DB"){db.reset; assert(true)}
 }
