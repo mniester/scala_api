@@ -124,19 +124,20 @@ object Routes extends JsonProtocols with SprayJsonSupport {
   // }
 
   // (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false, sortingFactor: String = null, sortingAsc: Boolean = true, searchedPage: Int = 1):
-  // val projectsList = {
-  //   (get & pathPrefix("projectslist") & path("names" / Segment / "moment" / Segment / "since" / Segment))
-  //     {
-  //       ccc: (String, String, String) => complete(ccc.toString)
-  //     } 
-  // }
+  val projectsList = {
+    (get & pathPrefix("projectslist") & path("names" / Segment / "moment" / Segment / "since" / Segment))
+      {
+        //complete(HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, user.toJson.toString)))
+        (aaa, bbb, ccc) => complete(aaa + bbb + ccc)
+      } 
+  }
   
-  val projectsList =
-    path("projectslist") {
-      get {
-        parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
-      }
-    }
+  // val projectsList =
+  //   path("projectslist") {
+  //     get {
+  //       parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
+  //     }
+  //   }
   
   val allRoutes = concat(testRoute, userGet, userPost, userDelete, taskGet, taskPost, taskDelete, taskPut, projectGet, projectPost, projectDelete, projectPut, projectsList)
 }
