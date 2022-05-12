@@ -38,14 +38,14 @@ object Routes extends JsonProtocols with SprayJsonSupport {
       (get & pathPrefix("user") & pathSuffix(Segment)) 
         {number => isStringNumber(number) match {
           case false => complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.BadRequest.intValue, "Only Numbers are allowed").toJson.toString)))
-          case true => db.getUserByKey(number.toInt).getOrElse(null) match {
+          case true =>  db.getUserByKey(number.toInt).getOrElse(null) match {
             case user: UserModel => complete(HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, user.toJson.toString)))
             case null => complete(HttpResponse(StatusCodes.NotFound, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.NotFound.intValue, "User not found").toJson.toString)))
           }
         }
       }
     }
-    
+  
   val userPost =
     path("user") {
       post {
@@ -124,11 +124,11 @@ object Routes extends JsonProtocols with SprayJsonSupport {
   // }
 
   // (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false, sortingFactor: String = null, sortingAsc: Boolean = true, searchedPage: Int = 1):
-  val projectsList = {
-    (get & pathPrefix("projectslist") & path("names" / Segment / "moment" / Segment / "since" / Segment))
+  def projectsList() = {
+    (get & pathPrefix("projectslist") & path("searchedPage" / Segment / "names" / Segment / "moment" / Segment / "since" / Segment / "deleted" / Segment/ "sortingFactor"/ Segment / "sortingAsc" / Segment))
       {
         //complete(HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, user.toJson.toString)))
-        (aaa, bbb, ccc) => complete(aaa + bbb + ccc)
+        (aaa, bbb, ccc, ddd, eee, fff, ggg) => complete(aaa + bbb + ccc + ddd +eee + fff + ggg)
       } 
   }
   
