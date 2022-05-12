@@ -11,15 +11,24 @@ import Factories._
 import Strings._
 import DBs.SQLite
 
+object CheckISOTimeFormatTest extends checkISOTimeFormat
+
+object IsStringBooleanTest extends isStringBoolean
+
 class UnitTests extends AnyFunSuite {
   implicit val execution = ExecutionContext.global
   val db = SQLite
   db.setup()
   test("test ScalaTest") {assert ((true == true) && (false ==  false))}
-
-  test("CheckISOTimeFormat - ok") {assert (CheckISOTimeFormat("2222-02-02T22:22:22"))}
-  test("CheckISOTimeFormat - fail; not proper datetime") {assert (!CheckISOTimeFormat("2222-33-02T22:22:22"))}
-  test("CheckISOTimeFormat - fail; string is not a datetime") {assert (!CheckISOTimeFormat("abcd"))}
+  
+  test("checkISOTimeFormat - ok") {assert (CheckISOTimeFormatTest.checkISOTimeFormat("2222-02-02T22:22:22"))}
+  test("checkISOTimeFormat - fail; not proper datetime") {assert (!CheckISOTimeFormatTest.checkISOTimeFormat("2222-33-02T22:22:22"))}
+  test("checkISOTimeFormat - fail; string is not a datetime") {assert (!CheckISOTimeFormatTest.checkISOTimeFormat("abcd"))}
+  
+  test("isStringBoolean - ok, true") {assert (IsStringBooleanTest.isStringBoolean("true"))}
+  test("isStringBoolean - ok, false") {assert (IsStringBooleanTest.isStringBoolean("false"))}
+  test("isStringBoolean - fail") {assert (!IsStringBooleanTest.isStringBoolean("truefasle"))}
+  
 
   test("UserFactory.apply - fail; name too long") {assert (UserFactory(uuid = UUID.random.toString, name = "ab" * Settings.maxUserNameLength) == None)}
   test("ProjectFactory.apply - fail; name too long") {assert (ProjectFactory(name = "abc" * Settings.maxProjectNameLength, user = 1, startTime = "2000-01-01T00:01:01") == None)}

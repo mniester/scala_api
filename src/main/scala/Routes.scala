@@ -9,6 +9,8 @@ import akka.http.scaladsl.server.PathMatcher
 import Strings.JWTCoder
 import DataModels._
 import DBs.SQLite
+import Strings.isStringNumber
+import Strings.checkISOTimeFormat
 
 case class ResponseMessage(code: Int, message: String)
 
@@ -19,13 +21,27 @@ trait JsonProtocols extends DefaultJsonProtocol {
   implicit val taskFormat = jsonFormat9(TaskModel)
 }
 
-object isStringNumber {
-  def apply(string: String): Boolean = {
-    string.forall(Character.isDigit)
+// (get & pathPrefix("projectslist") & path("searchedPage" / Segment / "names" / Segment / "moment" / Segment / "since" / Segment / "deleted" / Segment/ "sortingFactor"/ Segment / "sortingAsc" / Segment))
+
+trait checkUrlArguments extends isStringNumber with checkISOTimeFormat{
+  def checkUrlArguments (data: (String, String, String, String, String, String, String)): ResponseMessage = {
+    if (!isStringNumber(data._1)) {
+      ResponseMessage(StatusCodes.BadRequest.intValue, "Only Integers are allowed")
+    } else if (!checkISOTimeFormat(data._3)) {
+      ResponseMessage(StatusCodes.BadRequest.intValue, "Date and time are not properly formatted")
+    } else if (!isStringNumber(data._4)) {
+      ResponseMessage(StatusCodes.BadRequest.intValue, "since argument is not boolean - only true and false are allowed")
+    } else if (!isStringNumber(data._5)) {
+      ResponseMessage(StatusCodes.BadRequest.intValue, "deleted argument is not boolean - only true and false are allowed")
+    } else if (!isStringNumber(data._7)) {
+      ResponseMessage(StatusCodes.BadRequest.intValue, "sortingAsc (Sorting ascending) argument is not boolean - only true and false are allowed")
+    } else {
+      ResponseMessage(StatusCodes.OK.intValue,  "Data Accepted")
+    }
   }
 }
 
-object Routes extends JsonProtocols with SprayJsonSupport {
+object Routes extends JsonProtocols with SprayJsonSupport with checkUrlArguments  {
   val db = SQLite
   db.setup()
   val testRoute =
@@ -37,7 +53,7 @@ object Routes extends JsonProtocols with SprayJsonSupport {
     {
       (get & pathPrefix("user") & pathSuffix(Segment)) 
         {number => isStringNumber(number) match {
-          case false => complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.BadRequest.intValue, "Only Numbers are allowed").toJson.toString)))
+          case false => complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.BadRequest.intValue, "Only Integers are allowed").toJson.toString)))
           case true =>  db.getUserByKey(number.toInt).getOrElse(null) match {
             case user: UserModel => complete(HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, user.toJson.toString)))
             case null => complete(HttpResponse(StatusCodes.NotFound, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.NotFound.intValue, "User not found").toJson.toString)))
@@ -123,11 +139,9 @@ object Routes extends JsonProtocols with SprayJsonSupport {
   //     } 
   // }
 
-  // (listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false, sortingFactor: String = null, sortingAsc: Boolean = true, searchedPage: Int = 1):
   def projectsList() = {
     (get & pathPrefix("projectslist") & path("searchedPage" / Segment / "names" / Segment / "moment" / Segment / "since" / Segment / "deleted" / Segment/ "sortingFactor"/ Segment / "sortingAsc" / Segment))
       {
-        //complete(HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, user.toJson.toString)))
         (aaa, bbb, ccc, ddd, eee, fff, ggg) => complete(aaa + bbb + ccc + ddd +eee + fff + ggg)
       } 
   }
