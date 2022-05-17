@@ -35,7 +35,12 @@ case class ProjectModelWithTasks (key: Int,
                                                               deleteTime: String) {
   lazy val duration = (for (task <- this.tasks) yield task.duration).sum
   lazy val lastUpdate = if (tasks.isEmpty) {startTime} else (for (t <- tasks) yield t.startTime).max
-  val numberOfChars: Int = key.toString.length + name.length + Settings.maxUserNameLength + startTime.length + deleteTime.length + (for (task <- tasks) yield task.numberOfChars).sum
+  val numberOfChars: Int = key.toString.length +
+                            name.length +
+                            Settings.maxUserNameLength +
+                            startTime.length +
+                            deleteTime.length + (for (task <- tasks) yield task.numberOfChars).sum
+  def dropTasks (): ProjectModel = ProjectModel(key, name, user, startTime, deleteTime)
   }; 
                                                               
 

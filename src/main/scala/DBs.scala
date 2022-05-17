@@ -195,10 +195,17 @@ abstract class DBFacade extends DBBase {
     if (totalNumberOfChars(result) < higherBound) {result} else {result.init}
   } 
   
-  def getListOfProjects (searchedPage: Int = 1, listOfNames: List[String] = Nil, moment: String = "", since: Boolean = true, deleted: Boolean = false, sortingFactor: String = null, sortingAsc: Boolean = true): List[ProjectModelWithTasks] = {
+  def getListOfProjects (searchedPage: Int = 1, 
+                        listOfNames: List[String] = Nil, 
+                        moment: String = "", 
+                        since: Boolean = true, 
+                        deleted: Boolean = false, 
+                        sortingFactor: String = null, 
+                        sortingAsc: Boolean = true): List[ProjectModelWithTasks] = {
     val filteredProjects = filterProjects (listOfNames, moment, since, deleted)
     val projects = Await.result(cursor.run(filteredProjects.result), Settings.dbWaitingDuration).toList
     val sortedProjects = sortProjects(addTasksToProject(projects), sortingFactor, asc = sortingAsc)
+    println(sortedProjects)
     pagination(sortedProjects, searchedPage)
   }
 

@@ -11,6 +11,7 @@ import DataModels._
 import DBs.SQLite
 import Strings.isStringNumber
 import Strings.checkISOTimeFormat
+import Strings.isStringBoolean
 
 case class ResponseMessage(code: Int, message: String)
 
@@ -23,25 +24,39 @@ trait JsonProtocols extends DefaultJsonProtocol {
 
 // (get & pathPrefix("projectslist") & path("searchedPage" / Segment / "names" / Segment / "moment" / Segment / "since" / Segment / "deleted" / Segment/ "sortingFactor"/ Segment / "sortingAsc" / Segment))
 
-trait checkUrlArguments extends isStringNumber with checkISOTimeFormat{
+trait checkUrlArguments extends isStringNumber with isStringBoolean with checkISOTimeFormat{
   def checkUrlArguments (data: (String, String, String, String, String, String, String)): ResponseMessage = {
     if (!isStringNumber(data._1)) {
       ResponseMessage(StatusCodes.BadRequest.intValue, "Only Integers are allowed")
     } else if (!checkISOTimeFormat(data._3)) {
-      ResponseMessage(StatusCodes.BadRequest.intValue, "Date and time are not properly formatted")
-    } else if (!isStringNumber(data._4)) {
-      ResponseMessage(StatusCodes.BadRequest.intValue, "since argument is not boolean - only true and false are allowed")
-    } else if (!isStringNumber(data._5)) {
-      ResponseMessage(StatusCodes.BadRequest.intValue, "deleted argument is not boolean - only true and false are allowed")
-    } else if (!isStringNumber(data._7)) {
-      ResponseMessage(StatusCodes.BadRequest.intValue, "sortingAsc (Sorting ascending) argument is not boolean - only true and false are allowed")
+      ResponseMessage(StatusCodes.BadRequest.intValue, "Moment is not properly formatted - use ISO 8601")
+    } else if (!isStringBoolean(data._4)) {
+      ResponseMessage(StatusCodes.BadRequest.intValue, "since argument can be only boolean - only true and false are allowed")
+    } else if (!isStringBoolean(data._5)) {
+      ResponseMessage(StatusCodes.BadRequest.intValue, "deleted argument can be only boolean - only true and false are allowed")
+    } else if ((data._6 != "create") && (data._6 != "update")) {
+      ResponseMessage(StatusCodes.BadRequest.intValue, "sorting Factor valid arguments: create, update")
+    } else if (!isStringBoolean(data._7)) {
+      ResponseMessage(StatusCodes.BadRequest.intValue, "sortingAsc (Sorting ascending) argument can be only boolean - only true and false are allowed")
     } else {
       ResponseMessage(StatusCodes.OK.intValue,  "Data Accepted")
     }
   }
 }
 
-object Routes extends JsonProtocols with SprayJsonSupport with checkUrlArguments  {
+trait projectJsonSerializer extends JsonProtocols {
+
+  def serializeListOfProjects(projects: List[ProjectModelWithTasks]): String = {
+    if (projects.length > 0) { "{" + (projects.map(project => serializeProject(project))).toString.drop(5) + "}"}
+    else {ResponseMessage(StatusCodes.NotFound.intValue, "No data was found").toJson.toString}
+  }
+
+  def serializeProject(project: ProjectModelWithTasks): String = {
+    project.dropTasks().toJson.toString.dropRight(1) + """, "tasks" :[""" + project.tasks.map(task => task.toJson.toString).mkString(",") + "]}"
+  }
+}
+
+object Routes extends JsonProtocols with SprayJsonSupport with checkUrlArguments with projectJsonSerializer {
   val db = SQLite
   db.setup()
   val testRoute =
@@ -131,27 +146,41 @@ object Routes extends JsonProtocols with SprayJsonSupport with checkUrlArguments
         parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
       }
     }
-  
-  // val projectsList = {
-  //   (pathPrefix("projectslist") & get & parameters("aaa", "bbb"))
-  //     {
-  //       (ccc: String, vvv: String) => complete(ccc.concat(vvv))
-  //     } 
-  // }
 
   def projectsList() = {
     (get & pathPrefix("projectslist") & path("searchedPage" / Segment / "names" / Segment / "moment" / Segment / "since" / Segment / "deleted" / Segment/ "sortingFactor"/ Segment / "sortingAsc" / Segment))
       {
-        (aaa, bbb, ccc, ddd, eee, fff, ggg) => complete(aaa + bbb + ccc + ddd +eee + fff + ggg)
+        (searchedPage, names, moment, since, deleted, sortingFactor, sortingAsc) => val data = (searchedPage, names, moment, since, deleted, sortingFactor, sortingAsc)
+        val response = checkUrlArguments(data)
+        
+        println(data._1)
+        println(data._2)
+        println(data._3)
+        println(data._4)
+        println(data._5)
+        println(data._6)
+        println(data._7)
+        
+        // println(db.getListOfProjects(searchedPage = data._1.toInt, 
+        //                             listOfNames = data._2.split(",").toList,
+        //                             moment = data._3,
+        //                             since = data._4.toBoolean,
+        //                             deleted = data._5.toBoolean,
+        //                             sortingFactor = data._6,
+        //                             sortingAsc = data._7.toBoolean))
+        response match {
+          case ResponseMessage(200, _) => complete(HttpResponse(response.code, entity = HttpEntity(ContentTypes.`application/json`, 
+                                                    serializeListOfProjects(db.getListOfProjects(searchedPage = data._1.toInt, 
+                                                                        listOfNames = data._2.split(",").toList,
+                                                                        moment = data._3,
+                                                                        since = data._4.toBoolean,
+                                                                        deleted = data._5.toBoolean,
+                                                                        sortingFactor = data._6,
+                                                                        sortingAsc = data._7.toBoolean)))))
+          case ResponseMessage(_ , _) => complete(HttpResponse(response.code, entity = HttpEntity(ContentTypes.`application/json`, response.toJson.toString)))
+        }
       } 
   }
-  
-  // val projectsList =
-  //   path("projectslist") {
-  //     get {
-  //       parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
-  //     }
-  //   }
   
   val allRoutes = concat(testRoute, userGet, userPost, userDelete, taskGet, taskPost, taskDelete, taskPut, projectGet, projectPost, projectDelete, projectPut, projectsList)
 }
