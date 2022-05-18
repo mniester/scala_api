@@ -45,13 +45,15 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
   db.addProject(project)
   db.addNewTasks(List(task1, task2))
 
-  "Routes" should "always return a JSON" in {
-  
+  "Test" should "return response code 200" in {
     Get(s"http://127.0.0.1:8080/test/${test}") ~> testRoute ~> check {
       response.status shouldBe OK
       contentType shouldBe `text/plain(UTF-8)`
       responseAs[String] shouldBe test
       }
+  }
+
+  "Routes" should "always return a JSON" in {
     
     Post(s"http://127.0.0.1:8080/user/${codedUser}") ~> userPost ~> check {
       response.status shouldBe Created

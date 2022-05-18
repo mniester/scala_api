@@ -126,7 +126,7 @@ abstract class DBFacade extends DBBase {
   type ProjectQuery = Query[ProjectSchema,ProjectModel,Seq]
 
   def checkOverlappingTasksInProject(task: TaskModel): List[TaskModel] = {
-    val tasksOfProject = getTasksByProject(task.project)
+    val tasksOfProject = getTasksByProject(task.project).filter(t => t.user == task.user)
     (for (t <- tasksOfProject if task.checkLocalTimeDateOverlap(t)) yield t).toList
   }
 
@@ -192,7 +192,7 @@ abstract class DBFacade extends DBBase {
         .dropWhile(d => d._1 < lowerBound)
         .takeWhile(e => e._1 <= higherBound)
         .map(f => f._2)
-    if (totalNumberOfChars(result) < higherBound) {result} else {result.init}
+    if (totalNumberOfChars(result) < higherBound) {result} else {List(result(0))}
   } 
   
   def getListOfProjects (searchedPage: Int = 1, 
@@ -205,7 +205,6 @@ abstract class DBFacade extends DBBase {
     val filteredProjects = filterProjects (listOfNames, moment, since, deleted)
     val projects = Await.result(cursor.run(filteredProjects.result), Settings.dbWaitingDuration).toList
     val sortedProjects = sortProjects(addTasksToProject(projects), sortingFactor, asc = sortingAsc)
-    println(sortedProjects)
     pagination(sortedProjects, searchedPage)
   }
 

@@ -324,16 +324,23 @@ class UnitTests extends AnyFunSuite {
   }
   test("DBFacade.pagination"){db.reset;
     for (x <- (1 to 100)) {val project = ProjectFactory(name = x.toString, user = x, startTime = "2000-01-01T00:01:01").get;
-                          val task = TaskFactory(name = x.toString, 
+                          val task1 = TaskFactory(name = x.toString, 
                                                 user = x, 
                                                 startTime = "2002-01-01T00:01:01", 
                                                 endTime = "2002-02-01T00:01:01", 
                                                 project = x, 
                                                 volume = -1, 
                                                 comment = ("x" * (Settings.maxTaskCommentLength - 150))).get;
-                          db.addProject(project); db.addTask(task)}
-      val result = db.getListOfProjects(searchedPage = 1)
-      assert (result.length == (Settings.maxCharsInPage / result.head.numberOfChars))
+                          val task2 = TaskFactory(name = x.toString, 
+                                                user = x, 
+                                                startTime = "2003-01-01T00:01:01", 
+                                                endTime = "2003-02-01T00:01:01", 
+                                                project = 1, 
+                                                volume = -1, 
+                                                comment = ("x" * (Settings.maxTaskCommentLength - 150))).get;
+                          db.addProject(project); db.addTask(task1); db.addTask(task2)}
+      val result = db.getListOfProjects(searchedPage = 1).toString
+      assert (Settings.maxCharsInPage > result.length)
   }
-  test("Cleaning DB"){db.reset; assert(true)}
+  //test("Cleaning DB"){db.reset; assert(true)}
 }
