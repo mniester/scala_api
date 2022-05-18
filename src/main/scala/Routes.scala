@@ -47,7 +47,7 @@ trait checkUrlArguments extends isStringNumber with isStringBoolean with checkIS
 trait projectJsonSerializer extends JsonProtocols {
 
   def serializeListOfProjects(projects: List[ProjectModelWithTasks]): String = {
-    if (projects.length > 0) { "{" + (projects.map(project => serializeProject(project))).toString.drop(5) + "}"}
+    if (projects.length > 0) {"""{ "projects": [""" + (projects.map(project => serializeProject(project))).toString.drop(5).dropRight(1) + "]}"}
     else {ResponseMessage(StatusCodes.NotFound.intValue, "No data was found").toJson.toString}
   }
 
@@ -56,7 +56,7 @@ trait projectJsonSerializer extends JsonProtocols {
   }
 }
 
-object Routes extends JsonProtocols with SprayJsonSupport with checkUrlArguments with projectJsonSerializer {
+object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments with projectJsonSerializer {
   val db = SQLite
   db.setup()
   val testRoute =
@@ -152,22 +152,6 @@ object Routes extends JsonProtocols with SprayJsonSupport with checkUrlArguments
       {
         (searchedPage, names, moment, since, deleted, sortingFactor, sortingAsc) => val data = (searchedPage, names, moment, since, deleted, sortingFactor, sortingAsc)
         val response = checkUrlArguments(data)
-        
-        println(data._1)
-        println(data._2)
-        println(data._3)
-        println(data._4)
-        println(data._5)
-        println(data._6)
-        println(data._7)
-        
-        // println(db.getListOfProjects(searchedPage = data._1.toInt, 
-        //                             listOfNames = data._2.split(",").toList,
-        //                             moment = data._3,
-        //                             since = data._4.toBoolean,
-        //                             deleted = data._5.toBoolean,
-        //                             sortingFactor = data._6,
-        //                             sortingAsc = data._7.toBoolean))
         response match {
           case ResponseMessage(200, _) => complete(HttpResponse(response.code, entity = HttpEntity(ContentTypes.`application/json`, 
                                                     serializeListOfProjects(db.getListOfProjects(searchedPage = data._1.toInt, 
