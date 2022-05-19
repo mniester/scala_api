@@ -41,9 +41,9 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
   val codedTask2 = JWTCoder.encode(task2.toJson.toString())
   db.setup()
   db.reset()
-  db.addUser(user)
-  db.addProject(project)
-  db.addNewTasks(List(task1, task2))
+  //b.addUser(user)
+  //db.addProject(project)
+  //db.addNewTasks(List(task1, task2))
 
   "Test" should "return response code 200" in {
     Get(s"http://127.0.0.1:8080/test/${test}") ~> testRoute ~> check {
@@ -58,53 +58,54 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
     Post(s"http://127.0.0.1:8080/user/${codedUser}") ~> userPost ~> check {
       response.status shouldBe Created
       contentType shouldBe `application/json`
+      println(response)
       response.entity.toString().parseJson shouldBe user.toJson
       }
     
-    Get(s"http://127.0.0.1:8080/user/${user.key.toString}") ~> userGet ~> check {
-      response.status shouldBe OK
-      contentType shouldBe `application/json`
-      response.entity.toString().parseJson shouldBe user.toJson
-      }
+    // Get(s"http://127.0.0.1:8080/user/${user.key.toString}") ~> userGet ~> check {
+    //   response.status shouldBe OK
+    //   contentType shouldBe `application/json`
+    //   response.entity.toString().parseJson shouldBe user.toJson
+    //   }
 
-    Get(s"http://127.0.0.1:8080/user/${(user.key + 1).toString}") ~> userGet ~> check {
-      response.status shouldBe NotFound 
-      contentType shouldBe `application/json`
-      }
+    // Get(s"http://127.0.0.1:8080/user/${(user.key + 1).toString}") ~> userGet ~> check {
+    //   response.status shouldBe NotFound 
+    //   contentType shouldBe `application/json`
+    //   }
     
-    Post(s"http://127.0.0.1:8080/project/${codedProject}") ~> projectPost ~> check {
-      response.status shouldBe Created
-      contentType shouldBe `application/json`
-      response.entity.toString().parseJson shouldBe project.toJson
-      }
+    // Post(s"http://127.0.0.1:8080/project/${codedProject}") ~> projectPost ~> check {
+    //   response.status shouldBe Created
+    //   contentType shouldBe `application/json`
+    //   response.entity.toString().parseJson shouldBe project.toJson
+    //   }
     
-    Get(s"http://127.0.0.1:8080/project/${project.key.toString}") ~> projectGet ~> check {
-      response.status shouldBe OK
-      contentType shouldBe `application/json`
-      response.entity.toString().parseJson shouldBe project.toJson
-      }
+    // Get(s"http://127.0.0.1:8080/project/${project.key.toString}") ~> projectGet ~> check {
+    //   response.status shouldBe OK
+    //   contentType shouldBe `application/json`
+    //   response.entity.toString().parseJson shouldBe project.toJson
+    //   }
 
-    Get(s"http://127.0.0.1:8080/project/${(user.key + 1).toString}") ~> projectGet ~> check {
-      response.status shouldBe NotFound 
-      contentType shouldBe `application/json`
-      }
+    // Get(s"http://127.0.0.1:8080/project/${(user.key + 1).toString}") ~> projectGet ~> check {
+    //   response.status shouldBe NotFound 
+    //   contentType shouldBe `application/json`
+    //   }
     
-    Post(s"http://127.0.0.1:8080/task/${codedTask1}") ~> taskPost ~> check {
-      response.status shouldBe Created
-      contentType shouldBe `application/json`
-      response.entity.toString().parseJson shouldBe project.toJson
-      }
+    // Post(s"http://127.0.0.1:8080/task/${codedTask1}") ~> taskPost ~> check {
+    //   response.status shouldBe Created
+    //   contentType shouldBe `application/json`
+    //   response.entity.toString().parseJson shouldBe project.toJson
+    //   }
     
-    Get(s"http://127.0.0.1:8080/project/${task1.key.toString}") ~> taskGet ~> check {
-      response.status shouldBe OK
-      contentType shouldBe `application/json`
-      response.entity.toString().parseJson shouldBe project.toJson
-      }
+    // Get(s"http://127.0.0.1:8080/project/${task1.key.toString}") ~> taskGet ~> check {
+    //   response.status shouldBe OK
+    //   contentType shouldBe `application/json`
+    //   response.entity.toString().parseJson shouldBe project.toJson
+    //   }
 
-    Get(s"http://127.0.0.1:8080/project/${(task1.key + 1).toString}") ~> taskGet ~> check {
-      response.status shouldBe NotFound 
-      contentType shouldBe `application/json`
-      }
+    // Get(s"http://127.0.0.1:8080/project/${(task1.key + 1).toString}") ~> taskGet ~> check {
+    //   response.status shouldBe NotFound 
+    //   contentType shouldBe `application/json`
+    //   }
     
     }
 }

@@ -13,8 +13,6 @@ import Strings.isStringNumber
 import Strings.checkISOTimeFormat
 import Strings.isStringBoolean
 
-case class ResponseMessage(code: Int, message: String)
-
 trait JsonProtocols extends DefaultJsonProtocol {
   implicit val responseMessageFormat = jsonFormat2(ResponseMessage)
   implicit val userFormat = jsonFormat3(UserModel)
@@ -57,11 +55,12 @@ trait projectJsonSerializer extends JsonProtocols {
 }
 
 object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments with projectJsonSerializer {
+  val badRequest = ResponseMessage(400, "Bad request")
   val db = SQLite
   db.setup()
   val testRoute =
      {
-      (pathPrefix("test") & get & pathSuffix(Segment)) {jwt => complete(jwt)}
+      (get & pathPrefix("test") & pathSuffix(Segment)) {jwt => complete(jwt)}
     }
   
   val userGet =
@@ -77,10 +76,22 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments
       }
     }
   
-  val userPost =
-    path("user") {
-      post {
-        parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
+  // val userPost =
+  //   path("user") {
+  //     post {
+  //       parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
+  //     }
+  //   }
+
+  val userPost = {
+    (get & pathPrefix("user") & pathSuffix(Segment))
+      {data => val response = JWTCoder.decode(data); response match {
+        case ResponseMessage(200, _) => val result = db.addUser(response.message.parseJson.convertTo[UserModel]).get; result match {
+          case Nil => complete(HttpResponse(StatusCodes.Created, entity = HttpEntity(ContentTypes.`application/json`, response.toJson.toString)))
+          case _ => complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`application/json`, result.toJson.toString)))
+        }
+        case _ => complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`application/json`, response.toJson.toString)))
+        }
       }
     }
 

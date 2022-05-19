@@ -2,8 +2,10 @@ package Strings
 
 import java.time.LocalDateTime
 import pdi.jwt.{Jwt, JwtAlgorithm}
+import scala.util.{Failure, Success}
 
 import Settings._
+import DataModels.ResponseMessage
 
 
 trait isStringNumber {
@@ -38,11 +40,10 @@ object JWTCoder {
     Jwt.encode(data, jwtkey, alg)
   }
 
-  def decode (token: String) = {
-    Jwt.decodeRawAll(token, jwtkey, Seq(alg))
-  }
-
-  def getInput(token: String) = {
-    decode(token).get._2
+  def decode (token: String): ResponseMessage = {
+    Jwt.decodeRawAll(token, jwtkey, Seq(alg)) match {
+      case Success(s) => ResponseMessage(200, s._2)
+      case Failure(f) => ResponseMessage(400, f.getMessage())
+    }
   }
 }

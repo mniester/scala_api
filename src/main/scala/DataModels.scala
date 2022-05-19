@@ -5,7 +5,7 @@ import java.time.Duration
 
 import DBs.DBFacade
 
-case class JWTModel(key: Int, uuid: String, name: String)
+case class ResponseMessage(code: Int, message: String)
 
 abstract class AbstractProjectModel (key: Int, name: String, user: Int, startTime: String, deleteTime: String = "")
 
