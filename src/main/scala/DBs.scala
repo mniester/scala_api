@@ -125,6 +125,11 @@ abstract class DBFacade extends DBBase {
    
   type ProjectQuery = Query[ProjectSchema,ProjectModel,Seq]
 
+  def checkUuid (checkedUuid: String): Boolean = {
+    val check = cursor.run(users.filter(_.uuid === checkedUuid).result)
+    !Await.result(check, Settings.dbWaitingDuration).isEmpty
+  }
+
   def checkOverlappingTasksInProject(task: TaskModel): List[TaskModel] = {
     val tasksOfProject = getTasksByProject(task.project).filter(t => t.user == task.user)
     (for (t <- tasksOfProject if task.checkLocalTimeDateOverlap(t)) yield t).toList
@@ -135,9 +140,9 @@ abstract class DBFacade extends DBBase {
     if (userWithSameName.isEmpty) {super.addNewUser(newUser); None} else {Some(userWithSameName.head)}
   }
 
-  def addTask(newTask: TaskModel): List[TaskModel] = {
+  def addTask(newTask: TaskModel): Option[TaskModel] = {
     val overlappingTasks = checkOverlappingTasksInProject(newTask)
-    if (overlappingTasks.isEmpty) {addNewTask(newTask); Nil} else overlappingTasks 
+    if (overlappingTasks.isEmpty) {addNewTask(newTask); None} else Some(overlappingTasks.head) 
   }
 
   def replaceTask(newTask: TaskModel): List[TaskModel] = {
