@@ -6,7 +6,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.server.PathMatcher
 
 
-import Strings.JWTCoder
+import Strings.JwtCoder
 import DataModels._
 import DBs.SQLite
 import Strings.isStringNumber
@@ -19,6 +19,7 @@ trait JsonProtocols extends DefaultJsonProtocol {
   implicit val userFormat = jsonFormat3(UserModel)
   implicit val projectFormat = jsonFormat5(ProjectModel)
   implicit val taskFormat = jsonFormat9(TaskModel)
+  implicit val intQueryFormat = jsonFormat2(IntQuery)
 }
 
 // (get & pathPrefix("projectslist") & path("searchedPage" / Segment / "names" / Segment / "moment" / Segment / "since" / Segment / "deleted" / Segment/ "sortingFactor"/ Segment / "sortingAsc" / Segment))
@@ -65,22 +66,31 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments
     }
   
   val userGet =
-    {
-      (get & pathPrefix("user") & pathSuffix(Segment)) 
-        {number => isStringNumber(number) match {
-          case false => complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.BadRequest.intValue, "Only Integers are allowed").toJson.toString)))
-          case true =>  db.getUserByKey(number.toInt).getOrElse(null) match {
+    (get & pathPrefix("user") & pathSuffix(Segment)) 
+      {token => JwtCoder.decodeInput(token).getOrElse(null) match {
+        case null => complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.BadRequest.intValue, "JWT is not proper").toJson.toString)))
+        case json => val query = json.parseJson.convertTo[IntQuery]; db.checkUuid(query.uuid) match {
+          case false => complete(HttpResponse(StatusCodes.Forbidden, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.Forbidden.intValue, "You do not have permission").toJson.toString)))
+          case true => db.getUserByKey(query.number).getOrElse(null) match {
             case user: UserModel => complete(HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, user.toJson.toString)))
             case null => complete(HttpResponse(StatusCodes.NotFound, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.NotFound.intValue, "User not found").toJson.toString)))
+            }
           }
         }
       }
-    }
-
+      // (get & pathPrefix("user") & pathSuffix(Segment)) 
+      //   {number => isStringNumber(number) match {
+      //     case false => complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.BadRequest.intValue, "Only Integers are allowed").toJson.toString)))
+      //     case true =>  db.getUserByKey(number.toInt).getOrElse(null) match {
+      //       case user: UserModel => complete(HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, user.toJson.toString)))
+      //       case null => complete(HttpResponse(StatusCodes.NotFound, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.NotFound.intValue, "User not found").toJson.toString)))
+      //     }
+      //   }
+      // }
 
   val userPost = {
     (post & pathPrefix("user") & pathSuffix(Segment))
-      {token => JWTCoder.decodeInput(token).getOrElse(null) match {
+      {token => JwtCoder.decodeInput(token).getOrElse(null) match {
         case null => complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.BadRequest.intValue, "JWT is not proper").toJson.toString)))
         case json => db.addUser(json.parseJson.convertTo[UserModel]).getOrElse(null) match {
           case null => complete(HttpResponse(StatusCodes.Created, entity = HttpEntity(ContentTypes.`application/json`, json)))

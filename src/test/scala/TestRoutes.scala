@@ -13,18 +13,27 @@ import DefaultJsonProtocol._
 import Settings._
 import Routes._
 import Factories._
-import Strings.JWTCoder
+import Strings.JwtCoder
 import DBs.{SQLite}
 import DataModels.UserModel
+import DataModels.IntQuery
 
 class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
 
   val db = SQLite
   val test = "aaa"
-  val user = UserFactory(key= 1, uuid = "1", name = "a").get
-  val codedUser = JWTCoder.encode(user.toJson.toString())
+  
+  val user = UserFactory(key = 1, uuid = "1", name = "a").get
+  val codedUser = JwtCoder.encode(user.toJson.toString())
+  val userQuery = IntQuery(number = user.key, uuid = user.uuid)
+  val codedUserQuery = JwtCoder.encode(userQuery.toJson.toString())
+  
+  val userFail = UserFactory(uuid = "2", name = "b").get
+  val userFailQuery = IntQuery(number = userFail.key, uuid = userFail.uuid)
+  val codedUserFailQuery = JwtCoder.encode(userFailQuery.toJson.toString())
+
   val project = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
-  val codedProject = JWTCoder.encode(project.toJson.toString())
+  val codedProject = JwtCoder.encode(project.toJson.toString())
   val task1 = TaskFactory(name = "task1",
                           user = 1,
                           startTime = "2000-02-01T00:01:01",
@@ -39,8 +48,8 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
                           project = 1,
                           volume = 1, 
                           comment = "abc").get
-  val codedTask1 = JWTCoder.encode(task1.toJson.toString())
-  val codedTask2 = JWTCoder.encode(task2.toJson.toString())
+  val codedTask1 = JwtCoder.encode(task1.toJson.toString())
+  val codedTask2 = JwtCoder.encode(task2.toJson.toString())
   db.setup()
   db.reset()
 
@@ -60,7 +69,7 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
       Await.result(Unmarshal(response).to[UserModel], Settings.dbWaitingDuration)  shouldBe user
       }
     
-    Get(s"http://127.0.0.1:8080/user/${user.key.toString}") ~> userGet ~> check {
+    Get(s"http://127.0.0.1:8080/user/${codedUserQuery}") ~> userGet ~> check {
       response.status shouldBe OK
       contentType shouldBe `application/json`
       Await.result(Unmarshal(response).to[UserModel], Settings.dbWaitingDuration)  shouldBe user
@@ -72,8 +81,13 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
       Await.result(Unmarshal(response).to[UserModel], Settings.dbWaitingDuration)  shouldBe user
       }
 
-    Get(s"http://127.0.0.1:8080/user/${(user.key + 1).toString}") ~> userGet ~> check {
-      response.status shouldBe NotFound 
+    Get(s"http://127.0.0.1:8080/user/${user.key}") ~> userGet ~> check {
+      response.status shouldBe BadRequest 
+      contentType shouldBe `application/json`
+      }
+    
+    Get(s"http://127.0.0.1:8080/user/${codedUserFailQuery}") ~> userGet ~> check {
+      response.status shouldBe Forbidden 
       contentType shouldBe `application/json`
       }
     
