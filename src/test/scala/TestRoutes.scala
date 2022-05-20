@@ -3,10 +3,11 @@ import akka.http.scaladsl.model.ContentTypes._
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-//import akka.stream.scaladsl.Flow
+import akka.http.scaladsl.unmarshalling.Unmarshal
 import org.scalatest.flatspec.AsyncFlatSpec
 import org.scalatest.matchers.should.Matchers
 import spray.json._
+import scala.concurrent.Await
 import DefaultJsonProtocol._
 
 import Settings._
@@ -14,6 +15,7 @@ import Routes._
 import Factories._
 import Strings.JWTCoder
 import DBs.{SQLite}
+import DataModels.UserModel
 
 class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
 
@@ -41,9 +43,6 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
   val codedTask2 = JWTCoder.encode(task2.toJson.toString())
   db.setup()
   db.reset()
-  //b.addUser(user)
-  //db.addProject(project)
-  //db.addNewTasks(List(task1, task2))
 
   "Test" should "return response code 200" in {
     Get(s"http://127.0.0.1:8080/test/${test}") ~> testRoute ~> check {
@@ -53,20 +52,25 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
       }
   }
 
-  "Routes" should "always return a JSON" in {
+  "User" should "always return a JSON and proper HTTP Code" in {
     
     Post(s"http://127.0.0.1:8080/user/${codedUser}") ~> userPost ~> check {
       response.status shouldBe Created
       contentType shouldBe `application/json`
-      println(response)
-      response.entity.toString().parseJson shouldBe user.toJson
+      Await.result(Unmarshal(response).to[UserModel], Settings.dbWaitingDuration)  shouldBe user
       }
     
-    // Get(s"http://127.0.0.1:8080/user/${user.key.toString}") ~> userGet ~> check {
-    //   response.status shouldBe OK
-    //   contentType shouldBe `application/json`
-    //   response.entity.toString().parseJson shouldBe user.toJson
-    //   }
+    Get(s"http://127.0.0.1:8080/user/${user.key.toString}") ~> userGet ~> check {
+      response.status shouldBe OK
+      contentType shouldBe `application/json`
+      Await.result(Unmarshal(response).to[UserModel], Settings.dbWaitingDuration)  shouldBe user
+      }
+    
+    Post(s"http://127.0.0.1:8080/user/${codedUser}") ~> userPost ~> check {
+      response.status shouldBe Accepted
+      contentType shouldBe `application/json`
+      Await.result(Unmarshal(response).to[UserModel], Settings.dbWaitingDuration)  shouldBe user
+      }
 
     // Get(s"http://127.0.0.1:8080/user/${(user.key + 1).toString}") ~> userGet ~> check {
     //   response.status shouldBe NotFound 

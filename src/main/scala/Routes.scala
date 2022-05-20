@@ -12,6 +12,7 @@ import DBs.SQLite
 import Strings.isStringNumber
 import Strings.checkISOTimeFormat
 import Strings.isStringBoolean
+import com.typesafe.sslconfig.ssl.FakeChainedKeyStore
 
 trait JsonProtocols extends DefaultJsonProtocol {
   implicit val responseMessageFormat = jsonFormat2(ResponseMessage)
@@ -84,14 +85,14 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments
   //   }
 
   val userPost = {
-    (get & pathPrefix("user") & pathSuffix(Segment))
-      {data => val response = JWTCoder.decode(data); response match {
-        case ResponseMessage(200, _) => val result = db.addUser(response.message.parseJson.convertTo[UserModel]).get; result match {
-          case Nil => complete(HttpResponse(StatusCodes.Created, entity = HttpEntity(ContentTypes.`application/json`, response.toJson.toString)))
-          case _ => complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`application/json`, result.toJson.toString)))
+    (post & pathPrefix("user") & pathSuffix(Segment))
+      {token => JWTCoder.decodeInput(token).getOrElse(null) match {
+        case null => complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.BadRequest.intValue, "JWT is not proper").toJson.toString)))
+        case json => db.addUser(json.parseJson.convertTo[UserModel]).getOrElse(null) match {
+          case null => complete(HttpResponse(StatusCodes.Created, entity = HttpEntity(ContentTypes.`application/json`, json)))
+          case userModel: UserModel => complete(HttpResponse(StatusCodes.Accepted, entity = HttpEntity(ContentTypes.`application/json`, userModel.toJson.toString)))
         }
-        case _ => complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`application/json`, response.toJson.toString)))
-        }
+      }
       }
     }
 
