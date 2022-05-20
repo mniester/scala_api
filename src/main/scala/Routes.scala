@@ -78,15 +78,6 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments
           }
         }
       }
-      // (get & pathPrefix("user") & pathSuffix(Segment)) 
-      //   {number => isStringNumber(number) match {
-      //     case false => complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.BadRequest.intValue, "Only Integers are allowed").toJson.toString)))
-      //     case true =>  db.getUserByKey(number.toInt).getOrElse(null) match {
-      //       case user: UserModel => complete(HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, user.toJson.toString)))
-      //       case null => complete(HttpResponse(StatusCodes.NotFound, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.NotFound.intValue, "User not found").toJson.toString)))
-      //     }
-      //   }
-      // }
 
   val userPost = {
     (post & pathPrefix("user") & pathSuffix(Segment))

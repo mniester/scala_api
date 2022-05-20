@@ -27,6 +27,8 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
   val codedUser = JwtCoder.encode(user.toJson.toString())
   val userQuery = IntQuery(number = user.key, uuid = user.uuid)
   val codedUserQuery = JwtCoder.encode(userQuery.toJson.toString())
+  val queryNotFound = IntQuery(number = user.key + 1, uuid = user.uuid)
+  val codedQueryNotFound = JwtCoder.encode(queryNotFound.toJson.toString())
   
   val userFail = UserFactory(uuid = "2", name = "b").get
   val userFailQuery = IntQuery(number = userFail.key, uuid = userFail.uuid)
@@ -83,6 +85,11 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
 
     Get(s"http://127.0.0.1:8080/user/${user.key}") ~> userGet ~> check {
       response.status shouldBe BadRequest 
+      contentType shouldBe `application/json`
+      }
+    
+    Get(s"http://127.0.0.1:8080/user/${codedQueryNotFound}") ~> userGet ~> check {
+      response.status shouldBe NotFound 
       contentType shouldBe `application/json`
       }
     
