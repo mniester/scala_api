@@ -342,5 +342,14 @@ class UnitTests extends AnyFunSuite {
       val result = db.getListOfProjects(searchedPage = 1).toString
       assert (Settings.maxCharsInPage > result.length)
   }
+
+  test ("DBFacade.checkUuid") {
+    db.reset;
+    val userOk = UserFactory(name = "test", uuid = UUID.random.toString).get
+    db.addUser(userOk)
+    assert (db.checkUuid(userOk.uuid))
+    assert (!db.checkUuid(UUID.random.toString))
+  }
+
   test("Cleaning DB"){db.reset; assert(true)}
 }
