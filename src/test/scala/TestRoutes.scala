@@ -52,7 +52,7 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
       }
   }
 
-  "User" should "always return a JSON and proper HTTP Code" in {
+  "User Methods" should "always return a JSON and proper HTTP Code" in {
     
     Post(s"http://127.0.0.1:8080/user/${codedUser}") ~> userPost ~> check {
       response.status shouldBe Created
@@ -72,10 +72,17 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
       Await.result(Unmarshal(response).to[UserModel], Settings.dbWaitingDuration)  shouldBe user
       }
 
-    // Get(s"http://127.0.0.1:8080/user/${(user.key + 1).toString}") ~> userGet ~> check {
-    //   response.status shouldBe NotFound 
-    //   contentType shouldBe `application/json`
-    //   }
+    Get(s"http://127.0.0.1:8080/user/${(user.key + 1).toString}") ~> userGet ~> check {
+      response.status shouldBe NotFound 
+      contentType shouldBe `application/json`
+      }
+    
+    Delete(s"http://127.0.0.1:8080/user/${user.key.toString}") ~> userDelete ~> check {
+      response.status shouldBe MethodNotAllowed
+      contentType shouldBe `application/json`
+      }
+    }
+    
     
     // Post(s"http://127.0.0.1:8080/project/${codedProject}") ~> projectPost ~> check {
     //   response.status shouldBe Created
@@ -110,6 +117,4 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
     //   response.status shouldBe NotFound 
     //   contentType shouldBe `application/json`
     //   }
-    
-    }
 }

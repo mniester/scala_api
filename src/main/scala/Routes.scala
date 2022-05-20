@@ -76,13 +76,7 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments
         }
       }
     }
-  
-  // val userPost =
-  //   path("user") {
-  //     post {
-  //       parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
-  //     }
-  //   }
+
 
   val userPost = {
     (post & pathPrefix("user") & pathSuffix(Segment))
@@ -93,16 +87,15 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments
           case userModel: UserModel => complete(HttpResponse(StatusCodes.Accepted, entity = HttpEntity(ContentTypes.`application/json`, userModel.toJson.toString)))
         }
       }
+    }
+  }
+
+  val userDelete = {
+    (delete & pathPrefix("user") & pathSuffix(Neutral)) {
+       complete(HttpResponse(StatusCodes.MethodNotAllowed, entity = HttpEntity(ContentTypes.`application/json`, ResponseMessage(StatusCodes.MethodNotAllowed.intValue, "This method is not allowed - please contact admin").toJson.toString())))
       }
     }
 
-  val userDelete =
-    path("user") {
-      delete {
-        parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
-      }
-    }
-  
   val taskGet =
     path("task") {
       get {
