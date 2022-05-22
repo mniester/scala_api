@@ -351,5 +351,27 @@ class UnitTests extends AnyFunSuite {
     assert (!db.checkUuid(UUID.random.toString))
   }
 
+  test("DBFacade.checkIfUserIsAuthor - TaskModel") {
+    db.reset;
+    val task1 = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, volume = -1, comment = "Test").get;
+    val task2 = TaskFactory(key = 1, name = "Test", user = 2, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, volume = -1, comment = "Test").get;
+    db.addTask(task1)
+    assert (db.checkIfUserIsAuthor(task1))
+    assert (!db.checkIfUserIsAuthor(task2))
+    db.reset;
+    assert (!db.checkIfUserIsAuthor(task1))
+  }
+
+  test("DBFacade.checkIfUserIsAuthor - ProjectModel") {
+    db.reset;
+    val project1 = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
+    val project2 = ProjectFactory(key = 1, name = "Test", user = 2, startTime = "2000-01-01T00:01:01").get;
+    db.addProject(project1)
+    assert (db.checkIfUserIsAuthor(project1))
+    assert (!db.checkIfUserIsAuthor(project2))
+    db.reset;
+    assert (!db.checkIfUserIsAuthor(project1))
+  }
+
   test("Cleaning DB"){db.reset; assert(true)}
 }

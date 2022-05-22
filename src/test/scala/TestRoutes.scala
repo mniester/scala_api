@@ -15,7 +15,7 @@ import Routes._
 import Factories._
 import Strings.JwtCoder
 import DBs.{SQLite}
-import DataModels.UserModel
+import DataModels._
 import DataModels.IntQuery
 
 class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
@@ -23,7 +23,7 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
   val db = SQLite
   val test = "aaa"
   
-  val user = UserFactory(key = 1, uuid = "1", name = "a").get
+  val user = UserFactory(key = 1, uuid = "1", name = "RoutesTest").get
   val codedUser = JwtCoder.encode(user.toJson.toString())
   val userQuery = IntQuery(number = user.key, uuid = user.uuid)
   val codedUserQuery = JwtCoder.encode(userQuery.toJson.toString())
@@ -34,15 +34,14 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
   val userFailQuery = IntQuery(number = userFail.key, uuid = userFail.uuid)
   val codedUserFailQuery = JwtCoder.encode(userFailQuery.toJson.toString())
 
-  val project = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
-  val codedProject = JwtCoder.encode(project.toJson.toString())
-  val task1 = TaskFactory(name = "task1",
-                          user = 1,
-                          startTime = "2000-02-01T00:01:01",
-                          endTime = "2001-02-01T00:01:01",
-                          project = 1,
-                          volume = 1, 
-                          comment = "abc").get
+  val task1 = TaskFactory(key = 1, 
+                          name = "Test", 
+                          user = 1, 
+                          startTime = "2000-01-01T00:01:01", 
+                          endTime = "2000-02-01T00:01:01", 
+                          project = 1, 
+                          volume = -1, 
+                          comment = "Test").get;
   val task2 = TaskFactory(name = "task2",
                           user = 2,
                           startTime = "2000-02-01T00:01:01",
@@ -51,11 +50,23 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
                           volume = 1, 
                           comment = "abc").get
   val codedTask1 = JwtCoder.encode(task1.toJson.toString())
+  val task = task1
+  val codedTask = codedTask1
+  val taskQuery = IntQuery(task.key, user.uuid)
+  val codedTaskQuery = JwtCoder.encode(taskQuery.toJson.toString)
+  val taskNotFound = IntQuery(task2.key, user.uuid) 
+  val codedTaskNotFound = JwtCoder.encode(taskNotFound.toJson.toString)
+  val taskFailQuery = IntQuery(task.key, "Fake-UUID")
+  val codedTaskFailQuery = JwtCoder.encode(taskFailQuery.toJson.toString)
   val codedTask2 = JwtCoder.encode(task2.toJson.toString())
+
+  val project = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
+  val codedProject = JwtCoder.encode(project.toJson.toString())
+  
   db.setup()
   db.reset()
 
-  "Test" should "return response code 200" in {
+  "Test" should "return response code 200\n" in {
     Get(s"http://127.0.0.1:8080/test/${test}") ~> testRoute ~> check {
       response.status shouldBe OK
       contentType shouldBe `text/plain(UTF-8)`
@@ -63,9 +74,9 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
       }
   }
 
-  "User Methods" should "always return a JSON and proper HTTP Code" in {
+  "User Methods" should "always return a JSON and proper HTTP Code\n" in {
     
-    Post(s"http://127.0.0.1:8080/user/${codedUser}") ~> userPost ~> check {
+    Post(s"http://127.0.0.1:8080/user/${codedUser}") ~> userPost ~> check { //OK
       response.status shouldBe Created
       contentType shouldBe `application/json`
       Await.result(Unmarshal(response).to[UserModel], Settings.dbWaitingDuration)  shouldBe user
@@ -77,7 +88,7 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
       Await.result(Unmarshal(response).to[UserModel], Settings.dbWaitingDuration)  shouldBe user
       }
     
-    Post(s"http://127.0.0.1:8080/user/${codedUser}") ~> userPost ~> check {
+    Post(s"http://127.0.0.1:8080/user/${codedUser}") ~> userPost ~> check { // Fail - user name is now used 
       response.status shouldBe Accepted
       contentType shouldBe `application/json`
       Await.result(Unmarshal(response).to[UserModel], Settings.dbWaitingDuration)  shouldBe user
@@ -102,6 +113,52 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
       response.status shouldBe MethodNotAllowed
       contentType shouldBe `application/json`
       }
+    }
+
+    "Task Methods" should "always return a JSON and proper HTTP Code\n" in {
+    
+    Post(s"http://127.0.0.1:8080/task/${codedTask}") ~> taskPost ~> check { // OK
+      response.status shouldBe Created
+      contentType shouldBe `application/json`
+      Await.result(Unmarshal(response).to[TaskModel], Settings.dbWaitingDuration)  shouldBe task
+      }
+    
+    Get(s"http://127.0.0.1:8080/task/${codedTaskQuery}") ~> taskGet ~> check {
+      response.status shouldBe OK
+      contentType shouldBe `application/json`
+      Await.result(Unmarshal(response).to[TaskModel], Settings.dbWaitingDuration)  shouldBe task
+      }
+    
+    Post(s"http://127.0.0.1:8080/task/${codedTask}") ~> taskPost ~> check { // fail - Overlapping Task
+      response.status shouldBe Accepted
+      contentType shouldBe `application/json`
+      Await.result(Unmarshal(response).to[TaskModel], Settings.dbWaitingDuration)  shouldBe task
+      }
+
+    Get(s"http://127.0.0.1:8080/task/${task.key}") ~> taskGet ~> check {
+      response.status shouldBe BadRequest 
+      contentType shouldBe `application/json`
+      }
+    
+    Get(s"http://127.0.0.1:8080/task/${codedTaskNotFound}") ~> taskGet ~> check {
+      response.status shouldBe NotFound 
+      contentType shouldBe `application/json`
+      }
+    
+    Get(s"http://127.0.0.1:8080/task/${codedTaskFailQuery}") ~> taskGet ~> check {
+      response.status shouldBe Forbidden 
+      contentType shouldBe `application/json`
+      }
+    
+    // Delete(s"http://127.0.0.1:8080/task/${codedTaskQuery}") ~> taskDelete ~> check {
+    //   response.status shouldBe MethodNotAllowed
+    //   contentType shouldBe `application/json`
+    //   }
+    
+    // Get(s"http://127.0.0.1:8080/task/${codedTaskQuery}") ~> taskDelete ~> check {
+    //   response.status shouldBe NotFound 
+    //   contentType shouldBe `application/json`
+    //   }
     }
     
     

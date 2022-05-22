@@ -58,31 +58,47 @@ trait projectJsonSerializer extends JsonProtocols {
 
 object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments with projectJsonSerializer {
   val badRequest = ResponseMessage(400, "Bad request")
+  val jwtNotProper = ResponseMessage(StatusCodes.BadRequest.intValue, "JWT is not proper").toJson.toString
+  val jwtNotProperResponse = complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`application/json`, jwtNotProper)))
+  val forbidden = ResponseMessage(StatusCodes.Forbidden.intValue, "You do not have permission").toJson.toString
+  val forbiddenResponse = complete(HttpResponse(StatusCodes.Forbidden, entity = HttpEntity(ContentTypes.`application/json`, forbidden)))
+  val notFound = ResponseMessage(StatusCodes.NotFound.intValue, "User not found").toJson.toString
   val db = SQLite
   db.setup()
+  
   val testRoute =
      {
       (get & pathPrefix("test") & pathSuffix(Segment)) {jwt => complete(jwt)}
     }
   
-  val userGet =
-    (get & pathPrefix("user") & pathSuffix(Segment)) 
+  def getSingle(route: String) = {
+    
+    val DBMethod = route match {
+      case "user" => db.getUserByKey(_)
+      case "task" => db.getTaskByKey(_)
+    }
+
+    (get & pathPrefix(route) & pathSuffix(Segment)) 
       {token => JwtCoder.decodeInput(token).getOrElse(null) match {
-        case null => complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.BadRequest.intValue, "JWT is not proper").toJson.toString)))
+        case null => jwtNotProperResponse
         case json => val query = json.parseJson.convertTo[IntQuery]; db.checkUuid(query.uuid) match {
-          case false => complete(HttpResponse(StatusCodes.Forbidden, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.Forbidden.intValue, "You do not have permission").toJson.toString)))
-          case true => db.getUserByKey(query.number).getOrElse(null) match {
+          case false => forbiddenResponse
+          case true => DBMethod(query.number).getOrElse(null) match {
             case user: UserModel => complete(HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, user.toJson.toString)))
-            case null => complete(HttpResponse(StatusCodes.NotFound, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.NotFound.intValue, "User not found").toJson.toString)))
+            case task: TaskModel => complete(HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, task.toJson.toString)))
+            case null => complete(HttpResponse(StatusCodes.NotFound, entity = HttpEntity(ContentTypes.`application/json`, notFound)))
             }
           }
         }
       }
+    }
+
+  val userGet = getSingle("user")
 
   val userPost = {
     (post & pathPrefix("user") & pathSuffix(Segment))
       {token => JwtCoder.decodeInput(token).getOrElse(null) match {
-        case null => complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`application/json`, new ResponseMessage(StatusCodes.BadRequest.intValue, "JWT is not proper").toJson.toString)))
+        case null => jwtNotProperResponse
         case json => db.addUser(json.parseJson.convertTo[UserModel]).getOrElse(null) match {
           case null => complete(HttpResponse(StatusCodes.Created, entity = HttpEntity(ContentTypes.`application/json`, json)))
           case userModel: UserModel => complete(HttpResponse(StatusCodes.Accepted, entity = HttpEntity(ContentTypes.`application/json`, userModel.toJson.toString)))
@@ -97,26 +113,25 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments
       }
     }
 
-  val taskGet =
-    path("task") {
-      get {
-        parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
-      }
-    }
+  val taskGet = getSingle("task")
   
-  val taskPost =
-    path("task") {
-      post {
-        parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
+  val taskPost = {
+    (post & pathPrefix("task") & pathSuffix(Segment))
+      {token => JwtCoder.decodeInput(token).getOrElse(null) match {
+        case null => jwtNotProperResponse
+        case json => db.addTask(json.parseJson.convertTo[TaskModel]).getOrElse(null) match {
+          case null => complete(HttpResponse(StatusCodes.Created, entity = HttpEntity(ContentTypes.`application/json`, json)))
+          case taskModel: TaskModel => complete(HttpResponse(StatusCodes.Accepted, entity = HttpEntity(ContentTypes.`application/json`, taskModel.toJson.toString)))
+        }
       }
     }
+  }
   
-  val taskDelete =
-    path("task") {
-      delete {
-        parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
-      }
+  val taskDelete = {
+    (delete & pathPrefix("task") & pathSuffix(Segment)) 
+      {xx => forbiddenResponse
     }
+  }
 
   val taskPut =
     path("task") {

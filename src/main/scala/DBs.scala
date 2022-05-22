@@ -142,7 +142,7 @@ abstract class DBFacade extends DBBase {
 
   def addTask(newTask: TaskModel): Option[TaskModel] = {
     val overlappingTasks = checkOverlappingTasksInProject(newTask)
-    if (overlappingTasks.isEmpty) {addNewTask(newTask); None} else Some(overlappingTasks.head) 
+    if (overlappingTasks.isEmpty) {addNewTask(newTask); None} else {Some(overlappingTasks.head)} 
   }
 
   def replaceTask(newTask: TaskModel): List[TaskModel] = {
@@ -214,7 +214,8 @@ abstract class DBFacade extends DBBase {
   }
 
   def checkIfUserIsAuthor(data: TaskModel): Boolean = {
-    if (data.user == getTaskByKey(data.key).head.user) {true} else {false} 
+    val task = getTaskByKey(data.key).getOrElse(null)
+    if (task != null && (task.user == data.user)) {true} else {false} 
   }
 
   def modifyTask(task: TaskModel): List[TaskModel] = {
@@ -222,18 +223,13 @@ abstract class DBFacade extends DBBase {
   }
   
   def checkIfUserIsAuthor(data: ProjectModel): Boolean = {
-    if (data.user == getProjectByKey(data.key).head.user) {true} else {false} 
+    val project = getProjectByKey(data.key).getOrElse(null)
+    if (project != null && (project.user == data.user)) {true} else {false}
   }
 
   def delProject(project: ProjectModel): Unit =
     if (checkIfUserIsAuthor(project)) {delProjectByKey(project.key)}
-  
-  def checkIfUserIsAuthor(projectKey: Int): Boolean = {
-    if (projectKey == getProjectByKey(projectKey).head.user) {true} else {false} 
-  } 
-  def checkAndChangeProjectName(projectKey: Int, newName: String) = {
-    if (checkIfUserIsAuthor(projectKey)) {changeProjectName(projectKey, newName)}
-  }
+
 }
 
 object SQLite extends DBFacade {
