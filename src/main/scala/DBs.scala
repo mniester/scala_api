@@ -140,15 +140,22 @@ abstract class DBFacade extends DBBase {
     if (userWithSameName.isEmpty) {super.addNewUser(newUser); None} else {Some(userWithSameName.head)}
   }
 
-  def addTask(newTask: TaskModel): Option[TaskModel] = {
-    val overlappingTasks = checkOverlappingTasksInProject(newTask)
-    if (overlappingTasks.isEmpty) {addNewTask(newTask); None} else {Some(overlappingTasks.head)} 
+  def addTask(newTask: TaskModel, checkOverlapping: Boolean = true): Option[TaskModel] = {
+    if (checkOverlapping) 
+      {val overlappingTasks = checkOverlappingTasksInProject(newTask)
+      if (overlappingTasks.isEmpty) {addNewTask(newTask); None} else {Some(overlappingTasks.head)}}
+    else 
+      {addNewTask(newTask); None} 
   }
 
-  def replaceTask(newTask: TaskModel): List[TaskModel] = {
+  def delTask(task: TaskModel) = {
+    if (checkIfUserIsAuthor(task)) {delTaskByKey(task.key); true} else {false}
+  }
+
+  def replaceTask(newTask: TaskModel): Option[TaskModel] = {
     checkOverlappingTasksInProject(newTask).filter(_.key != newTask.key) match {
-      case Nil => {delTaskByKey(newTask.key); addNewTask(newTask); Nil}
-      case listOfOverlapping => listOfOverlapping
+      case Nil => {delTaskByKey(newTask.key); addTask(newTask, checkOverlapping = false); None}
+      case listOfOverlapping => Some(listOfOverlapping.head)
     }
   }
 
@@ -218,8 +225,11 @@ abstract class DBFacade extends DBBase {
     if (task != null && (task.user == data.user)) {true} else {false} 
   }
 
-  def modifyTask(task: TaskModel): List[TaskModel] = {
-    if (checkIfUserIsAuthor(task)) {replaceTask(task)} else {Nil}
+  def modifyTask(task: TaskModel): Option[TaskModel] = {
+    checkIfUserIsAuthor(task) match {
+      case true => replaceTask(task)
+      case false => Some(task)
+    }
   }
   
   def checkIfUserIsAuthor(data: ProjectModel): Boolean = {
@@ -229,7 +239,6 @@ abstract class DBFacade extends DBBase {
 
   def delProject(project: ProjectModel): Unit =
     if (checkIfUserIsAuthor(project)) {delProjectByKey(project.key)}
-
 }
 
 object SQLite extends DBFacade {

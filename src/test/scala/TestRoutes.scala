@@ -42,6 +42,23 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
                           project = 1, 
                           volume = -1, 
                           comment = "Test").get;
+  val taskToPut = TaskFactory(key = 1, 
+                          name = "PUT", 
+                          user = 1, 
+                          startTime = "2000-01-01T00:01:01", 
+                          endTime = "2000-02-01T00:01:01", 
+                          project = 1, 
+                          volume = -1, 
+                          comment = "Test").get;
+  val task1_InvalidUser = TaskFactory(key = 1, 
+                          name = "Test", 
+                          user = 11, 
+                          startTime = "2000-01-01T00:01:01", 
+                          endTime = "2000-02-01T00:01:01", 
+                          project = 1, 
+                          volume = -1, 
+                          comment = "Test").get;
+  val codedTask1_InvalidUser = JwtCoder.encode(task1_InvalidUser.toJson.toString)
   val task2 = TaskFactory(name = "task2",
                           user = 2,
                           startTime = "2000-02-01T00:01:01",
@@ -59,6 +76,7 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
   val taskFailQuery = IntQuery(task.key, "Fake-UUID")
   val codedTaskFailQuery = JwtCoder.encode(taskFailQuery.toJson.toString)
   val codedTask2 = JwtCoder.encode(task2.toJson.toString())
+  val codedTaskToPut = JwtCoder.encode(taskToPut.toJson.toString())
 
   val project = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
   val codedProject = JwtCoder.encode(project.toJson.toString())
@@ -150,15 +168,28 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
       contentType shouldBe `application/json`
       }
     
-    // Delete(s"http://127.0.0.1:8080/task/${codedTaskQuery}") ~> taskDelete ~> check {
-    //   response.status shouldBe MethodNotAllowed
-    //   contentType shouldBe `application/json`
-    //   }
+    Delete(s"http://127.0.0.1:8080/task/${codedTask}") ~> taskDelete ~> check {
+      response.status shouldBe OK
+      contentType shouldBe `application/json`
+      }
     
-    // Get(s"http://127.0.0.1:8080/task/${codedTaskQuery}") ~> taskDelete ~> check {
-    //   response.status shouldBe NotFound 
-    //   contentType shouldBe `application/json`
-    //   }
+    Get(s"http://127.0.0.1:8080/task/${codedTaskQuery}") ~> taskGet ~> check {
+      response.status shouldBe NotFound 
+      contentType shouldBe `application/json`
+      }
+    
+    db.reset; Post(s"http://127.0.0.1:8080/task/${codedTask}") ~> taskPost
+    
+    Put(s"http://127.0.0.1:8080/task/${codedTaskToPut}") ~> taskPut ~> check {
+      response.status shouldBe OK
+      contentType shouldBe `application/json`
+      }
+    
+    Put(s"http://127.0.0.1:8080/task/${codedTask1_InvalidUser}") ~> taskPut ~> check {
+      response.status shouldBe Accepted
+      contentType shouldBe `application/json`
+      }
+    
     }
     
     

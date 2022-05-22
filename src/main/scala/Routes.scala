@@ -63,6 +63,7 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments
   val forbidden = ResponseMessage(StatusCodes.Forbidden.intValue, "You do not have permission").toJson.toString
   val forbiddenResponse = complete(HttpResponse(StatusCodes.Forbidden, entity = HttpEntity(ContentTypes.`application/json`, forbidden)))
   val notFound = ResponseMessage(StatusCodes.NotFound.intValue, "User not found").toJson.toString
+  val deleted = ResponseMessage(StatusCodes.OK.intValue, "Data was deleted").toJson.toString
   val db = SQLite
   db.setup()
   
@@ -129,16 +130,27 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments
   
   val taskDelete = {
     (delete & pathPrefix("task") & pathSuffix(Segment)) 
-      {xx => forbiddenResponse
+      {token => JwtCoder.decodeInput(token).getOrElse(null) match {
+        case null => jwtNotProperResponse
+        case json => db.delTask(json.parseJson.convertTo[TaskModel]) match {
+          case true => complete(HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, deleted)))
+          case false => complete(HttpResponse(StatusCodes.Forbidden, entity = HttpEntity(ContentTypes.`application/json`, forbidden)))
+        }
+      }
     }
   }
 
-  val taskPut =
-    path("task") {
-      put {
-        parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
+  val taskPut = {
+    (put & pathPrefix("task") & pathSuffix(Segment)) 
+      {token => JwtCoder.decodeInput(token).getOrElse(null) match {
+        case null => jwtNotProperResponse
+        case json => db.modifyTask(json.parseJson.convertTo[TaskModel]).getOrElse(null) match {
+          case null => complete(HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, json)))
+          case task: TaskModel => complete(HttpResponse(StatusCodes.Accepted, entity = HttpEntity(ContentTypes.`application/json`, task.toJson.toString)))
+        }
       }
     }
+  }
 
   val projectGet =
     path("project") {
