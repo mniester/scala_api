@@ -51,6 +51,13 @@ abstract class DBBase {
     Await.result(cursor.run(tasks ++= nt), Settings.dbWaitingDuration)
   }
 
+  def compareUserKeyUuid(key: Int, uuid: String): Boolean = {
+    getUserByKey(key).getOrElse(false) match {
+      case false => false
+      case user: UserModel => (user.uuid == uuid)
+    }
+  }
+
   def getUserByName(query: String): Option[UserModel] = {
     val action = cursor.run(users.filter(_.name  === query).result)
     val result = Await.result(action, Settings.dbWaitingDuration).toList
@@ -148,8 +155,8 @@ abstract class DBFacade extends DBBase {
       {addNewTask(newTask); None} 
   }
 
-  def delTask(task: TaskModel) = {
-    if (checkIfUserIsAuthor(task)) {delTaskByKey(task.key); true} else {false}
+  def delTask(delModel: DelData): Boolean = {
+    if (compareUserKeyUuid(delModel.userKey, delModel.userUuid)) {delTaskByKey(delModel.dataKey); true} else {false}
   }
 
   def replaceTask(newTask: TaskModel): Option[TaskModel] = {

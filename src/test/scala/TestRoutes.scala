@@ -42,6 +42,8 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
                           project = 1, 
                           volume = -1, 
                           comment = "Test").get;
+  val delTask1 = DelData(dataKey = task1.key, userKey = task1.user, userUuid = user.uuid)
+  val codedDelTask1 = JwtCoder.encode(delTask1.toJson.toString())
   val taskToPut = TaskFactory(key = 1, 
                           name = "PUT", 
                           user = 1, 
@@ -168,17 +170,7 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
       contentType shouldBe `application/json`
       }
     
-    Delete(s"http://127.0.0.1:8080/task/${codedTask}") ~> taskDelete ~> check {
-      response.status shouldBe OK
-      contentType shouldBe `application/json`
-      }
-    
-    Get(s"http://127.0.0.1:8080/task/${codedTaskQuery}") ~> taskGet ~> check {
-      response.status shouldBe NotFound 
-      contentType shouldBe `application/json`
-      }
-    
-    db.reset; Post(s"http://127.0.0.1:8080/task/${codedTask}") ~> taskPost
+    db.reset; Post(s"http://127.0.0.1:8080/task/${codedTask}") ~> taskPost;
     
     Put(s"http://127.0.0.1:8080/task/${codedTaskToPut}") ~> taskPut ~> check {
       response.status shouldBe OK
@@ -188,8 +180,17 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
     Put(s"http://127.0.0.1:8080/task/${codedTask1_InvalidUser}") ~> taskPut ~> check {
       response.status shouldBe Accepted
       contentType shouldBe `application/json`
+    }
+
+    Post(s"http://127.0.0.1:8080/user/${codedUser}") ~> userPost;
+
+    Delete(s"http://127.0.0.1:8080/task/${codedDelTask1}") ~> taskDelete ~> check {
+      response.status shouldBe OK
+      contentType shouldBe `application/json`
       }
-    
+    }
+
+
     }
     
     
@@ -226,4 +227,3 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
     //   response.status shouldBe NotFound 
     //   contentType shouldBe `application/json`
     //   }
-}

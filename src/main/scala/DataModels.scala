@@ -9,6 +9,8 @@ case class ResponseMessage(code: Int, message: String)
 
 case class IntQuery(number: Int, uuid: String)
 
+case class DelData(dataKey: Int, userKey: Int, userUuid: String)
+
 abstract class AbstractProjectModel (key: Int, name: String, user: Int, startTime: String, deleteTime: String = "")
 
 case class UserModel(key: Int, uuid: String, name: String)

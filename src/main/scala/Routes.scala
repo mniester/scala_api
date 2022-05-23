@@ -20,6 +20,7 @@ trait JsonProtocols extends DefaultJsonProtocol {
   implicit val projectFormat = jsonFormat5(ProjectModel)
   implicit val taskFormat = jsonFormat9(TaskModel)
   implicit val intQueryFormat = jsonFormat2(IntQuery)
+  implicit val delDataFormat = jsonFormat3(DelData)
 }
 
 // (get & pathPrefix("projectslist") & path("searchedPage" / Segment / "names" / Segment / "moment" / Segment / "since" / Segment / "deleted" / Segment/ "sortingFactor"/ Segment / "sortingAsc" / Segment))
@@ -132,7 +133,7 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments
     (delete & pathPrefix("task") & pathSuffix(Segment)) 
       {token => JwtCoder.decodeInput(token).getOrElse(null) match {
         case null => jwtNotProperResponse
-        case json => db.delTask(json.parseJson.convertTo[TaskModel]) match {
+        case json => db.delTask(json.parseJson.convertTo[DelData]) match {
           case true => complete(HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, deleted)))
           case false => complete(HttpResponse(StatusCodes.Forbidden, entity = HttpEntity(ContentTypes.`application/json`, forbidden)))
         }

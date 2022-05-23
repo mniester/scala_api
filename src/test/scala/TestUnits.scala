@@ -214,6 +214,33 @@ class UnitTests extends AnyFunSuite {
     assert(result.length == 0)
   }
 
+  test("DBBase.compareUserKeyUuid") {db.reset;
+    val user = UserFactory(key = 1, uuid = UUID.random.toString, name = "Test").get;
+    db.addUser(user)
+    assert (db.compareUserKeyUuid(user.key, user.uuid))
+    assert (!db.compareUserKeyUuid(user.key + 1, user.uuid))
+  }
+
+  test("delTask - OK") {db.reset;
+    val user = UserFactory(key = 1, uuid = UUID.random.toString, name = "Test").get;
+    val task = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, volume = -1, comment = "Test").get;
+    val delData = DelData(1, user.key, user.uuid)
+    db.addTask(task)
+    db.addUser(user)
+    assert(db.delTask(delData))
+    assert(db.getTaskByKey(1).getOrElse(null) == null)
+  }
+
+  test("delTask - fail") {db.reset;
+    val user = UserFactory(key = 1, uuid = UUID.random.toString, name = "Test").get;
+    val task = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, volume = -1, comment = "Test").get;
+    val delData = DelData(1, user.key + 1, user.uuid)
+    db.addTask(task)
+    db.addUser(user)
+    assert(!db.delTask(delData))
+    assert(db.getTaskByKey(1).getOrElse(null) == task)
+  }
+
   test("DBFacade.addUser, DBFacade.getUserByName, DBFacade.delUsersByName - OK") {db.reset;
                                         val user = UserFactory(key = 1, uuid = UUID.random.toString, name = "Test").get;
                                         val userQuery = "Test"
