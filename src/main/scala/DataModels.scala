@@ -11,7 +11,9 @@ case class IntQuery(number: Int, uuid: String)
 
 case class DelData(dataKey: Int, userKey: Int, userUuid: String)
 
-abstract class AbstractProjectModel (key: Int, name: String, user: Int, startTime: String, deleteTime: String = "")
+abstract class DataModel
+
+abstract class AbstractProjectModel (key: Int, name: String, user: Int, startTime: String, deleteTime: String = "") extends DataModel
 
 case class UserModel(key: Int, uuid: String, name: String)
 
@@ -49,7 +51,15 @@ case class ProjectModelWithTasks (key: Int,
                                                               
 
 
-case class TaskModel(key: Int, name: String, user: Int, startTime: String, endTime: String, project: Int, volume: Int, comment: String, deleteTime: String) {
+case class TaskModel(key: Int, 
+                    name: String, 
+                    user: Int, 
+                    startTime: String, 
+                    endTime: String, 
+                    project: Int, 
+                    volume: Int, 
+                    comment: String, 
+                    deleteTime: String) extends DataModel{
   
   def startMoment(): LocalDateTime = LocalDateTime.parse(startTime)
   def endMoment(): LocalDateTime = LocalDateTime.parse(endTime)

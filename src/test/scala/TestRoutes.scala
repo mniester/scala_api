@@ -31,8 +31,8 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
   val codedQueryNotFound = JwtCoder.encode(queryNotFound.toJson.toString())
   
   val userFail = UserFactory(uuid = "2", name = "b").get
-  val userFailQuery = IntQuery(number = userFail.key, uuid = userFail.uuid)
-  val codedUserFailQuery = JwtCoder.encode(userFailQuery.toJson.toString())
+  val userWrongQuery = IntQuery(number = userFail.key, uuid = userFail.uuid)
+  val codedUserWrongQuery = JwtCoder.encode(userWrongQuery.toJson.toString())
 
   val task1 = TaskFactory(key = 1, 
                           name = "Test", 
@@ -77,8 +77,8 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
   val codedTaskQuery = JwtCoder.encode(taskQuery.toJson.toString)
   val taskNotFound = IntQuery(task2.key, user.uuid) 
   val codedTaskNotFound = JwtCoder.encode(taskNotFound.toJson.toString)
-  val taskFailQuery = IntQuery(task.key, "Fake-UUID")
-  val codedTaskFailQuery = JwtCoder.encode(taskFailQuery.toJson.toString)
+  val taskWrongQuery = IntQuery(task.key, "Fake-UUID")
+  val codedTaskWrongQuery = JwtCoder.encode(taskWrongQuery.toJson.toString)
   val codedTask2 = JwtCoder.encode(task2.toJson.toString())
   val codedTaskToPut = JwtCoder.encode(taskToPut.toJson.toString())
 
@@ -126,7 +126,7 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
       contentType shouldBe `application/json`
       }
     
-    Get(s"http://127.0.0.1:8080/user/${codedUserFailQuery}") ~> userGet ~> check {
+    Get(s"http://127.0.0.1:8080/user/${codedUserWrongQuery}") ~> userGet ~> check {
       response.status shouldBe Forbidden 
       contentType shouldBe `application/json`
       }
@@ -167,7 +167,7 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
       contentType shouldBe `application/json`
       }
     
-    Get(s"http://127.0.0.1:8080/task/${codedTaskFailQuery}") ~> taskGet ~> check {
+    Get(s"http://127.0.0.1:8080/task/${codedTaskWrongQuery}") ~> taskGet ~> check {
       response.status shouldBe Forbidden 
       contentType shouldBe `application/json`
       }
@@ -198,40 +198,64 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
       }
     }
 
+  "Project Methods" should "always return a JSON and proper HTTP Code\n" in {
+    
+    Post(s"http://127.0.0.1:8080/project/${codedProject}") ~> projectPost ~> check { // OK
+      response.status shouldBe Created
+      contentType shouldBe `application/json`
+      Await.result(Unmarshal(response).to[ProjectModel], Settings.dbWaitingDuration)  shouldBe project
+      }
+    
+    Get(s"http://127.0.0.1:8080/project/${codedProjectQuery}") ~> projectGet ~> check {
+      response.status shouldBe OK
+      contentType shouldBe `application/json`
+      Await.result(Unmarshal(response).to[ProjectModel], Settings.dbWaitingDuration)  shouldBe project
+      }
+    
+    Post(s"http://127.0.0.1:8080/project/${codedProject}") ~> projectPost ~> check { // fail - Overlapping Task
+      response.status shouldBe Accepted
+      contentType shouldBe `application/json`
+      Await.result(Unmarshal(response).to[ProjectModel], Settings.dbWaitingDuration)  shouldBe project
+      }
 
+    Get(s"http://127.0.0.1:8080/project/${project.key}") ~> projectGet ~> check {
+      response.status shouldBe BadRequest 
+      contentType shouldBe `application/json`
+      }
+    
+    Get(s"http://127.0.0.1:8080/project/${codedProjectNotFound}") ~> projectGet ~> check {
+      response.status shouldBe NotFound 
+      contentType shouldBe `application/json`
+      }
+    
+    Get(s"http://127.0.0.1:8080/project/${codedProjectWrongQuery}") ~> projectGet ~> check {
+      response.status shouldBe Forbidden 
+      contentType shouldBe `application/json`
+      }
+    
+    db.reset; Post(s"http://127.0.0.1:8080/project/${codedProject}") ~> projectPost;
+    
+    Put(s"http://127.0.0.1:8080/project/${codedProjectToPut}") ~> projectPut ~> check {
+      response.status shouldBe OK
+      contentType shouldBe `application/json`
+      }
+    
+    Put(s"http://127.0.0.1:8080/project/${codedProject_InvalidUser}") ~> projectPut ~> check {
+      response.status shouldBe Accepted
+      contentType shouldBe `application/json`
     }
-    
-    
-    // Post(s"http://127.0.0.1:8080/project/${codedProject}") ~> projectPost ~> check {
-    //   response.status shouldBe Created
-    //   contentType shouldBe `application/json`
-    //   response.entity.toString().parseJson shouldBe project.toJson
-    //   }
-    
-    // Get(s"http://127.0.0.1:8080/project/${project.key.toString}") ~> projectGet ~> check {
-    //   response.status shouldBe OK
-    //   contentType shouldBe `application/json`
-    //   response.entity.toString().parseJson shouldBe project.toJson
-    //   }
 
-    // Get(s"http://127.0.0.1:8080/project/${(user.key + 1).toString}") ~> projectGet ~> check {
-    //   response.status shouldBe NotFound 
-    //   contentType shouldBe `application/json`
-    //   }
-    
-    // Post(s"http://127.0.0.1:8080/task/${codedTask1}") ~> taskPost ~> check {
-    //   response.status shouldBe Created
-    //   contentType shouldBe `application/json`
-    //   response.entity.toString().parseJson shouldBe project.toJson
-    //   }
-    
-    // Get(s"http://127.0.0.1:8080/project/${task1.key.toString}") ~> taskGet ~> check {
-    //   response.status shouldBe OK
-    //   contentType shouldBe `application/json`
-    //   response.entity.toString().parseJson shouldBe project.toJson
-    //   }
+    Post(s"http://127.0.0.1:8080/project/${codedProject}") ~> projectPost;
 
-    // Get(s"http://127.0.0.1:8080/project/${(task1.key + 1).toString}") ~> taskGet ~> check {
-    //   response.status shouldBe NotFound 
-    //   contentType shouldBe `application/json`
-    //   }
+    Delete(s"http://127.0.0.1:8080/task/${codedProject}") ~> projectDelete ~> check {
+      response.status shouldBe OK
+      contentType shouldBe `application/json`
+      }
+    
+    db.reset; Post(s"http://127.0.0.1:8080/task/${codedProject}") ~> projectPost;
+    Delete(s"http://127.0.0.1:8080/task/${codedDelProject_InvalidUser}") ~> projectDelete ~> check {
+      response.status shouldBe Forbidden
+      contentType shouldBe `application/json`
+      }
+  }
+  }
