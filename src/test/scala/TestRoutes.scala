@@ -43,7 +43,7 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
                           volume = -1, 
                           comment = "Test").get;
   val delTask1 = DelData(dataKey = task1.key, userKey = task1.user, userUuid = user.uuid)
-  val codedDelTask1 = JwtCoder.encode(delTask1.toJson.toString())
+  val codedDelTask1 = JwtCoder.encode(delTask1.toJson.toString()) 
   val taskToPut = TaskFactory(key = 1, 
                           name = "PUT", 
                           user = 1, 
@@ -61,6 +61,8 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
                           volume = -1, 
                           comment = "Test").get;
   val codedTask1_InvalidUser = JwtCoder.encode(task1_InvalidUser.toJson.toString)
+  val delTask1_InvalidUser = DelData(dataKey = task1_InvalidUser .key, userKey = task1.user, userUuid = user.uuid)
+  val codedDelTask1_InvalidUser = JwtCoder.encode(delTask1_InvalidUser.toJson.toString)
   val task2 = TaskFactory(name = "task2",
                           user = 2,
                           startTime = "2000-02-01T00:01:01",
@@ -186,6 +188,12 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
 
     Delete(s"http://127.0.0.1:8080/task/${codedDelTask1}") ~> taskDelete ~> check {
       response.status shouldBe OK
+      contentType shouldBe `application/json`
+      }
+    
+    db.reset; Post(s"http://127.0.0.1:8080/task/${codedTask}") ~> taskPost;
+    Delete(s"http://127.0.0.1:8080/task/${codedDelTask1_InvalidUser}") ~> taskDelete ~> check {
+      response.status shouldBe Forbidden
       contentType shouldBe `application/json`
       }
     }
