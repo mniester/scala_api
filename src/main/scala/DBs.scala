@@ -166,9 +166,9 @@ abstract class DBFacade extends DBBase {
     }
   }
 
-  def addProject(newProject: ProjectModel): List[ProjectModel] = {
+  def addProject(newProject: ProjectModel): Option[ProjectModel] = {
     val projectWithTheSameName = getProjectByName(newProject.name)
-    if (projectWithTheSameName.isEmpty) {addNewProject(newProject); Nil} else {projectWithTheSameName}
+    if (projectWithTheSameName.isEmpty) {addNewProject(newProject); None} else {Some(projectWithTheSameName.head)}
   }
 
   def getProjectWithTasks (query: Int): Option[ProjectModelWithTasks] = {
@@ -244,8 +244,9 @@ abstract class DBFacade extends DBBase {
     if (project != null && (project.user == data.user)) {true} else {false}
   }
 
-  def delProject(project: ProjectModel): Unit =
-    if (checkIfUserIsAuthor(project)) {delProjectByKey(project.key)}
+  def delProject(delModel: DelData): Boolean = {
+    if (compareUserKeyUuid(delModel.userKey, delModel.userUuid)) {delProjectByKey(delModel.dataKey); true} else {false}
+  }
 }
 
 object SQLite extends DBFacade {

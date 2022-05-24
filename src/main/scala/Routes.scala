@@ -58,6 +58,11 @@ trait projectJsonSerializer extends JsonProtocols {
 }
 
 object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments with projectJsonSerializer {
+  
+  val taskRoute = "task"
+  val projectRoute = "project"
+  val userRoute = "user"
+  
   val badRequest = ResponseMessage(400, "Bad request")
   val jwtNotProper = ResponseMessage(StatusCodes.BadRequest.intValue, "JWT is not proper").toJson.toString
   val jwtNotProperResponse = complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`application/json`, jwtNotProper)))
@@ -76,9 +81,9 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments
   def getData(route: String) = {
     
     val DBMethod = route match {
-      case "user" => db.getUserByKey(_)
-      case "task" => db.getTaskByKey(_)
-      case "project" => db.getProjectByKey(_)
+      case `userRoute` => db.getUserByKey(_)
+      case `taskRoute` => db.getTaskByKey(_)
+      case `projectRoute` => db.getProjectByKey(_)
     }
 
     (get & pathPrefix(route) & pathSuffix(Segment)) 
@@ -97,22 +102,28 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments
       }
     }
   
-  def delData(route: String) = 
+  def delData(route: String) = {
+
+    val DBMethod = route match {
+      case `taskRoute` => db.delTask(_)
+      case `projectRoute` => db.delProject(_)
+    }
+
     (delete & pathPrefix(route) & pathSuffix(Segment)) 
       {token => JwtCoder.decodeInput(token).getOrElse(null) match {
         case null => jwtNotProperResponse
-        case json => db.delTask(json.parseJson.convertTo[DelData]) match {
+        case json => DBMethod(json.parseJson.convertTo[DelData]) match {
           case true => complete(HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, deleted)))
           case false => complete(HttpResponse(StatusCodes.Forbidden, entity = HttpEntity(ContentTypes.`application/json`, forbidden)))
         }
       }
     }
-  
+  }
  
-  val userGet = getData("user")
+  val userGet = getData(userRoute)
 
   val userPost = {
-    (post & pathPrefix("user") & pathSuffix(Segment))
+    (post & pathPrefix(userRoute) & pathSuffix(Segment))
       {token => JwtCoder.decodeInput(token).getOrElse(null) match {
         case null => jwtNotProperResponse
         case json => db.addUser(json.parseJson.convertTo[UserModel]).getOrElse(null) match {
@@ -124,35 +135,35 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments
   }
 
   val userDelete = {
-    (delete & pathPrefix("user") & pathSuffix(Neutral)) {
+    (delete & pathPrefix(userRoute) & pathSuffix(Neutral)) {
        complete(HttpResponse(StatusCodes.MethodNotAllowed, entity = HttpEntity(ContentTypes.`application/json`, ResponseMessage(StatusCodes.MethodNotAllowed.intValue, "This method is not allowed - please contact admin").toJson.toString())))
       }
     }
   
   val userPut = {
-    (put & pathPrefix("user") & pathSuffix(Neutral)) {
+    (put & pathPrefix(userRoute) & pathSuffix(Neutral)) {
        complete(HttpResponse(StatusCodes.MethodNotAllowed, entity = HttpEntity(ContentTypes.`application/json`, ResponseMessage(StatusCodes.MethodNotAllowed.intValue, "This method is not allowed - please contact admin").toJson.toString())))
       }
     }
 
-  val taskGet = getData("task")
+  val taskGet = getData(taskRoute)
   
   val taskPost = {
-    (post & pathPrefix("task") & pathSuffix(Segment))
+    (post & pathPrefix(taskRoute) & pathSuffix(Segment))
       {token => JwtCoder.decodeInput(token).getOrElse(null) match {
         case null => jwtNotProperResponse
         case json => db.addTask(json.parseJson.convertTo[TaskModel]).getOrElse(null) match {
           case null => complete(HttpResponse(StatusCodes.Created, entity = HttpEntity(ContentTypes.`application/json`, json)))
-          case taskModel: TaskModel => complete(HttpResponse(StatusCodes.Accepted, entity = HttpEntity(ContentTypes.`application/json`, taskModel.toJson.toString)))
+          case task: TaskModel => complete(HttpResponse(StatusCodes.Accepted, entity = HttpEntity(ContentTypes.`application/json`, task.toJson.toString)))
         }
       }
     }
   }
   
-  val taskDelete = delData("task")
+  val taskDelete = delData(taskRoute)
 
   val taskPut = {
-    (put & pathPrefix("task") & pathSuffix(Segment)) 
+    (put & pathPrefix(taskRoute) & pathSuffix(Segment)) 
       {token => JwtCoder.decodeInput(token).getOrElse(null) match {
         case null => jwtNotProperResponse
         case json => db.modifyTask(json.parseJson.convertTo[TaskModel]).getOrElse(null) match {
@@ -163,23 +174,27 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments
     }
   }
 
-  val projectGet = getData("project")
+  val projectGet = getData(projectRoute)
   
-  val projectPost =
-    path("project") {
-      post {
-        parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
+  val projectPost = {
+    (post & pathPrefix(projectRoute) & pathSuffix(Segment))
+      {token => JwtCoder.decodeInput(token).getOrElse(null) match {
+        case null => jwtNotProperResponse
+        case json => db.addProject(json.parseJson.convertTo[ProjectModel]).getOrElse(null) match {
+          case null => complete(HttpResponse(StatusCodes.Created, entity = HttpEntity(ContentTypes.`application/json`, json)))
+          case project: ProjectModel => complete(HttpResponse(StatusCodes.Accepted, entity = HttpEntity(ContentTypes.`application/json`, project.toJson.toString)))
+        }
       }
     }
+  }
   
-  val projectDelete = delData("project")
+val projectDelete = delData(projectRoute)
   
-  val projectPut =
-    path("project") {
-      put {
-        parameter("JWT") {jwt => complete(HttpEntity(ContentTypes.`application/json`, jwt))}
-      }
-    }
+val projectPut = {
+  (put & pathPrefix(projectRoute) & pathSuffix(Neutral)) {
+      complete(HttpResponse(StatusCodes.MethodNotAllowed, entity = HttpEntity(ContentTypes.`application/json`, ResponseMessage(StatusCodes.MethodNotAllowed.intValue, "This method is not allowed - please contact admin").toJson.toString())))
+  }
+}
 
   def projectsList() = {
     (get & pathPrefix("projectslist") & path("searchedPage" / Segment / "names" / Segment / "moment" / Segment / "since" / Segment / "deleted" / Segment/ "sortingFactor"/ Segment / "sortingAsc" / Segment))
