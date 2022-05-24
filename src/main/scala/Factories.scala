@@ -24,9 +24,9 @@ object ProjectFactory extends checkISOTimeFormat {
     }
 }
 
-object ProjectModelWithTasksFactory {
-  def apply (project: ProjectModel, tasks: List[TaskModel]): Option[ProjectModelWithTasks] = {
-    Some(ProjectModelWithTasks(key = project.key, name = project.name, user = project.user, startTime = project.startTime, deleteTime = project.deleteTime, tasks = tasks))
+object FullProjectModelFactory {
+  def apply (project: ProjectModel, tasks: List[TaskModel]): Option[FullProjectModel] = {
+    Some(FullProjectModel(key = project.key, name = project.name, user = project.user, startTime = project.startTime, deleteTime = project.deleteTime, tasks = tasks))
   }
 }
 

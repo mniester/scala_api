@@ -21,6 +21,7 @@ trait JsonProtocols extends DefaultJsonProtocol {
   implicit val taskFormat = jsonFormat9(TaskModel)
   implicit val intQueryFormat = jsonFormat2(IntQuery)
   implicit val delDataFormat = jsonFormat3(DelData)
+  implicit val fullProjectQueryFormat = jsonFormat7(FullProjectQuery)
 }
 
 // (get & pathPrefix("projectslist") & path("searchedPage" / Segment / "names" / Segment / "moment" / Segment / "since" / Segment / "deleted" / Segment/ "sortingFactor"/ Segment / "sortingAsc" / Segment))
@@ -45,23 +46,12 @@ trait checkUrlArguments extends isStringNumber with isStringBoolean with checkIS
   }
 }
 
-trait projectJsonSerializer extends JsonProtocols {
-
-  def serializeListOfProjects(projects: List[ProjectModelWithTasks]): String = {
-    if (projects.length > 0) {"""{ "projects": [""" + (projects.map(project => serializeProject(project))).toString.drop(5).dropRight(1) + "]}"}
-    else {ResponseMessage(StatusCodes.NotFound.intValue, "No data was found").toJson.toString}
-  }
-
-  def serializeProject(project: ProjectModelWithTasks): String = {
-    project.dropTasks().toJson.toString.dropRight(1) + """, "tasks" :[""" + project.tasks.map(task => task.toJson.toString).mkString(",") + "]}"
-  }
-}
-
-object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments with projectJsonSerializer {
+object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments {
   
   val taskRoute = "task"
   val projectRoute = "project"
   val userRoute = "user"
+  val fullProjects = "projectslist"
   
   val badRequest = ResponseMessage(400, "Bad request")
   val jwtNotProper = ResponseMessage(StatusCodes.BadRequest.intValue, "JWT is not proper").toJson.toString
@@ -196,24 +186,36 @@ val projectPut = {
   }
 }
 
-  def projectsList() = {
-    (get & pathPrefix("projectslist") & path("searchedPage" / Segment / "names" / Segment / "moment" / Segment / "since" / Segment / "deleted" / Segment/ "sortingFactor"/ Segment / "sortingAsc" / Segment))
-      {
-        (searchedPage, names, moment, since, deleted, sortingFactor, sortingAsc) => val data = (searchedPage, names, moment, since, deleted, sortingFactor, sortingAsc)
-        val response = checkUrlArguments(data)
-        response match {
-          case ResponseMessage(200, _) => complete(HttpResponse(response.code, entity = HttpEntity(ContentTypes.`application/json`, 
-                                                    serializeListOfProjects(db.getListOfProjects(searchedPage = data._1.toInt, 
-                                                                        listOfNames = data._2.split(",").toList,
-                                                                        moment = data._3,
-                                                                        since = data._4.toBoolean,
-                                                                        deleted = data._5.toBoolean,
-                                                                        sortingFactor = data._6,
-                                                                        sortingAsc = data._7.toBoolean)))))
-          case ResponseMessage(_ , _) => complete(HttpResponse(response.code, entity = HttpEntity(ContentTypes.`application/json`, response.toJson.toString)))
-        }
-      } 
-  }
+// val projectsList = {
+//   (put & pathPrefix(projectRoute) & pathSuffix(Neutral)) {
+//      {token => JwtCoder.decodeInput(token).getOrElse(null) match {
+//         case null => jwtNotProperResponse
+//         case json => db.getListOfProjects(json.parseJson.convertTo[FullProjectQuery]).getOrElse(null) match {
+
+//     }
+//   }
+// }
+  // def projectsList() = {
+  //   (get & pathPrefix("projectslist") & path(Segment))
+  //     {
+  //       (searchedPage, names, moment, since, deleted, sortingFactor, sortingAsc) => val data = (searchedPage, names, moment, since, deleted, sortingFactor, sortingAsc)
+  //       val response = checkUrlArguments(data)
+  //       response match {
+  //         case ResponseMessage(200, _) => complete(HttpResponse(response.code, entity = HttpEntity(ContentTypes.`application/json`, 
+  //                                                   serializeListOfProjects(db.getListOfProjects(searchedPage = data._1.toInt, 
+  //                                                                       listOfNames = data._2.split(",").toList,
+  //                                                                       moment = data._3,
+  //                                                                       since = data._4.toBoolean,
+  //                                                                       deleted = data._5.toBoolean,
+  //                                                                       sortingFactor = data._6,
+  //                                                                       sortingAsc = data._7.toBoolean)))))
+  //         case ResponseMessage(_ , _) => complete(HttpResponse(response.code, entity = HttpEntity(ContentTypes.`application/json`, response.toJson.toString)))
+  //       }
+  //     } 
+  // }
   
-  val allRoutes = concat(testRoute, userGet, userPost, userDelete, userPut, taskGet, taskPost, taskDelete, taskPut, projectGet, projectPost, projectDelete, projectPut, projectsList)
+  val allRoutes = concat(testRoute, 
+                        userGet, userPost, userDelete, userPut, 
+                        taskGet, taskPost, taskDelete, taskPut, 
+                        projectGet, projectPost, projectDelete, projectPut)
 }

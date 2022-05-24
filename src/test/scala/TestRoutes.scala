@@ -1,4 +1,3 @@
-//import akka.event.NoLogging
 import akka.http.scaladsl.model.ContentTypes._
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.model.StatusCodes._
@@ -102,6 +101,14 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
   val codedProjectInvalidUser = JwtCoder.encode(projectInvalidUser.toJson.toString)
   val delProjectInvalidUser = DelData(dataKey = projectInvalidUser.key, userKey = projectInvalidUser.user, userUuid = user.uuid)
   val codedDelProjectInvalidUser = JwtCoder.encode(delProjectInvalidUser.toJson.toString())
+
+  val fullProjectQuery = FullProjectQuery(searchedPage = 1,
+                                          listOfNames = List("aaa", "bbb", "ccc"),
+                                          moment = "2000-01-01T00:01:01",
+                                          since = true,
+                                          deleted = false,
+                                          sortingFactor = "create",
+                                          sortingAsc = true)
   
   db.setup()
   db.reset()
@@ -112,6 +119,12 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
       contentType shouldBe `text/plain(UTF-8)`
       responseAs[String] shouldBe test
       }
+  }
+
+  "Parsing Json" should "return proper JSON (with lists)"  in {
+    val json = fullProjectQuery.toJson.toString()
+    val query =  Await.result(Unmarshal(json).to[FullProjectQuery], Settings.dbWaitingDuration)
+    assert (query == fullProjectQuery)
   }
 
   "User Methods" should "always return a JSON and proper HTTP Code\n" in {
@@ -272,4 +285,16 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
       contentType shouldBe `application/json`
       }
     }
+
+  "Get Full Project (with tasks)" should "always return a JSON and proper HTTP Code\n" in {
+    Post(s"http://127.0.0.1:8080/project/${codedProject}") ~> projectPost;
+    Post(s"http://127.0.0.1:8080/task/${codedTask}") ~> taskPost;
+    Post(s"http://127.0.0.1:8080/user/${codedUser}") ~> userPost;
+
+    Get(s"http://127.0.0.1:8080/projectslist/${codedProjectQuery}") ~> projectPost ~> check { // OK
+      response.status shouldBe OK
+      contentType shouldBe `application/json`
+      }
+    }
+
   }

@@ -28,7 +28,7 @@ case class ProjectModel (key: Int,
                                                       startTime: String, 
                                                       deleteTime: String)
 
-case class ProjectModelWithTasks (key: Int, 
+case class FullProjectModel (key: Int, 
                                   name: String, 
                                   user: Int, 
                                   startTime: String, 
@@ -69,3 +69,13 @@ case class TaskModel(key: Int,
   def checkLocalTimeDateOverlap (otherTask: TaskModel): Boolean =
     !this.endMoment.isBefore(otherTask.startMoment) && !otherTask.endMoment.isBefore(this.startMoment)
 }
+
+case class FullProjectQuery (
+  searchedPage: Int,
+  listOfNames: List[String],
+  moment: String, // ISO timedate
+  since: Boolean,
+  deleted: Boolean,
+  sortingFactor: String, 
+  sortingAsc: Boolean
+)

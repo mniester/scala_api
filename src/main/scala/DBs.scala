@@ -171,9 +171,9 @@ abstract class DBFacade extends DBBase {
     if (projectWithTheSameName.isEmpty) {addNewProject(newProject); None} else {Some(projectWithTheSameName.head)}
   }
 
-  def getProjectWithTasks (query: Int): Option[ProjectModelWithTasks] = {
+  def getFullProjects (query: Int): Option[FullProjectModel] = {
     Some(getProjectByKey(query)
-      .flatMap(project => ProjectModelWithTasksFactory(project, getTasksByProject(project.key))).head)
+      .flatMap(project => FullProjectModelFactory(project, getTasksByProject(project.key))).head)
   }
 
   def filterProjects (listOfNames: List[String], moment: String, since: Boolean, deleted: Boolean): ProjectQuery = {
@@ -182,11 +182,11 @@ abstract class DBFacade extends DBBase {
     if (deleted) {filteredByTime.filter(delta => delta.deleteTime.length > 0)} else {filteredByTime.filter(delta => delta.deleteTime.length === 0)}
   }
 
-  def addTasksToProject (seqOfProjects: List[ProjectModel]): List[ProjectModelWithTasks] = {
-    for (project <- seqOfProjects) yield (ProjectModelWithTasksFactory(project, getTasksByProject(project.key)).get)
+  def addTasksToProject (seqOfProjects: List[ProjectModel]): List[FullProjectModel] = {
+    for (project <- seqOfProjects) yield (FullProjectModelFactory(project, getTasksByProject(project.key)).get)
   }
 
-  def sortProjects (projects:  List[ProjectModelWithTasks], sortingFactor: String, asc: Boolean): List[ProjectModelWithTasks] = {
+  def sortProjects (projects:  List[FullProjectModel], sortingFactor: String, asc: Boolean): List[FullProjectModel] = {
     sortingFactor match {
       case "update" => asc match {
         case true => projects.sortBy(_.lastUpdate)
@@ -200,10 +200,10 @@ abstract class DBFacade extends DBBase {
       }
     }
   
-  def pagination(projects: List[ProjectModelWithTasks], searchedPage: Int): List[ProjectModelWithTasks] = {
+  def pagination(projects: List[FullProjectModel], searchedPage: Int): List[FullProjectModel] = {
     val lowerBound = Settings.maxCharsInPage * (searchedPage - 1)
     val higherBound = lowerBound + Settings.maxCharsInPage
-    def totalNumberOfChars (projects: List[ProjectModelWithTasks]) = (for (p <- projects) yield p.numberOfChars).sum
+    def totalNumberOfChars (projects: List[FullProjectModel]) = (for (p <- projects) yield p.numberOfChars).sum
     val result = projects
         .map(project => project.numberOfChars)
         .scan(0)((prevNumber, nextNumber) => prevNumber + nextNumber)
@@ -220,7 +220,7 @@ abstract class DBFacade extends DBBase {
                         since: Boolean = true, 
                         deleted: Boolean = false, 
                         sortingFactor: String = null, 
-                        sortingAsc: Boolean = true): List[ProjectModelWithTasks] = {
+                        sortingAsc: Boolean = true): List[FullProjectModel] = {
     val filteredProjects = filterProjects (listOfNames, moment, since, deleted)
     val projects = Await.result(cursor.run(filteredProjects.result), Settings.dbWaitingDuration).toList
     val sortedProjects = sortProjects(addTasksToProject(projects), sortingFactor, asc = sortingAsc)

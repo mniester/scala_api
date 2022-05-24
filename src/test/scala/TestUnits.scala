@@ -76,7 +76,7 @@ class UnitTests extends AnyFunSuite {
                           comment = "abc").get
     db.addProject(project)
     db.addTask(task)
-    val result = db.getProjectWithTasks(1).get
+    val result = db.getFullProjects(1).get
     assert ((result.numberOfChars < 200) && (result.numberOfChars > 30))
   }
   
@@ -287,14 +287,14 @@ class UnitTests extends AnyFunSuite {
                                         var dbResult2 = db.getProjectByName(projectQuery);
                                         assert (dbResult2.length == 0);}
   
-  test("DBFacade.addProject, DBFacade.addTask, DBFacade.addTask, DBFacade.getProjectWithTasks") {db.reset;
+  test("DBFacade.addProject, DBFacade.addTask, DBFacade.addTask, DBFacade.getFullProjects") {db.reset;
     val project = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
     val task1 = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, volume = -1, comment = "Test").get;
     val task2 = TaskFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01", endTime = "2000-02-01T00:01:01", project = 1, volume = -1, comment = "Test").get;
     db.addProject(project)
     db.addTask(task1)
     db.addTask(task2)
-    val result = db.getProjectWithTasks(1).get
+    val result = db.getFullProjects(1).get
     assert((result.tasks.head.duration + result.tasks.last.duration) == (task1.duration + task2.duration))
    }
 
@@ -374,7 +374,7 @@ class UnitTests extends AnyFunSuite {
                                                 volume = -1, 
                                                 comment = ("x" * (Settings.maxTaskCommentLength - 150))).get;
                           db.addProject(project); db.addTask(task1); db.addTask(task2)}
-      val result = db.getListOfProjects(searchedPage = 1).toString
+      val result = db.getListOfProjects(searchedPage = 5).toString
       assert (Settings.maxCharsInPage > result.length)
   }
 
