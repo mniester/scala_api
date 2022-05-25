@@ -291,7 +291,7 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
     Post(s"http://127.0.0.1:8080/task/${codedTask}") ~> taskPost;
     Post(s"http://127.0.0.1:8080/user/${codedUser}") ~> userPost;
 
-    Get(s"http://127.0.0.1:8080/projectslist/${codedProjectQuery}") ~> projectPost ~> check { // OK
+    Get(s"http://127.0.0.1:8080/projectslist/${codedProjectQuery}") ~> projectsListGet ~> check { // OK
       response.status shouldBe OK
       contentType shouldBe `application/json`
       }

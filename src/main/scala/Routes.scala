@@ -22,44 +22,42 @@ trait JsonProtocols extends DefaultJsonProtocol {
   implicit val intQueryFormat = jsonFormat2(IntQuery)
   implicit val delDataFormat = jsonFormat3(DelData)
   implicit val fullProjectQueryFormat = jsonFormat7(FullProjectQuery)
+  implicit val fullProjectModelFormat = jsonFormat6(FullProjectModel)
+  //implicit val fullProjectQueryResponse = jsonFormat1(FullProjectQueryResponse)
 }
 
 // (get & pathPrefix("projectslist") & path("searchedPage" / Segment / "names" / Segment / "moment" / Segment / "since" / Segment / "deleted" / Segment/ "sortingFactor"/ Segment / "sortingAsc" / Segment))
 
-trait checkUrlArguments extends isStringNumber with isStringBoolean with checkISOTimeFormat{
-  def checkUrlArguments (data: (String, String, String, String, String, String, String)): ResponseMessage = {
-    if (!isStringNumber(data._1)) {
-      ResponseMessage(StatusCodes.BadRequest.intValue, "Only Integers are allowed")
-    } else if (!checkISOTimeFormat(data._3)) {
-      ResponseMessage(StatusCodes.BadRequest.intValue, "Moment is not properly formatted - use ISO 8601")
-    } else if (!isStringBoolean(data._4)) {
-      ResponseMessage(StatusCodes.BadRequest.intValue, "since argument can be only boolean - only true and false are allowed")
-    } else if (!isStringBoolean(data._5)) {
-      ResponseMessage(StatusCodes.BadRequest.intValue, "deleted argument can be only boolean - only true and false are allowed")
-    } else if ((data._6 != "create") && (data._6 != "update")) {
-      ResponseMessage(StatusCodes.BadRequest.intValue, "sorting Factor valid arguments: create, update")
-    } else if (!isStringBoolean(data._7)) {
-      ResponseMessage(StatusCodes.BadRequest.intValue, "sortingAsc (Sorting ascending) argument can be only boolean - only true and false are allowed")
+trait checkQueryArguments extends checkISOTimeFormat{
+
+  val sortingFactors = List("create", "update")
+
+  def checkQueryArguments (query: FullProjectQuery): Option[ResponseMessage] = {
+    if (!checkISOTimeFormat(query.moment)) {
+      Some(ResponseMessage(StatusCodes.BadRequest.intValue, "Moment is not properly formatted - use ISO 8601"))
+    } else if (sortingFactors.contains(query.sortingFactor)) {
+      Some(ResponseMessage(StatusCodes.BadRequest.intValue, s"sorting Factor valid arguments: ${sortingFactors.toString.drop(5).dropRight(1)}"))
     } else {
-      ResponseMessage(StatusCodes.OK.intValue,  "Data Accepted")
+      Some(ResponseMessage(StatusCodes.OK.intValue,  "Data Accepted"))
     }
   }
 }
 
-object Routes extends SprayJsonSupport with JsonProtocols with checkUrlArguments {
+object Routes extends SprayJsonSupport with JsonProtocols with checkQueryArguments {
   
   val taskRoute = "task"
   val projectRoute = "project"
   val userRoute = "user"
   val fullProjects = "projectslist"
   
-  val badRequest = ResponseMessage(400, "Bad request")
+  val badRequest = ResponseMessage(400, "Bad request").toJson.toString
   val jwtNotProper = ResponseMessage(StatusCodes.BadRequest.intValue, "JWT is not proper").toJson.toString
   val jwtNotProperResponse = complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`application/json`, jwtNotProper)))
   val forbidden = ResponseMessage(StatusCodes.Forbidden.intValue, "You do not have permission").toJson.toString
   val forbiddenResponse = complete(HttpResponse(StatusCodes.Forbidden, entity = HttpEntity(ContentTypes.`application/json`, forbidden)))
   val notFound = ResponseMessage(StatusCodes.NotFound.intValue, "User not found").toJson.toString
   val deleted = ResponseMessage(StatusCodes.OK.intValue, "Data was deleted").toJson.toString
+  
   val db = SQLite
   db.setup()
   
@@ -186,20 +184,22 @@ val projectPut = {
   }
 }
 
-// val projectsList = {
-//   (put & pathPrefix(projectRoute) & pathSuffix(Neutral)) {
-//      {token => JwtCoder.decodeInput(token).getOrElse(null) match {
-//         case null => jwtNotProperResponse
-//         case json => db.getListOfProjects(json.parseJson.convertTo[FullProjectQuery]).getOrElse(null) match {
-
-//     }
-//   }
-// }
+val projectsListGet = {
+  (get & pathPrefix("projectslist") & path(Segment))
+    {token => JwtCoder.decodeInput(token).getOrElse(null) match {
+      case null => jwtNotProperResponse
+      case json => checkQueryArguments(json.parseJson.convertTo[FullProjectQuery]).getOrElse(null) match {
+        case null => complete(HttpResponse(StatusCodes.MethodNotAllowed, entity = HttpEntity(ContentTypes.`application/json`, badRequest)))
+        case response: ResponseMessage => complete(HttpResponse(StatusCodes.MethodNotAllowed, entity = HttpEntity(ContentTypes.`application/json`, response.toJson.toString)))
+      }
+    }
+  }
+}
   // def projectsList() = {
   //   (get & pathPrefix("projectslist") & path(Segment))
   //     {
   //       (searchedPage, names, moment, since, deleted, sortingFactor, sortingAsc) => val data = (searchedPage, names, moment, since, deleted, sortingFactor, sortingAsc)
-  //       val response = checkUrlArguments(data)
+  //       val response = checkQueryArguments(data)
   //       response match {
   //         case ResponseMessage(200, _) => complete(HttpResponse(response.code, entity = HttpEntity(ContentTypes.`application/json`, 
   //                                                   serializeListOfProjects(db.getListOfProjects(searchedPage = data._1.toInt, 
@@ -217,5 +217,5 @@ val projectPut = {
   val allRoutes = concat(testRoute, 
                         userGet, userPost, userDelete, userPut, 
                         taskGet, taskPost, taskDelete, taskPut, 
-                        projectGet, projectPost, projectDelete, projectPut)
+                        projectGet, projectPost, projectDelete, projectPut, projectsListGet)
 }
