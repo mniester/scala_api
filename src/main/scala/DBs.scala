@@ -171,7 +171,7 @@ abstract class DBFacade extends DBBase {
     if (projectWithTheSameName.isEmpty) {addNewProject(newProject); None} else {Some(projectWithTheSameName.head)}
   }
 
-  def getFullProjects (query: Int): Option[FullProjectModel] = {
+  def getFullProject (query: Int): Option[FullProjectModel] = {
     Some(getProjectByKey(query)
       .flatMap(project => FullProjectModelFactory(project, getTasksByProject(project.key))).head)
   }
@@ -214,17 +214,10 @@ abstract class DBFacade extends DBBase {
     if (totalNumberOfChars(result) < higherBound) {result} else {List(result(0))}
   } 
   
-  def getListOfProjects (searchedPage: Int = 1, 
-                        listOfNames: List[String] = Nil, 
-                        moment: String = "", 
-                        since: Boolean = true, 
-                        deleted: Boolean = false, 
-                        sortingFactor: String = null, 
-                        sortingAsc: Boolean = true): List[FullProjectModel] = {
-    val filteredProjects = filterProjects (listOfNames, moment, since, deleted)
+  def getListOfProjects(query: FullProjectQuery): FullProjectQueryResponse = {
+    val filteredProjects = filterProjects (query.listOfNames, query.moment, query.since, query.deleted)
     val projects = Await.result(cursor.run(filteredProjects.result), Settings.dbWaitingDuration).toList
-    val sortedProjects = sortProjects(addTasksToProject(projects), sortingFactor, asc = sortingAsc)
-    pagination(sortedProjects, searchedPage)
+    FullProjectQueryResponse(sortProjects(addTasksToProject(projects), query.sortingFactor, asc = query.sortingAsc))
   }
 
   def checkIfUserIsAuthor(data: TaskModel): Boolean = {

@@ -50,13 +50,20 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkQueryArgumen
   val userRoute = "user"
   val fullProjects = "projectslist"
   
-  val badRequest = ResponseMessage(400, "Bad request").toJson.toString
+  val notDoneYet = ResponseMessage(StatusCodes.MethodNotAllowed.intValue, "Route needs to be done").toJson.toString
+  val notDoneYetResponse = complete(HttpResponse(StatusCodes.NotFound, entity = HttpEntity(ContentTypes.`application/json`, notDoneYet)))
+  val badRequest = ResponseMessage(StatusCodes.MethodNotAllowed.intValue, "Bad request").toJson.toString
+  val badRequestResponse = complete(HttpResponse(StatusCodes.MethodNotAllowed.intValue, entity = HttpEntity(ContentTypes.`application/json`, badRequest)))
+  val methodNotAllowed = ResponseMessage(StatusCodes.MethodNotAllowed.intValue, "This method is not allowed - please contact admin").toJson.toString()
+  val methodNotAllowedResponse = complete(HttpResponse(StatusCodes.MethodNotAllowed, entity = HttpEntity(ContentTypes.`application/json`, methodNotAllowed)))
   val jwtNotProper = ResponseMessage(StatusCodes.BadRequest.intValue, "JWT is not proper").toJson.toString
   val jwtNotProperResponse = complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`application/json`, jwtNotProper)))
   val forbidden = ResponseMessage(StatusCodes.Forbidden.intValue, "You do not have permission").toJson.toString
   val forbiddenResponse = complete(HttpResponse(StatusCodes.Forbidden, entity = HttpEntity(ContentTypes.`application/json`, forbidden)))
   val notFound = ResponseMessage(StatusCodes.NotFound.intValue, "User not found").toJson.toString
+  val notFoundResponse = complete(HttpResponse(StatusCodes.NotFound, entity = HttpEntity(ContentTypes.`application/json`, notFound)))
   val deleted = ResponseMessage(StatusCodes.OK.intValue, "Data was deleted").toJson.toString
+  val deletedResponse = complete(HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, deleted)))
   
   val db = SQLite
   db.setup()
@@ -83,7 +90,7 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkQueryArgumen
             case user: UserModel => complete(HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, user.toJson.toString)))
             case task: TaskModel => complete(HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, task.toJson.toString)))
             case project: ProjectModel => complete(HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, project.toJson.toString)))
-            case null => complete(HttpResponse(StatusCodes.NotFound, entity = HttpEntity(ContentTypes.`application/json`, notFound)))
+            case null => notFoundResponse
             }
           }
         }
@@ -101,8 +108,8 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkQueryArgumen
       {token => JwtCoder.decodeInput(token).getOrElse(null) match {
         case null => jwtNotProperResponse
         case json => DBMethod(json.parseJson.convertTo[DelData]) match {
-          case true => complete(HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, deleted)))
-          case false => complete(HttpResponse(StatusCodes.Forbidden, entity = HttpEntity(ContentTypes.`application/json`, forbidden)))
+          case true => deletedResponse
+          case false => forbiddenResponse
         }
       }
     }
@@ -124,13 +131,13 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkQueryArgumen
 
   val userDelete = {
     (delete & pathPrefix(userRoute) & pathSuffix(Neutral)) {
-       complete(HttpResponse(StatusCodes.MethodNotAllowed, entity = HttpEntity(ContentTypes.`application/json`, ResponseMessage(StatusCodes.MethodNotAllowed.intValue, "This method is not allowed - please contact admin").toJson.toString())))
+        methodNotAllowedResponse
       }
     }
   
   val userPut = {
     (put & pathPrefix(userRoute) & pathSuffix(Neutral)) {
-       complete(HttpResponse(StatusCodes.MethodNotAllowed, entity = HttpEntity(ContentTypes.`application/json`, ResponseMessage(StatusCodes.MethodNotAllowed.intValue, "This method is not allowed - please contact admin").toJson.toString())))
+        methodNotAllowedResponse
       }
     }
 
@@ -180,7 +187,7 @@ val projectDelete = delData(projectRoute)
   
 val projectPut = {
   (put & pathPrefix(projectRoute) & pathSuffix(Neutral)) {
-      complete(HttpResponse(StatusCodes.MethodNotAllowed, entity = HttpEntity(ContentTypes.`application/json`, ResponseMessage(StatusCodes.MethodNotAllowed.intValue, "This method is not allowed - please contact admin").toJson.toString())))
+      methodNotAllowedResponse
   }
 }
 
@@ -189,31 +196,16 @@ val projectsListGet = {
     {token => JwtCoder.decodeInput(token).getOrElse(null) match {
       case null => jwtNotProperResponse
       case json => checkQueryArguments(json.parseJson.convertTo[FullProjectQuery]).getOrElse(null) match {
-        case null => complete(HttpResponse(StatusCodes.MethodNotAllowed, entity = HttpEntity(ContentTypes.`application/json`, badRequest)))
-        case response: ResponseMessage => complete(HttpResponse(StatusCodes.MethodNotAllowed, entity = HttpEntity(ContentTypes.`application/json`, response.toJson.toString)))
+        case null => badRequestResponse
+        case response: ResponseMessage => response match {
+          case ResponseMessage(400, _) => complete(HttpResponse(response.code, entity = HttpEntity(ContentTypes.`application/json`, response.toJson.toString)))
+          case _ => notDoneYetResponse
+        }
       }
     }
   }
 }
-  // def projectsList() = {
-  //   (get & pathPrefix("projectslist") & path(Segment))
-  //     {
-  //       (searchedPage, names, moment, since, deleted, sortingFactor, sortingAsc) => val data = (searchedPage, names, moment, since, deleted, sortingFactor, sortingAsc)
-  //       val response = checkQueryArguments(data)
-  //       response match {
-  //         case ResponseMessage(200, _) => complete(HttpResponse(response.code, entity = HttpEntity(ContentTypes.`application/json`, 
-  //                                                   serializeListOfProjects(db.getListOfProjects(searchedPage = data._1.toInt, 
-  //                                                                       listOfNames = data._2.split(",").toList,
-  //                                                                       moment = data._3,
-  //                                                                       since = data._4.toBoolean,
-  //                                                                       deleted = data._5.toBoolean,
-  //                                                                       sortingFactor = data._6,
-  //                                                                       sortingAsc = data._7.toBoolean)))))
-  //         case ResponseMessage(_ , _) => complete(HttpResponse(response.code, entity = HttpEntity(ContentTypes.`application/json`, response.toJson.toString)))
-  //       }
-  //     } 
-  // }
-  
+
   val allRoutes = concat(testRoute, 
                         userGet, userPost, userDelete, userPut, 
                         taskGet, taskPost, taskDelete, taskPut, 

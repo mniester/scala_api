@@ -76,7 +76,7 @@ class UnitTests extends AnyFunSuite {
                           comment = "abc").get
     db.addProject(project)
     db.addTask(task)
-    val result = db.getFullProjects(1).get
+    val result = db.getFullProject(1).get
     assert ((result.numberOfChars < 200) && (result.numberOfChars > 30))
   }
   
@@ -294,7 +294,7 @@ class UnitTests extends AnyFunSuite {
     db.addProject(project)
     db.addTask(task1)
     db.addTask(task2)
-    val result = db.getFullProjects(1).get
+    val result = db.getFullProject(1).get
     assert((result.tasks.head.duration + result.tasks.last.duration) == (task1.duration + task2.duration))
    }
 
