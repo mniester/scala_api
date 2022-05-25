@@ -47,8 +47,6 @@ case class FullProjectModel (key: Int,
                             startTime.length +
                             deleteTime.length + (for (task <- tasks) yield task.numberOfChars).sum
   }; 
-                                                              
-
 
 case class TaskModel(key: Int, 
                     name: String, 
@@ -79,4 +77,9 @@ case class FullProjectQuery (
   sortingAsc: Boolean
 )
 
-case class FullProjectQueryResponse (projects: List[FullProjectModel])
+case class FullProjectQueryResponse (projects: List[FullProjectModel]) 
+  {
+    def head(): FullProjectModel = projects.head
+    def last(): FullProjectModel = projects.last
+    def length(): Int = projects.length
+  }

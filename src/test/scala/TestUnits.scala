@@ -305,7 +305,7 @@ class UnitTests extends AnyFunSuite {
     db.addProject(project2)
     val selectTest = db.getListOfProjects(listOfNames = List("Test"))
     assert (selectTest.head.name == "Test")
-    val selectTestAndOther = db.getListOfProjects(listOfNames = List("Test", "Other"))
+    val selectTestAndOther = db.getListOfProjects(listOfNames = List("Test", "Other")).projects
     assert ((for (x <- selectTestAndOther) yield x.key).toSet == Set(1,2))
     val selectSinceMoment = db.getListOfProjects(moment = "2001-01-01T00:01:01", since = true)
     assert (selectSinceMoment.head.key == 2)

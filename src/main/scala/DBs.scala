@@ -214,6 +214,22 @@ abstract class DBFacade extends DBBase {
     if (totalNumberOfChars(result) < higherBound) {result} else {List(result(0))}
   } 
   
+  def getListOfProjects (searchedPage: Int = 1, 
+    listOfNames: List[String] = Nil, 
+    moment: String = "", 
+    since: Boolean = true, 
+    deleted: Boolean = false, 
+    sortingFactor: String = null, 
+    sortingAsc: Boolean = true): FullProjectQueryResponse = {
+                                        getListOfProjects(new FullProjectQuery(searchedPage, 
+                                        listOfNames,
+                                        moment,
+                                        since,
+                                        deleted, 
+                                        sortingFactor, 
+                                        sortingAsc))  
+                        }
+
   def getListOfProjects(query: FullProjectQuery): FullProjectQueryResponse = {
     val filteredProjects = filterProjects (query.listOfNames, query.moment, query.since, query.deleted)
     val projects = Await.result(cursor.run(filteredProjects.result), Settings.dbWaitingDuration).toList
