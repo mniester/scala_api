@@ -256,6 +256,15 @@ abstract class DBFacade extends DBBase {
   def delProject(delModel: DelData): Boolean = {
     if (compareUserKeyUuid(delModel.userKey, delModel.userUuid)) {delProjectByKey(delModel.dataKey); true} else {false}
   }
+
+  def addData(data: DataModel): Option[DataModel] = {
+    data match {
+      case user: UserModel => addUser(user)
+      case project: ProjectModel => addProject(project)
+      case task: TaskModel => addTask(task) 
+      case _ => None
+    }
+  }
 }
 
 object SQLite extends DBFacade {

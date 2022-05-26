@@ -15,7 +15,7 @@ abstract class DataModel
 
 abstract class AbstractProjectModel (key: Int, name: String, user: Int, startTime: String, deleteTime: String = "") extends DataModel
 
-case class UserModel(key: Int, uuid: String, name: String)
+case class UserModel(key: Int, uuid: String, name: String) extends DataModel
 
 case class ProjectModel (key: Int, 
                         name: String, 

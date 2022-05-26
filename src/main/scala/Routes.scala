@@ -23,10 +23,10 @@ trait JsonProtocols extends DefaultJsonProtocol {
   implicit val delDataFormat = jsonFormat3(DelData)
   implicit val fullProjectQueryFormat = jsonFormat7(FullProjectQuery)
   implicit val fullProjectModelFormat = jsonFormat6(FullProjectModel)
-  //implicit val fullProjectQueryResponse = jsonFormat1(FullProjectQueryResponse)
+  implicit val fullProjectQueryResponse = jsonFormat1(FullProjectQueryResponse)
 }
 
-// (get & pathPrefix("projectslist") & path("searchedPage" / Segment / "names" / Segment / "moment" / Segment / "since" / Segment / "deleted" / Segment/ "sortingFactor"/ Segment / "sortingAsc" / Segment))
+
 
 trait checkQueryArguments extends checkISOTimeFormat{
 
@@ -45,6 +45,21 @@ trait checkQueryArguments extends checkISOTimeFormat{
 
 object Routes extends SprayJsonSupport with JsonProtocols with checkQueryArguments {
   
+  def parseAndConvertJson(json: String, routeAndModel: String): Option[DataModel] = {
+    try {
+      routeAndModel match {
+        case `taskRoute` => Some(json.parseJson.convertTo[TaskModel])
+        case `userRoute` => Some(json.parseJson.convertTo[UserModel])
+        case `projectRoute` => Some(json.parseJson.convertTo[ProjectModel])
+        case "fullProject" => Some(json.parseJson.convertTo[FullProjectModel])
+        case _ => None
+      }
+    } catch {
+        case _: Throwable => None
+      }
+  }
+
+
   val taskRoute = "task"
   val projectRoute = "project"
   val userRoute = "user"
@@ -96,7 +111,22 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkQueryArgumen
         }
       }
     }
-  
+
+  def postData(routeAndModel: String) ={
+    (post & pathPrefix(routeAndModel) & pathSuffix(Segment))
+      {token => JwtCoder.decodeInput(token).getOrElse(null) match {
+        case null => jwtNotProperResponse
+        case json => parseAndConvertJson(json, routeAndModel).getOrElse(null) match {
+          case null => complete(HttpResponse(StatusCodes.Accepted, entity = HttpEntity(ContentTypes.`application/json`, json)))
+          case dataModel: DataModel => db.addData(dataModel).getOrElse(null) match {
+            case null => complete(HttpResponse(StatusCodes.Created, entity = HttpEntity(ContentTypes.`application/json`, json)))
+            case _: DataModel => complete(HttpResponse(StatusCodes.Accepted, entity = HttpEntity(ContentTypes.`application/json`, json)))
+          }
+        }
+      }
+    }
+  }
+
   def delData(route: String) = {
 
     val DBMethod = route match {
@@ -117,17 +147,7 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkQueryArgumen
  
   val userGet = getData(userRoute)
 
-  val userPost = {
-    (post & pathPrefix(userRoute) & pathSuffix(Segment))
-      {token => JwtCoder.decodeInput(token).getOrElse(null) match {
-        case null => jwtNotProperResponse
-        case json => db.addUser(json.parseJson.convertTo[UserModel]).getOrElse(null) match {
-          case null => complete(HttpResponse(StatusCodes.Created, entity = HttpEntity(ContentTypes.`application/json`, json)))
-          case userModel: UserModel => complete(HttpResponse(StatusCodes.Accepted, entity = HttpEntity(ContentTypes.`application/json`, userModel.toJson.toString)))
-        }
-      }
-    }
-  }
+  val userPost = postData(userRoute)
 
   val userDelete = {
     (delete & pathPrefix(userRoute) & pathSuffix(Neutral)) {
@@ -143,17 +163,7 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkQueryArgumen
 
   val taskGet = getData(taskRoute)
   
-  val taskPost = {
-    (post & pathPrefix(taskRoute) & pathSuffix(Segment))
-      {token => JwtCoder.decodeInput(token).getOrElse(null) match {
-        case null => jwtNotProperResponse
-        case json => db.addTask(json.parseJson.convertTo[TaskModel]).getOrElse(null) match {
-          case null => complete(HttpResponse(StatusCodes.Created, entity = HttpEntity(ContentTypes.`application/json`, json)))
-          case task: TaskModel => complete(HttpResponse(StatusCodes.Accepted, entity = HttpEntity(ContentTypes.`application/json`, task.toJson.toString)))
-        }
-      }
-    }
-  }
+  val taskPost = postData(taskRoute)
   
   val taskDelete = delData(taskRoute)
 
@@ -171,40 +181,31 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkQueryArgumen
 
   val projectGet = getData(projectRoute)
   
-  val projectPost = {
-    (post & pathPrefix(projectRoute) & pathSuffix(Segment))
-      {token => JwtCoder.decodeInput(token).getOrElse(null) match {
-        case null => jwtNotProperResponse
-        case json => db.addProject(json.parseJson.convertTo[ProjectModel]).getOrElse(null) match {
-          case null => complete(HttpResponse(StatusCodes.Created, entity = HttpEntity(ContentTypes.`application/json`, json)))
-          case project: ProjectModel => complete(HttpResponse(StatusCodes.Accepted, entity = HttpEntity(ContentTypes.`application/json`, project.toJson.toString)))
-        }
-      }
-    }
-  }
+  val projectPost = postData(projectRoute)
+
   
-val projectDelete = delData(projectRoute)
+  val projectDelete = delData(projectRoute)
   
-val projectPut = {
+  val projectPut = {
   (put & pathPrefix(projectRoute) & pathSuffix(Neutral)) {
       methodNotAllowedResponse
+    }
   }
-}
 
-val projectsListGet = {
-  (get & pathPrefix("projectslist") & path(Segment))
-    {token => JwtCoder.decodeInput(token).getOrElse(null) match {
-      case null => jwtNotProperResponse
-      case json => checkQueryArguments(json.parseJson.convertTo[FullProjectQuery]).getOrElse(null) match {
-        case null => badRequestResponse
-        case response: ResponseMessage => response match {
-          case ResponseMessage(400, _) => complete(HttpResponse(response.code, entity = HttpEntity(ContentTypes.`application/json`, response.toJson.toString)))
-          case _ => notDoneYetResponse
+  val projectsListGet = {
+    (get & pathPrefix("projectslist") & path(Segment))
+      {token => JwtCoder.decodeInput(token).getOrElse(null) match {
+        case null => jwtNotProperResponse
+        case json => checkQueryArguments(json.parseJson.convertTo[FullProjectQuery]).getOrElse(null) match {
+          case null => badRequestResponse
+          case response: ResponseMessage => response match {
+            case ResponseMessage(400, _) => complete(HttpResponse(response.code, entity = HttpEntity(ContentTypes.`application/json`, response.toJson.toString)))
+            case _ => notDoneYetResponse
+          }
         }
       }
     }
   }
-}
 
   val allRoutes = concat(testRoute, 
                         userGet, userPost, userDelete, userPut, 
