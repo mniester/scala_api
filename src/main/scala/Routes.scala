@@ -13,6 +13,7 @@ import Strings.isStringNumber
 import Strings.checkISOTimeFormat
 import Strings.isStringBoolean
 import com.typesafe.sslconfig.ssl.FakeChainedKeyStore
+import javax.xml.crypto.Data
 
 trait JsonProtocols extends DefaultJsonProtocol {
   implicit val responseMessageFormat = jsonFormat2(ResponseMessage)
@@ -26,9 +27,7 @@ trait JsonProtocols extends DefaultJsonProtocol {
   implicit val fullProjectQueryResponse = jsonFormat1(FullProjectQueryResponse)
 }
 
-
-
-trait checkQueryArguments extends checkISOTimeFormat{
+trait CheckQueryArguments extends checkISOTimeFormat{
 
   val sortingFactors = List("create", "update")
 
@@ -43,9 +42,9 @@ trait checkQueryArguments extends checkISOTimeFormat{
   }
 }
 
-object Routes extends SprayJsonSupport with JsonProtocols with checkQueryArguments {
+object Routes extends SprayJsonSupport with JsonProtocols with CheckQueryArguments {
   
-  def parseAndConvertJson(json: String, routeAndModel: String): Option[DataModel] = {
+  def parseAndConvertToModel(json: String, routeAndModel: String): Option[DataModel] = {
     try {
       routeAndModel match {
         case `taskRoute` => Some(json.parseJson.convertTo[TaskModel])
@@ -59,12 +58,22 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkQueryArgumen
       }
   }
 
+  def convertToJsonString(dataModel: DataModel): Option[String] = {
+    dataModel match {
+      case data: UserModel => Some(data.toJson.toString)
+      case data: ProjectModel => Some(data.toJson.toString)
+      case data: FullProjectModel => Some(data.toJson.toString)
+      case data: TaskModel => Some(data.toJson.toString)
+      case _ => None
+    }  
+  } 
 
   val taskRoute = "task"
   val projectRoute = "project"
   val userRoute = "user"
   val fullProjects = "projectslist"
   
+
   val notDoneYet = ResponseMessage(StatusCodes.MethodNotAllowed.intValue, "Route needs to be done").toJson.toString
   val notDoneYetResponse = complete(HttpResponse(StatusCodes.NotFound, entity = HttpEntity(ContentTypes.`application/json`, notDoneYet)))
   val badRequest = ResponseMessage(StatusCodes.MethodNotAllowed.intValue, "Bad request").toJson.toString
@@ -112,15 +121,15 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkQueryArgumen
       }
     }
 
-  def postData(routeAndModel: String) ={
+  def postData (routeAndModel: String) ={
     (post & pathPrefix(routeAndModel) & pathSuffix(Segment))
       {token => JwtCoder.decodeInput(token).getOrElse(null) match {
         case null => jwtNotProperResponse
-        case json => parseAndConvertJson(json, routeAndModel).getOrElse(null) match {
+        case json => parseAndConvertToModel(json, routeAndModel).getOrElse(null) match {
           case null => complete(HttpResponse(StatusCodes.Accepted, entity = HttpEntity(ContentTypes.`application/json`, json)))
           case dataModel: DataModel => db.addData(dataModel).getOrElse(null) match {
             case null => complete(HttpResponse(StatusCodes.Created, entity = HttpEntity(ContentTypes.`application/json`, json)))
-            case _: DataModel => complete(HttpResponse(StatusCodes.Accepted, entity = HttpEntity(ContentTypes.`application/json`, json)))
+            case dataModel: DataModel => complete(HttpResponse(StatusCodes.Accepted, entity = HttpEntity(ContentTypes.`application/json`, convertToJsonString(dataModel).getOrElse("Data Accepted"))))
           }
         }
       }
@@ -182,7 +191,6 @@ object Routes extends SprayJsonSupport with JsonProtocols with checkQueryArgumen
   val projectGet = getData(projectRoute)
   
   val projectPost = postData(projectRoute)
-
   
   val projectDelete = delData(projectRoute)
   
