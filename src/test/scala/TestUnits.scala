@@ -6,6 +6,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import io.jvm.uuid._
 
 import Settings._
+import Cmds._
 import DataModels._
 import Factories._
 import Strings._
@@ -114,8 +115,8 @@ class UnitTests extends AnyFunSuite {
 
   test("DBFacade.addProject (twice with the same name)") {db.reset;
                                         val project = ProjectFactory(key = 1, name = "Test", user = 1, startTime = "2000-01-01T00:01:01").get;
-                                        val resultNoRepeat = db.addProject(project);
-                                        assert (resultNoRepeat == Nil)
+                                        val resultNoRepeat = db.addProject(project).getOrElse(null);
+                                        assert (resultNoRepeat == null)
                                         val resultWithRepeat = db.addProject(project);
                                         assert (resultWithRepeat.head == project)
                                       }

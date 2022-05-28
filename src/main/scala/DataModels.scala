@@ -7,10 +7,6 @@ import DBs.DBFacade
 
 case class ResponseMessage(code: Int, message: String)
 
-case class IntQuery(number: Int, uuid: String)
-
-case class DelData(dataKey: Int, userKey: Int, userUuid: String)
-
 abstract class DataModel
 
 abstract class AbstractProjectModel (key: Int, name: String, user: Int, startTime: String, deleteTime: String = "") extends DataModel
@@ -66,16 +62,6 @@ case class TaskModel(key: Int,
   def checkLocalTimeDateOverlap (otherTask: TaskModel): Boolean =
     !this.endMoment.isBefore(otherTask.startMoment) && !otherTask.endMoment.isBefore(this.startMoment)
 }
-
-case class FullProjectQuery (
-  searchedPage: Int,
-  listOfNames: List[String],
-  moment: String, // ISO timedate
-  since: Boolean,
-  deleted: Boolean,
-  sortingFactor: String, 
-  sortingAsc: Boolean
-)
 
 case class FullProjectQueryResponse (projects: List[FullProjectModel]) 
   {

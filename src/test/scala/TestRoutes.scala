@@ -15,7 +15,7 @@ import Factories._
 import Strings.JwtCoder
 import DBs.{SQLite}
 import DataModels._
-import DataModels.IntQuery
+import Cmds._
 
 class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
 

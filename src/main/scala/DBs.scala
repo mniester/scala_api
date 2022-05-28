@@ -10,6 +10,7 @@ import slick.basic.BasicBackend
 import slick.jdbc.SQLiteProfile.api._
 import java.time.LocalDateTime
 
+import Cmds._
 import Settings._
 import Schemas._
 import DataModels._

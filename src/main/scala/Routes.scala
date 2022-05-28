@@ -5,8 +5,8 @@ import spray.json._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.server.PathMatcher
 
-
 import Strings.JwtCoder
+import Cmds._
 import DataModels._
 import DBs.SQLite
 import Strings.isStringNumber
@@ -110,7 +110,7 @@ object Routes extends SprayJsonSupport with JsonProtocols with CheckQueryArgumen
         case null => jwtNotProperResponse
         case json => val query = json.parseJson.convertTo[IntQuery]; db.checkUuid(query.uuid) match {
           case false => forbiddenResponse
-          case true => DBMethod(query).getOrElse(null) match {
+          case true => DBMethod(query.number).getOrElse(null) match {
             case user: UserModel => complete(HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, user.toJson.toString)))
             case task: TaskModel => complete(HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, task.toJson.toString)))
             case project: ProjectModel => complete(HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, project.toJson.toString)))
@@ -200,7 +200,11 @@ object Routes extends SprayJsonSupport with JsonProtocols with CheckQueryArgumen
     }
   }
 
-  val projectsListGet = getData(projectsList)
+  val projectsListGet = {  
+    (get & pathPrefix(projectRoute) & pathSuffix(Neutral)) {
+      methodNotAllowedResponse
+    }
+  }
 
   val allRoutes = concat(testRoute, 
                         userGet, userPost, userDelete, userPut, 
