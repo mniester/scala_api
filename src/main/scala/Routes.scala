@@ -68,10 +68,10 @@ object Routes extends SprayJsonSupport with JsonProtocols with CheckQueryArgumen
     }  
   } 
 
-  val taskRoute = "task"
-  val projectRoute = "project"
-  val userRoute = "user"
-  val projectsList = "projectslist"
+  val taskRoute = Settings.taskRoute
+  val projectRoute = Settings.projectRoute
+  val userRoute = Settings.userRoute
+  val projectsList = Settings.projectsListsRoute
   
 
   val notDoneYet = ResponseMessage(StatusCodes.MethodNotAllowed.intValue, "Route needs to be done").toJson.toString
@@ -108,7 +108,7 @@ object Routes extends SprayJsonSupport with JsonProtocols with CheckQueryArgumen
     (get & pathPrefix(route) & pathSuffix(Segment)) 
       {token => JwtCoder.decodeInput(token).getOrElse(null) match {
         case null => jwtNotProperResponse
-        case json => val query = json.parseJson.convertTo[IntQuery]; db.checkUuid(query.uuid) match {
+        case json: String => val query = json.parseJson.convertTo[IntQuery]; db.checkUuid(query.uuid) match {
           case false => forbiddenResponse
           case true => DBMethod(query.number).getOrElse(null) match {
             case user: UserModel => complete(HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, user.toJson.toString)))
@@ -180,7 +180,7 @@ object Routes extends SprayJsonSupport with JsonProtocols with CheckQueryArgumen
     (put & pathPrefix(taskRoute) & pathSuffix(Segment)) 
       {token => JwtCoder.decodeInput(token).getOrElse(null) match {
         case null => jwtNotProperResponse
-        case json => db.modifyTask(json.parseJson.convertTo[TaskModel]).getOrElse(null) match {
+        case json: String => db.modifyTask(json.parseJson.convertTo[TaskModel]).getOrElse(null) match {
           case null => complete(HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, json)))
           case task: TaskModel => complete(HttpResponse(StatusCodes.Accepted, entity = HttpEntity(ContentTypes.`application/json`, task.toJson.toString)))
         }
@@ -201,11 +201,14 @@ object Routes extends SprayJsonSupport with JsonProtocols with CheckQueryArgumen
   }
 
   val projectsListGet = {  
-    (get & pathPrefix(projectRoute) & pathSuffix(Neutral)) {
-      methodNotAllowedResponse
+    (get & pathPrefix(projectRoute) & pathSuffix(Segment)) {
+      {token =>  JwtCoder.decodeInput(token).getOrElse(null) match {
+        case null => jwtNotProperResponse
+        case json: String =>  complete(HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, db.getListOfProjects(json.parseJson.convertTo[FullProjectQuery]).toJson.toString))) 
+      }
     }
   }
-
+} 
   val allRoutes = concat(testRoute, 
                         userGet, userPost, userDelete, userPut, 
                         taskGet, taskPost, taskDelete, taskPut, 

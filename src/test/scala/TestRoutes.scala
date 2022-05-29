@@ -103,13 +103,14 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
   val codedDelProjectInvalidUser = JwtCoder.encode(delProjectInvalidUser.toJson.toString())
 
   val fullProjectQuery = FullProjectQuery(searchedPage = 1,
-                                          listOfNames = List("aaa", "bbb", "ccc"),
+                                          listOfNames = List("1"),
                                           moment = "2000-01-01T00:01:01",
                                           since = true,
                                           deleted = false,
                                           sortingFactor = "create",
                                           sortingAsc = true)
-  
+  val codedFullProjectQuery = JwtCoder.encode(fullProjectQuery.toJson.toString())
+
   db.setup()
   db.reset()
 
@@ -288,7 +289,7 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
 
   "Get Full Project (with tasks)" should "always return a JSON and proper HTTP Code\n" in {
     db.reset;
-    for (x <- (1 to 100)) {val project = ProjectFactory(name = x.toString, user = x, startTime = "2000-01-01T00:01:01").get;
+    for (x <- (1 to 100)) {val project = ProjectFactory(name = x.toString, user = x, startTime = "2001-01-01T00:01:01").get;
                           val task1 = TaskFactory(name = x.toString, 
                                                 user = x, 
                                                 startTime = "2002-01-01T00:01:01", 
@@ -305,10 +306,11 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
                                                 comment = ("x" * (Settings.maxTaskCommentLength - 150))).get;
                           db.addProject(project); db.addTask(task1); db.addTask(task2)}
     
-    Get(s"http://127.0.0.1:8080/projectslist/${codedProjectQuery}") ~> projectsListGet ~> check {
-      response.status shouldBe NotFound 
+    Get(s"http://127.0.0.1:8080/projectslist/${codedFullProjectQuery}") ~> projectsListGet ~> check {
+      response.status shouldBe OK 
       contentType shouldBe `application/json`
-      }
+      val result = Await.result(Unmarshal(response).to[FullProjectQueryResponse], Settings.dbWaitingDuration) // if smth is wrong, here should be error
+      assert (result.isInstanceOf[FullProjectQueryResponse] ==  true)
     }
-
   }
+}

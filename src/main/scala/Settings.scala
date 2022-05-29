@@ -17,9 +17,14 @@ package object Settings {
   val minTaskCommentLength = source.getConfig("length").getInt("minTaskCommentLength")
   val maxCharsInPage = source.getConfig("length").getInt("maxCharsInPage") 
   
-  val JWTKey = source.getConfig("secrets").getString("JWTKey")
+  val JwtKey = source.getConfig("secrets").getString("JwtKey")
   val dbWaitingDuration = Duration(source.getConfig("wait").getInt("db.quantity"), source.getConfig("wait").getString("db.unit"))
 
   val localHostName = source.getConfig("server").getString("localHostName")
   val port = source.getConfig("server").getInt("port")
+
+  val userRoute = source.getConfig("routes").getString("user")
+  val projectRoute = source.getConfig("routes").getString("project")
+  val taskRoute = source.getConfig("routes").getString("task")
+  val projectsListsRoute = source.getConfig("routes").getString("projectsLists")
 }

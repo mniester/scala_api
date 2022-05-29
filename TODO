@@ -8,44 +8,44 @@
 2) [ ] prepare TypeScript test page
 3) [>] Add checking to DB data methods
 4) [v] Add routes
-    - [ ] GET user
-        - [ ] OK
-        - [ ] fail/user do not exist
-    - [ ] POST user
-        - [ ] OK/return new entry
-        - [ ] fail
-    - [ ] DELETE user
-        - [ ] OK
-        - [ ] fail
-    - [ ] GET Task
-        - [ ] OK
-        - [ ] fail
-    - [ ] POST Task
-        - [ ] OK/return new entry
-        - [ ] fail
-    - [ ] PUT Task
-        - [ ] OK/return new/modified entry
-        - [ ] fail
-    - [ ] DELETE Task
-        - [ ] OK/return deleted entry
-        - [ ] fail
-    - [ ] GET Project
-        - [ ] OK/return entry
-        - [ ] fail
-    - [ ] POST Project
-        - [ ] OK/return entry
-        - [ ] fail
-    - [ ] PUT Project
-        - [ ] OK/return entry
-        - [ ] fail
-    - [ ] DELETE Project
-        - [ ] OK/return deleted entry
-        - [ ] fail
-    - [ ] GET ProjectsWithTasks
-        - [ ] OK/return project with lists of task (nested)
-        - [ ] fail
+    - [x] GET user
+        - [x] OK
+        - [x] fail/user do not exist
+    - [x] POST user
+        - [x] OK/return new entry
+        - [x] fail
+    - [x] DELETE user
+        - [x] OK
+        - [x] fail
+    - [x] GET Task
+        - [x] OK
+        - [x] fail
+    - [x] POST Task
+        - [x] OK/return new entry
+        - [x] fail
+    - [x] PUT Task
+        - [x] OK/return new/modified entry
+        - [x] fail
+    - [x] DELETE Task
+        - [x] OK/return deleted entry
+        - [x] fail
+    - [x] GET Project
+        - [x] OK/return entry
+        - [x] fail
+    - [x] POST Project
+        - [x] OK/return entry
+        - [x] fail
+    - [x] PUT Project
+        - [x] OK/return entry
+        - [x] fail
+    - [x] DELETE Project
+        - [x] OK/return deleted entry
+        - [x] fail
+    - [x] GET ProjectsWithTasks
+        - [x] OK/return projects with lists of task (nested)
+        - [x] fail
 5) [v] Data Base and DataModels
-    - [ ] replace get by getOrElse
+    - [x] replace get by getOrElse
     - [x] check overlapping when adding a new task
     - [x] ban adding new task if tasks overlapping
     - [x] no projects with the same name
@@ -65,15 +65,15 @@
     - [x] project filters
     - [x] project sorting
     - [x] task replacing
-    - [ ] user or user or alias
+    - [-] user or user or alias
     - [x] pagination
     - [-] Separate Input and Output data models
 6) JSONs
     - [x] JWT coding
-    - [ ] Requests
-        - [ ] Add User
-        - [ ] Add Task
-        - [ ] Add Project
+    - [x] Requests
+        - [x] Add User
+        - [x] Add Task
+        - [x] Add Project
         - [-] Get Project with Tasks
     - [ ] Responses
         - [ ] Users
@@ -104,10 +104,10 @@
 9) [z] Generalize gets in DB
 10) [z, -] Change Queries to String subclass
 11) [-] Remove Unit - all functions should return something
-12) [ ] Separate Config for Secrets
+12) [-] Separate Config for Secrets
 13) [z] Combining mutiple filters into one; duck typing
 14) [z] replace if/else constructions in DBFacade.getListOfProjects by case/match (data types and methods)
 15) [z] replace if/else constructions in DBFacade.filterProjects by case/match (pattern matching results data flow resembling tree graph,
 which do not resemble actual flow)
 16) [ ] remove race condition in tests
-17) [ ] check why reset do not remove projects
+17) [x] check why reset do not remove projects

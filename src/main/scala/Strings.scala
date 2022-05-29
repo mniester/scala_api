@@ -33,7 +33,7 @@ trait checkISOTimeFormat {
 
 
 object JwtCoder {
-  private val jwtkey = Settings.JWTKey
+  private val jwtkey = Settings.JwtKey
   private val alg = JwtAlgorithm.HS256
   
   def encode (data: String) = {
