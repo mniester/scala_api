@@ -210,9 +210,9 @@ abstract class DBFacade extends DBBase {
         .scan(0)((prevNumber, nextNumber) => prevNumber + nextNumber)
         .zip(projects)
         .dropWhile(d => d._1 < lowerBound)
-        .takeWhile(e => e._1 <= higherBound)
+        .takeWhile(e => e._1 < higherBound)
         .map(f => f._2)
-    if (totalNumberOfChars(result) < higherBound) {result} else {List(result(0))}
+    if (totalNumberOfChars(result) < Settings.maxCharsInPage) {result} else {List(result(0))}
   } 
   
   def getListOfProjects (searchedPage: Int = 1, 
@@ -220,7 +220,7 @@ abstract class DBFacade extends DBBase {
     moment: String = "", 
     since: Boolean = true, 
     deleted: Boolean = false, 
-    sortingFactor: String = null, 
+    sortingFactor: String = "update", 
     sortingAsc: Boolean = true): FullProjectQueryResponse = {
                                         getListOfProjects(new FullProjectQuery(searchedPage, 
                                         listOfNames,
@@ -234,7 +234,8 @@ abstract class DBFacade extends DBBase {
   def getListOfProjects(query: FullProjectQuery): FullProjectQueryResponse = {
     val filteredProjects = filterProjects (query.listOfNames, query.moment, query.since, query.deleted)
     val projects = Await.result(cursor.run(filteredProjects.result), Settings.dbWaitingDuration).toList
-    FullProjectQueryResponse(sortProjects(addTasksToProject(projects), query.sortingFactor, asc = query.sortingAsc))
+    val sortedPages = sortProjects(addTasksToProject(projects), query.sortingFactor, asc = query.sortingAsc)
+    FullProjectQueryResponse(pagination(sortedPages, query.searchedPage))
   }
 
   def checkIfUserIsAuthor(data: TaskModel): Boolean = {
