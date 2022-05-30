@@ -10,6 +10,7 @@ import Cmds._
 import DataModels._
 import Factories._
 import Strings._
+import Validators._
 import DBs.SQLite
 
 object CheckISOTimeFormatTest extends checkISOTimeFormat
@@ -28,7 +29,7 @@ class UnitTests extends AnyFunSuite {
   
   test("isStringBoolean - ok, true") {assert (IsStringBooleanTest.isStringBoolean("true"))}
   test("isStringBoolean - ok, false") {assert (IsStringBooleanTest.isStringBoolean("false"))}
-  test("isStringBoolean - fail") {assert (!IsStringBooleanTest.isStringBoolean("truefasle"))}
+  test("isStringBoolean - fail") {assert (!IsStringBooleanTest.isStringBoolean("truefalse"))}
   
 
   test("UserFactory.apply - fail; name too long") {assert (UserFactory(uuid = UUID.random.toString, name = "ab" * Settings.maxUserNameLength) == None)}

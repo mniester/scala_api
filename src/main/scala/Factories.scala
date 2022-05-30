@@ -3,11 +3,11 @@ package Factories
 import java.time.LocalDateTime
 
 import DataModels._
-import Strings.checkISOTimeFormat
+import Validators._
 
-object UserFactory {
+object UserFactory extends UserValidators {
   def apply (key: Int = -1, uuid: String, name: String): Option[UserModel] = {// this fake key is used only in new inputs, because schemas demand any. 
-    if ((name.length <= Settings.maxUserNameLength) && (name.length >= Settings.minUserNameLength)) {
+    if (validateUserNameMaxLength(name) && validateUserNameMinLength(name)) {
       Some(UserModel(key, uuid, name))
     } else {
       None
@@ -15,9 +15,9 @@ object UserFactory {
   }
 }
 
-object ProjectFactory extends checkISOTimeFormat {
+object ProjectFactory extends checkISOTimeFormat with ProjectValidators {
   def apply (key: Int = -1, name: String, user: Int, startTime: String,  deleteTime: String = ""): Option[ProjectModel] =
-    if ((name.length <= Settings.maxProjectNameLength) && checkISOTimeFormat(startTime)) {
+    if (validateProjectNameMaxLength(name) && validateProjectNameMinLength(name) && checkISOTimeFormat(startTime)) {
       Some(new ProjectModel(key, name, user, startTime, deleteTime))
     } else {
       None
@@ -30,11 +30,14 @@ object FullProjectModelFactory {
   }
 }
 
-object TaskFactory extends checkISOTimeFormat {
-  def apply (key: Int = -1, name: String, user: Int, startTime: String, endTime: String, project: Int, volume: Int = -1, comment: String = "", deleteTime: String = ""): Option[TaskModel] =
-    if ((comment.length <= Settings.maxTaskCommentLength) && checkISOTimeFormat(startTime) && checkISOTimeFormat(endTime) && (LocalDateTime.parse(startTime).isBefore(LocalDateTime.parse(endTime)))) {
-      Some(TaskModel(key, name, user, startTime, endTime, project, volume, comment, deleteTime))
+object TaskFactory extends checkISOTimeFormat with TaskValidators {
+  def apply (key: Int = -1, name: String, user: Int, startTime: String, endTime: String, project: Int, volume: Int = -1, comment: String = "", deleteTime: String = ""): Option[TaskModel] = {
+    if (validateTaskNameMaxLength(name) && validateTaskNameMinLength(name) && 
+        validateTaskCommentMaxLength(comment) && validateTaskCommentMinLength(comment) && 
+        checkISOTimeFormat(startTime) && checkISOTimeFormat(endTime) && (LocalDateTime.parse(startTime).isBefore(LocalDateTime.parse(endTime)))) {
+        Some(TaskModel(key, name, user, startTime, endTime, project, volume, comment, deleteTime))
     } else {
       None
     }
+  }
 }

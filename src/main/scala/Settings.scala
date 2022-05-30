@@ -13,6 +13,8 @@ package object Settings {
   val minProjectNameLength = source.getConfig("length").getInt("minProjectNameLength")
   val maxProjectNameLength = source.getConfig("length").getInt("maxProjectNameLength")
   
+  val maxTaskNameLength = source.getConfig("length").getInt("maxTaskNameLength")
+  val minTaskNameLength = source.getConfig("length").getInt("minTaskNameLength")
   val maxTaskCommentLength = source.getConfig("length").getInt("maxTaskCommentLength")
   val minTaskCommentLength = source.getConfig("length").getInt("minTaskCommentLength")
   val maxCharsInPage = source.getConfig("length").getInt("maxCharsInPage") 

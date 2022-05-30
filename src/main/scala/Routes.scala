@@ -9,9 +9,7 @@ import Strings.JwtCoder
 import Cmds._
 import DataModels._
 import DBs.SQLite
-import Strings.isStringNumber
-import Strings.checkISOTimeFormat
-import Strings.isStringBoolean
+import Validators._
 import com.typesafe.sslconfig.ssl.FakeChainedKeyStore
 import javax.xml.crypto.Data
 

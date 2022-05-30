@@ -1,35 +1,10 @@
 package Strings
 
-import java.time.LocalDateTime
 import pdi.jwt.{Jwt, JwtAlgorithm}
 import scala.util.{Failure, Success}
 
 import Settings._
 import DataModels.ResponseMessage
-
-
-trait isStringNumber {
-  def isStringNumber(string: String): Boolean = {
-    string.forall(Character.isDigit)
-  }
-}
-
-trait isStringBoolean {
-  def isStringBoolean(string: String): Boolean = {
-    if ((string == "true") || (string == "false")) {true} else {false}
-  }
-}
-
-trait checkISOTimeFormat {
-  def checkISOTimeFormat (string: String): Boolean =
-    try {
-      LocalDateTime.parse(string)
-      true
-    }
-    catch {
-      case _: Throwable => false
-    }
-}
 
 
 object JwtCoder {
@@ -52,5 +27,5 @@ object JwtCoder {
       case null => None
       case tuple => Some(tuple._2)
     }
-    }
+  }
 }
