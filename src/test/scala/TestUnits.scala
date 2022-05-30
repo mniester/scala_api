@@ -13,7 +13,7 @@ import Strings._
 import Validators._
 import DBs.SQLite
 
-object CheckISOTimeFormatTest extends checkISOTimeFormat
+object CheckISOTimeFormatTest extends validateIsoTimeFormat
 
 object IsStringBooleanTest extends isStringBoolean
 
@@ -23,9 +23,9 @@ class UnitTests extends AnyFunSuite {
   db.setup()
   test("test ScalaTest") {assert ((true == true) && (false ==  false))}
   
-  test("checkISOTimeFormat - ok") {assert (CheckISOTimeFormatTest.checkISOTimeFormat("2222-02-02T22:22:22"))}
-  test("checkISOTimeFormat - fail; not proper datetime") {assert (!CheckISOTimeFormatTest.checkISOTimeFormat("2222-33-02T22:22:22"))}
-  test("checkISOTimeFormat - fail; string is not a datetime") {assert (!CheckISOTimeFormatTest.checkISOTimeFormat("abcd"))}
+  test("validateIsoTimeFormat - ok") {assert (CheckISOTimeFormatTest.validateIsoTimeFormat("2222-02-02T22:22:22"))}
+  test("validateIsoTimeFormat - fail; not proper datetime") {assert (!CheckISOTimeFormatTest.validateIsoTimeFormat("2222-33-02T22:22:22"))}
+  test("validateIsoTimeFormat - fail; string is not a datetime") {assert (!CheckISOTimeFormatTest.validateIsoTimeFormat("abcd"))}
   
   test("isStringBoolean - ok, true") {assert (IsStringBooleanTest.isStringBoolean("true"))}
   test("isStringBoolean - ok, false") {assert (IsStringBooleanTest.isStringBoolean("false"))}

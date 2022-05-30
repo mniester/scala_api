@@ -25,12 +25,12 @@ trait JsonProtocols extends DefaultJsonProtocol {
   implicit val fullProjectQueryResponse = jsonFormat1(FullProjectQueryResponse)
 }
 
-trait CheckQueryArguments extends checkISOTimeFormat{
+trait CheckQueryArguments extends validateIsoTimeFormat{
 
   val sortingFactors = List("create", "update")
 
   def checkQueryArguments (query: FullProjectQuery): Option[ResponseMessage] = {
-    if (!checkISOTimeFormat(query.moment)) {
+    if (!validateIsoTimeFormat(query.moment)) {
       Some(ResponseMessage(StatusCodes.BadRequest.intValue, "Moment is not properly formatted - use ISO 8601"))
     } else if (sortingFactors.contains(query.sortingFactor)) {
       Some(ResponseMessage(StatusCodes.BadRequest.intValue, s"sorting Factor valid arguments: ${sortingFactors.toString.drop(5).dropRight(1)}"))

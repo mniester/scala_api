@@ -18,8 +18,8 @@ trait isStringBoolean {
   }
 }
 
-trait checkISOTimeFormat {
-  def checkISOTimeFormat (string: String): Boolean =
+trait validateIsoTimeFormat {
+  def validateIsoTimeFormat (string: String): Boolean =
     try {
       LocalDateTime.parse(string)
       true
@@ -71,4 +71,10 @@ trait TaskValidators {
     comment.length >= Settings.minTaskCommentLength 
   }
 
+}
+
+trait TimeValidators {
+  def isEarlier(time1: String, time2: String): Boolean = {
+    LocalDateTime.parse(time1).isBefore(LocalDateTime.parse(time2))
+  }
 }

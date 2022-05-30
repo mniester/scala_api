@@ -15,9 +15,9 @@ object UserFactory extends UserValidators {
   }
 }
 
-object ProjectFactory extends checkISOTimeFormat with ProjectValidators {
+object ProjectFactory extends validateIsoTimeFormat with ProjectValidators {
   def apply (key: Int = -1, name: String, user: Int, startTime: String,  deleteTime: String = ""): Option[ProjectModel] =
-    if (validateProjectNameMaxLength(name) && validateProjectNameMinLength(name) && checkISOTimeFormat(startTime)) {
+    if (validateProjectNameMaxLength(name) && validateProjectNameMinLength(name) && validateIsoTimeFormat(startTime)) {
       Some(new ProjectModel(key, name, user, startTime, deleteTime))
     } else {
       None
@@ -30,11 +30,11 @@ object FullProjectModelFactory {
   }
 }
 
-object TaskFactory extends checkISOTimeFormat with TaskValidators {
+object TaskFactory extends validateIsoTimeFormat with TaskValidators with TimeValidators{
   def apply (key: Int = -1, name: String, user: Int, startTime: String, endTime: String, project: Int, volume: Int = -1, comment: String = "", deleteTime: String = ""): Option[TaskModel] = {
     if (validateTaskNameMaxLength(name) && validateTaskNameMinLength(name) && 
         validateTaskCommentMaxLength(comment) && validateTaskCommentMinLength(comment) && 
-        checkISOTimeFormat(startTime) && checkISOTimeFormat(endTime) && (LocalDateTime.parse(startTime).isBefore(LocalDateTime.parse(endTime)))) {
+        validateIsoTimeFormat(startTime) && validateIsoTimeFormat(endTime) && isEarlier(startTime, endTime)) {
         Some(TaskModel(key, name, user, startTime, endTime, project, volume, comment, deleteTime))
     } else {
       None
