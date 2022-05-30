@@ -314,7 +314,106 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
     }
   }
 
-    // "All responses" should "Json with proper string" in {
-    //   Post
-    // }
+"All responses" should "Json with proper string" in {
+
+  db.reset;
+    
+  val taskNameTooLong = TaskFactory(key = 1, 
+                          name = "Xy" * Settings.maxTaskNameLength, 
+                          user = 1, 
+                          startTime = "2000-01-01T00:01:01", 
+                          endTime = "2000-02-01T00:01:01", 
+                          project = 1, 
+                          volume = -1, 
+                          comment = "Test").get;
+
+  Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${taskNameTooLong}") ~> taskPost ~> check {
+      response.status shouldBe PayloadTooLarge
+      contentType shouldBe `application/json`
+    }
+
+  val taskNameTooShort = TaskFactory(key = 1, 
+                          name = "", 
+                          user = 1, 
+                          startTime = "2000-01-01T00:01:01", 
+                          endTime = "2000-02-01T00:01:01", 
+                          project = 1, 
+                          volume = -1, 
+                          comment = "Test").get;
+
+  Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${taskNameTooShort}") ~> taskPost ~> check {
+      response.status shouldBe BadRequest
+      contentType shouldBe `application/json`
+    }
+  
+  val taskCommentTooLong = TaskFactory(key = 1, 
+                          name = "Test", 
+                          user = 1, 
+                          startTime = "2000-01-01T00:01:01", 
+                          endTime = "2000-02-01T00:01:01", 
+                          project = 1, 
+                          volume = -1, 
+                          comment = "Xy" * Settings.maxTaskCommentLength).get;
+  
+  Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${taskCommentTooLong}") ~> taskPost ~> check {
+      response.status shouldBe PayloadTooLarge
+      contentType shouldBe `application/json`
+    }
+
+  val taskNoIsoDatetime = TaskFactory(key = 1, 
+                          name = "Test", 
+                          user = 1, 
+                          startTime = "1st January 2000", 
+                          endTime = "2000-02-01T00:01:01", 
+                          project = 1, 
+                          volume = -1, 
+                          comment = "Test").get;
+  
+  Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${taskNoIsoDatetime}") ~> taskPost ~> check {
+      response.status shouldBe BadRequest
+      contentType shouldBe `application/json`
+    }
+
+  val taskDatesInWrongOrder = TaskFactory(key = 1, 
+                          name = "", 
+                          user = 1, 
+                          startTime = "2000-02-01T00:01:01", 
+                          endTime = "2000-01-01T00:01:01", 
+                          project = 1, 
+                          volume = -1, 
+                          comment = "Test").get;
+
+  Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${taskDatesInWrongOrder}") ~> taskPost ~> check {
+      response.status shouldBe BadRequest
+      contentType shouldBe `application/json`
+    }
+
+  val projectNameTooLong = ProjectFactory(name = "Xy" * Settings.maxProjectNameLength, user = 1, startTime = "2001-01-01T00:01:01").get
+
+  Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${projectNameTooLong}") ~> projectPost ~> check {
+      response.status shouldBe PayloadTooLarge
+      contentType shouldBe `application/json`
+    }
+
+  val projectNameTooShort = ProjectFactory(name = "", user = 1, startTime = "2001-01-01T00:01:01").get
+  
+  Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${projectNameTooShort}") ~> projectPost ~> check {
+      response.status shouldBe BadRequest
+      contentType shouldBe `application/json`
+    }
+
+  val userNameTooLong = UserFactory(key = 1, uuid = "1", name = "Xy" * Settings.maxUserNameLength).get
+
+  Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${userNameTooLong}") ~> userPost ~> check {
+      response.status shouldBe PayloadTooLarge
+      contentType shouldBe `application/json`
+    }
+
+  val userNameTooShort = UserFactory(key = 1, uuid = "1", name = "").get
+
+  Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${userNameTooShort}") ~> userPost ~> check {
+      response.status shouldBe BadRequest
+      contentType shouldBe `application/json`
+    }
+  }
 }
