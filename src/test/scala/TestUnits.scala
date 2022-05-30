@@ -13,9 +13,9 @@ import Strings._
 import Validators._
 import DBs.SQLite
 
-object CheckISOTimeFormatTest extends validateIsoTimeFormat
+object CheckISOTimeFormatTest extends ValidateIsoTimeFormat
 
-object IsStringBooleanTest extends isStringBoolean
+object IsStringBooleanTest extends IsStringBoolean
 
 class UnitTests extends AnyFunSuite {
   implicit val execution = ExecutionContext.global

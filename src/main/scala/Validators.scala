@@ -5,20 +5,20 @@ import java.time.LocalDateTime
 import Settings._
 
 
-trait isStringNumber {
+trait IsStringNumber {
   def isStringNumber(string: String): Boolean = {
     string.forall(Character.isDigit)
   }
 }
 
 
-trait isStringBoolean {
+trait IsStringBoolean {
   def isStringBoolean(string: String): Boolean = {
     if ((string == "true") || (string == "false")) {true} else {false}
   }
 }
 
-trait validateIsoTimeFormat {
+trait ValidateIsoTimeFormat {
   def validateIsoTimeFormat (string: String): Boolean =
     try {
       LocalDateTime.parse(string)

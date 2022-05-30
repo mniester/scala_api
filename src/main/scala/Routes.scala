@@ -25,22 +25,22 @@ trait JsonProtocols extends DefaultJsonProtocol {
   implicit val fullProjectQueryResponse = jsonFormat1(FullProjectQueryResponse)
 }
 
-trait CheckQueryArguments extends validateIsoTimeFormat{
+trait InputsValidation extends ValidateIsoTimeFormat{
 
   val sortingFactors = List("create", "update")
 
-  def checkQueryArguments (query: FullProjectQuery): Option[ResponseMessage] = {
+  def validateFullProjectQuery (query: FullProjectQuery): Option[ResponseMessage] = {
     if (!validateIsoTimeFormat(query.moment)) {
       Some(ResponseMessage(StatusCodes.BadRequest.intValue, "Moment is not properly formatted - use ISO 8601"))
-    } else if (sortingFactors.contains(query.sortingFactor)) {
+    } else if (!sortingFactors.contains(query.sortingFactor)) {
       Some(ResponseMessage(StatusCodes.BadRequest.intValue, s"sorting Factor valid arguments: ${sortingFactors.toString.drop(5).dropRight(1)}"))
     } else {
-      Some(ResponseMessage(StatusCodes.OK.intValue,  "Data Accepted"))
+      None
     }
   }
 }
 
-object Routes extends SprayJsonSupport with JsonProtocols with CheckQueryArguments {
+object Routes extends SprayJsonSupport with JsonProtocols with InputsValidation {
   
   def parseAndConvertToModel(json: String, routeAndModel: String): Option[DataModel] = {
     try {
@@ -202,7 +202,11 @@ object Routes extends SprayJsonSupport with JsonProtocols with CheckQueryArgumen
     (get & pathPrefix(projectRoute) & pathSuffix(Segment)) {
       {token =>  JwtCoder.decodeInput(token).getOrElse(null) match {
         case null => jwtNotProperResponse
-        case json: String =>  complete(HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, db.getListOfProjects(json.parseJson.convertTo[FullProjectQuery]).toJson.toString))) 
+        //case json: String => complete(HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, db.getListOfProjects(json.parseJson.convertTo[FullProjectQuery]).toJson.toString)))
+        case json: String => val query = json.parseJson.convertTo[FullProjectQuery]; validateFullProjectQuery(query).getOrElse(null) match {
+          case response: ResponseMessage => complete(HttpResponse(response.code, entity = HttpEntity(ContentTypes.`application/json`, response.toJson.toString)))
+          case null => complete(HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, db.getListOfProjects(query).toJson.toString)))
+        }
       }
     }
   }
