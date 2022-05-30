@@ -130,40 +130,40 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
 
   "User Methods" should "always return a JSON and proper HTTP Code\n" in {
     
-    Post(s"http://127.0.0.1:8080/user/${codedUser}") ~> userPost ~> check { //OK
+    Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUser}") ~> userPost ~> check { //OK
       response.status shouldBe Created
       contentType shouldBe `application/json`
       Await.result(Unmarshal(response).to[UserModel], Settings.dbWaitingDuration)  shouldBe user
       }
     
-    Get(s"http://127.0.0.1:8080/user/${codedUserQuery}") ~> userGet ~> check {
+    Get(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUserQuery}") ~> userGet ~> check {
       response.status shouldBe OK
       contentType shouldBe `application/json`
       Await.result(Unmarshal(response).to[UserModel], Settings.dbWaitingDuration)  shouldBe user
       }
     
-    Post(s"http://127.0.0.1:8080/user/${codedUser}") ~> userPost ~> check { // Fail - user name is now used 
+    Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUser}") ~> userPost ~> check { // Fail - user name is now used 
       response.status shouldBe Accepted
       contentType shouldBe `application/json`
       Await.result(Unmarshal(response).to[UserModel], Settings.dbWaitingDuration)  shouldBe user
       }
 
-    Get(s"http://127.0.0.1:8080/user/${user.key}") ~> userGet ~> check {
+    Get(s"http://127.0.0.1:8080/${Settings.userRoute}/${user.key}") ~> userGet ~> check {
       response.status shouldBe BadRequest 
       contentType shouldBe `application/json`
       }
     
-    Get(s"http://127.0.0.1:8080/user/${codedQueryNotFound}") ~> userGet ~> check {
+    Get(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedQueryNotFound}") ~> userGet ~> check {
       response.status shouldBe NotFound 
       contentType shouldBe `application/json`
       }
     
-    Get(s"http://127.0.0.1:8080/user/${codedUserWrongQuery}") ~> userGet ~> check {
+    Get(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUserWrongQuery}") ~> userGet ~> check {
       response.status shouldBe Forbidden 
       contentType shouldBe `application/json`
       }
     
-    Delete(s"http://127.0.0.1:8080/user/${user.key.toString}") ~> userDelete ~> check {
+    Delete(s"http://127.0.0.1:8080/${Settings.userRoute}/${user.key.toString}") ~> userDelete ~> check {
       response.status shouldBe MethodNotAllowed
       contentType shouldBe `application/json`
       }
@@ -171,60 +171,60 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
 
   "Task Methods" should "always return a JSON and proper HTTP Code\n" in {
     
-    Post(s"http://127.0.0.1:8080/task/${codedTask}") ~> taskPost ~> check { // OK
+    Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask}") ~> taskPost ~> check { // OK
       response.status shouldBe Created
       contentType shouldBe `application/json`
       Await.result(Unmarshal(response).to[TaskModel], Settings.dbWaitingDuration)  shouldBe task
       }
     
-    Get(s"http://127.0.0.1:8080/task/${codedTaskQuery}") ~> taskGet ~> check {
+    Get(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTaskQuery}") ~> taskGet ~> check {
       response.status shouldBe OK
       contentType shouldBe `application/json`
       Await.result(Unmarshal(response).to[TaskModel], Settings.dbWaitingDuration)  shouldBe task
       }
     
-    Post(s"http://127.0.0.1:8080/task/${codedTask}") ~> taskPost ~> check { // fail - Overlapping Task
+    Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask}") ~> taskPost ~> check { // fail - Overlapping Task
       response.status shouldBe Accepted
       contentType shouldBe `application/json`
       Await.result(Unmarshal(response).to[TaskModel], Settings.dbWaitingDuration)  shouldBe task
       }
 
-    Get(s"http://127.0.0.1:8080/task/${task.key}") ~> taskGet ~> check {
+    Get(s"http://127.0.0.1:8080/${Settings.taskRoute}/${task.key}") ~> taskGet ~> check {
       response.status shouldBe BadRequest 
       contentType shouldBe `application/json`
       }
     
-    Get(s"http://127.0.0.1:8080/task/${codedTaskNotFound}") ~> taskGet ~> check {
+    Get(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTaskNotFound}") ~> taskGet ~> check {
       response.status shouldBe NotFound 
       contentType shouldBe `application/json`
       }
     
-    Get(s"http://127.0.0.1:8080/task/${codedTaskWrongQuery}") ~> taskGet ~> check {
+    Get(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTaskWrongQuery}") ~> taskGet ~> check {
       response.status shouldBe Forbidden 
       contentType shouldBe `application/json`
       }
     
-    db.reset; Post(s"http://127.0.0.1:8080/task/${codedTask}") ~> taskPost;
+    db.reset; Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask}") ~> taskPost;
     
-    Put(s"http://127.0.0.1:8080/task/${codedTaskToPut}") ~> taskPut ~> check {
+    Put(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTaskToPut}") ~> taskPut ~> check {
       response.status shouldBe OK
       contentType shouldBe `application/json`
       }
     
-    Put(s"http://127.0.0.1:8080/task/${codedTask1_InvalidUser}") ~> taskPut ~> check {
+    Put(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask1_InvalidUser}") ~> taskPut ~> check {
       response.status shouldBe Accepted
       contentType shouldBe `application/json`
     }
 
-    Post(s"http://127.0.0.1:8080/user/${codedUser}") ~> userPost;
+    Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUser}") ~> userPost;
 
-    Delete(s"http://127.0.0.1:8080/task/${codedDelTask1}") ~> taskDelete ~> check {
+    Delete(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedDelTask1}") ~> taskDelete ~> check {
       response.status shouldBe OK
       contentType shouldBe `application/json`
       }
     
-    db.reset; Post(s"http://127.0.0.1:8080/task/${codedTask}") ~> taskPost;  Post(s"http://127.0.0.1:8080/user/${codedUser}") ~> userPost;
-    Delete(s"http://127.0.0.1:8080/task/${codedDelTask1_InvalidUser}") ~> taskDelete ~> check {
+    db.reset; Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask}") ~> taskPost;  Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUser}") ~> userPost;
+    Delete(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedDelTask1_InvalidUser}") ~> taskDelete ~> check {
       response.status shouldBe Forbidden
       contentType shouldBe `application/json`
       }
@@ -232,56 +232,56 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
 
   "Project Methods" should "always return a JSON and proper HTTP Code\n" in {
     
-    Post(s"http://127.0.0.1:8080/project/${codedProject}") ~> projectPost ~> check { // OK
+    Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProject}") ~> projectPost ~> check { // OK
       response.status shouldBe Created
       contentType shouldBe `application/json`
       Await.result(Unmarshal(response).to[ProjectModel], Settings.dbWaitingDuration)  shouldBe project
       }
     
-    Get(s"http://127.0.0.1:8080/project/${codedProjectQuery}") ~> projectGet ~> check {
+    Get(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProjectQuery}") ~> projectGet ~> check {
       response.status shouldBe OK
       contentType shouldBe `application/json`
       Await.result(Unmarshal(response).to[ProjectModel], Settings.dbWaitingDuration)  shouldBe project
       }
     
-    Post(s"http://127.0.0.1:8080/project/${codedProject}") ~> projectPost ~> check { // fail - Overlapping Task
+    Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProject}") ~> projectPost ~> check { // fail - Overlapping Task
       response.status shouldBe Accepted
       contentType shouldBe `application/json`
       Await.result(Unmarshal(response).to[ProjectModel], Settings.dbWaitingDuration)  shouldBe project
       }
 
-    Get(s"http://127.0.0.1:8080/project/${project.key}") ~> projectGet ~> check {
+    Get(s"http://127.0.0.1:8080/${Settings.projectRoute}/${project.key}") ~> projectGet ~> check {
       response.status shouldBe BadRequest 
       contentType shouldBe `application/json`
       }
     
-    Get(s"http://127.0.0.1:8080/project/${codedProjectNotFound}") ~> projectGet ~> check {
+    Get(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProjectNotFound}") ~> projectGet ~> check {
       response.status shouldBe NotFound 
       contentType shouldBe `application/json`
       }
     
-    Get(s"http://127.0.0.1:8080/project/${codedProjectWrongQuery}") ~> projectGet ~> check {
+    Get(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProjectWrongQuery}") ~> projectGet ~> check {
       response.status shouldBe Forbidden 
       contentType shouldBe `application/json`
       }
     
-    db.reset; Post(s"http://127.0.0.1:8080/project/${codedProject}") ~> projectPost;
+    db.reset; Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProject}") ~> projectPost;
     
-    Put(s"http://127.0.0.1:8080/project/${codedProjectToPut}") ~> projectPut ~> check {
+    Put(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProjectToPut}") ~> projectPut ~> check {
       response.status shouldBe MethodNotAllowed
       contentType shouldBe `application/json`
       }
 
-    db.reset; Post(s"http://127.0.0.1:8080/project/${codedProject}") ~> projectPost; Post(s"http://127.0.0.1:8080/user/${codedUser}") ~> userPost;
+    db.reset; Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProject}") ~> projectPost; Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUser}") ~> userPost;
 
-    Delete(s"http://127.0.0.1:8080/project/${codedDelProject}") ~> projectDelete ~> check {
+    Delete(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedDelProject}") ~> projectDelete ~> check {
       response.status shouldBe OK
       contentType shouldBe `application/json`
       }
     
-    db.reset; Post(s"http://127.0.0.1:8080/project/${codedProject}") ~> projectPost; Post(s"http://127.0.0.1:8080/user/${codedUser}") ~> userPost;
+    db.reset; Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProject}") ~> projectPost; Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUser}") ~> userPost;
     
-    Delete(s"http://127.0.0.1:8080/project/${codedDelProjectInvalidUser}") ~> projectDelete ~> check {
+    Delete(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedDelProjectInvalidUser}") ~> projectDelete ~> check {
       response.status shouldBe Forbidden
       contentType shouldBe `application/json`
       }
@@ -306,11 +306,15 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
                                                 comment = ("x" * (Settings.maxTaskCommentLength - 150))).get;
                           db.addProject(project); db.addTask(task1); db.addTask(task2)}
     
-    Get(s"http://127.0.0.1:8080/projectslist/${codedFullProjectQuery}") ~> projectsListGet ~> check {
+    Get(s"http://127.0.0.1:8080/${Settings.projectsListsRoute}/${codedFullProjectQuery}") ~> projectsListGet ~> check {
       response.status shouldBe OK 
       contentType shouldBe `application/json`
       val result = Await.result(Unmarshal(response).to[FullProjectQueryResponse], Settings.dbWaitingDuration) // if smth is wrong, here should be error
       assert (result.isInstanceOf[FullProjectQueryResponse] ==  true)
     }
   }
+
+    // "All responses" should "Json with proper string" in {
+    //   Post
+    // }
 }
