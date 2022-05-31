@@ -13,7 +13,7 @@ import Coders._
 import Validators._
 import DBs.SQLite
 
-object CheckISOTimeFormatTest extends ValidateIsoTimeFormat
+object CheckISOTimeFormatTest extends TimeValidators
 
 object IsStringBooleanTest extends IsStringBoolean
 

@@ -27,16 +27,16 @@ trait IsStringBoolean {
   }
 }
 
-trait ValidateIsoTimeFormat {
-  def validateIsoTimeFormat (string: String): Boolean =
-    try {
-      LocalDateTime.parse(string)
-      true
-    }
-    catch {
-      case _: Throwable => false
-    }
-}
+// trait ValidateIsoTimeFormat {
+//   def validateIsoTimeFormat (string: String): Boolean =
+//     try {
+//       LocalDateTime.parse(string)
+//       true
+//     }
+//     catch {
+//       case _: Throwable => false
+//     }
+// }
 
 
 trait UserValidators {
@@ -83,12 +83,22 @@ trait TaskValidators {
 }
 
 trait TimeValidators {
+  
   def isEarlier(time1: String, time2: String): Boolean = {
     LocalDateTime.parse(time1).isBefore(LocalDateTime.parse(time2))
   }
-}
 
-trait FullProjectQueryValidation extends ValidateIsoTimeFormat {
+  def validateIsoTimeFormat (string: String): Boolean =
+    try {
+      LocalDateTime.parse(string)
+      true
+    }
+    catch {
+      case _: Throwable => false
+    }
+  }
+
+trait FullProjectQueryValidation extends TimeValidators {
 
   val sortingFactors = List("create", "update")
 
@@ -103,13 +113,13 @@ trait FullProjectQueryValidation extends ValidateIsoTimeFormat {
   }
 }
 
-trait InputValidation extends UserValidators  with ProjectValidators {
+trait InputValidation extends UserValidators with ProjectValidators with TaskValidators with TimeValidators {
     
     def validateInput(dataModel: DataModel): Option[ResponseMessage] = {
       dataModel match {
         case user: UserModel => validateUser(user)
-        //case project: ProjectModel => validateProject(project)
-        //case task: TaskModel => validateTask(task)
+        case project: ProjectModel => validateProject(project)
+        case task: TaskModel => validateTask(task)
         case _ => Some(ResponseMessage(StatusCodes.BadRequest.intValue, "Input type was not recognized"))
       }
     }
@@ -124,13 +134,31 @@ trait InputValidation extends UserValidators  with ProjectValidators {
       }
     }
 
-  //   def validateProject(project: ProjectModel): Option[ResponseMessage] = {
-  //     validateProjectNameMinLength(project.name) match {
-  //       case false => Some(ResponseMessage(StatusCodes.BadRequest.intValue, s"Project Name is too short. Min. Length is ${Settings.minProjectNameLength}."))
-  //       case true => validateProjectNameMaxLength(project.name) match {
-  //         case false => Some(ResponseMessage(StatusCodes.PayloadTooLarge.intValue, s"User Name is too long. Max. Length is ${Settings.maxProjectNameLength}."))
-  //         case true => None
-  //     } 
-  //   }
-  // }
+    def validateProject(project: ProjectModel): Option[ResponseMessage] = {
+      validateProjectNameMinLength(project.name) match {
+        case false => Some(ResponseMessage(StatusCodes.BadRequest.intValue, s"Project Name is too short. Min. Length is ${Settings.minProjectNameLength}."))
+        case true => validateProjectNameMaxLength(project.name) match {
+          case false => Some(ResponseMessage(StatusCodes.PayloadTooLarge.intValue, s"Project Name is too long. Max. Length is ${Settings.maxProjectNameLength}."))
+          case true => None
+      } 
+    }
+  }
+  def validateTask(task: TaskModel): Option[ResponseMessage] = {
+    validateTaskNameMinLength(task.name) match {
+      case false => Some(ResponseMessage(StatusCodes.BadRequest.intValue, s"Task Name is too short. Min. Length is ${Settings.minTaskNameLength}."))
+      case true => validateTaskNameMaxLength(task.name) match {
+        case false => Some(ResponseMessage(StatusCodes.PayloadTooLarge.intValue, s"Task Name is too long. Max. Length is ${Settings.maxTaskNameLength}."))
+        case true => validateIsoTimeFormat(task.startTime) match {
+          case false => Some(ResponseMessage(StatusCodes.BadRequest.intValue, "Start Time is not proper ISO Time"))
+          case true => validateIsoTimeFormat(task.endTime) match {
+            case false => Some(ResponseMessage(StatusCodes.BadRequest.intValue, "End Time is not proper ISO Time"))
+            case true => isEarlier(task.startTime, task.endTime) match {
+              case false => Some(ResponseMessage(StatusCodes.BadRequest.intValue, "Start Time is later than End Time"))
+              case true => None
+            }
+          }
+        }
+      }
+    }
+  }
 }

@@ -15,7 +15,7 @@ object UserFactory extends UserValidators {
   }
 }
 
-object ProjectFactory extends ValidateIsoTimeFormat with ProjectValidators {
+object ProjectFactory extends TimeValidators with ProjectValidators {
   def apply (key: Int = -1, name: String, user: Int, startTime: String,  deleteTime: String = ""): Option[ProjectModel] =
     if (validateProjectNameMaxLength(name) && validateProjectNameMinLength(name) && validateIsoTimeFormat(startTime)) {
       Some(new ProjectModel(key, name, user, startTime, deleteTime))
@@ -30,7 +30,7 @@ object FullProjectModelFactory {
   }
 }
 
-object TaskFactory extends ValidateIsoTimeFormat with TaskValidators with TimeValidators{
+object TaskFactory extends TaskValidators with TimeValidators{
   def apply (key: Int = -1, name: String, user: Int, startTime: String, endTime: String, project: Int, volume: Int = -1, comment: String = "", deleteTime: String = ""): Option[TaskModel] = {
     if (validateTaskNameMaxLength(name) && validateTaskNameMinLength(name) && 
         validateTaskCommentMaxLength(comment) && validateTaskCommentMinLength(comment) && 
