@@ -1,9 +1,18 @@
 package Validators
 
+
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.server.Directives._
+import spray.json._
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import akka.http.scaladsl.server.PathMatcher
 import java.time.LocalDateTime
+import spray.json._
 
 import Settings._
-
+import DataModels._
+import Cmds._
 
 trait IsStringNumber {
   def isStringNumber(string: String): Boolean = {
@@ -76,5 +85,20 @@ trait TaskValidators {
 trait TimeValidators {
   def isEarlier(time1: String, time2: String): Boolean = {
     LocalDateTime.parse(time1).isBefore(LocalDateTime.parse(time2))
+  }
+}
+
+trait FullProjectQueryValidation extends ValidateIsoTimeFormat {
+
+  val sortingFactors = List("create", "update")
+
+  def validateFullProjectQuery (query: FullProjectQuery): Option[ResponseMessage] = {
+    if (!validateIsoTimeFormat(query.moment)) {
+      Some(ResponseMessage(StatusCodes.BadRequest.intValue, "Moment is not properly formatted - use ISO 8601"))
+    } else if (!sortingFactors.contains(query.sortingFactor)) {
+      Some(ResponseMessage(StatusCodes.BadRequest.intValue, s"sorting Factor valid arguments: ${sortingFactors.toString.drop(5).dropRight(1)}"))
+    } else {
+      None
+    }
   }
 }

@@ -9,7 +9,7 @@ import Settings._
 import Cmds._
 import DataModels._
 import Factories._
-import Strings._
+import Coders._
 import Validators._
 import DBs.SQLite
 

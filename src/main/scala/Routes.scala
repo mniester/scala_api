@@ -5,13 +5,11 @@ import spray.json._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.server.PathMatcher
 
-import Strings.JwtCoder
+import Coders.JwtCoder
 import Cmds._
 import DataModels._
 import DBs.SQLite
 import Validators._
-import com.typesafe.sslconfig.ssl.FakeChainedKeyStore
-import javax.xml.crypto.Data
 
 trait JsonProtocols extends DefaultJsonProtocol {
   implicit val responseMessageFormat = jsonFormat2(ResponseMessage)
@@ -25,22 +23,7 @@ trait JsonProtocols extends DefaultJsonProtocol {
   implicit val fullProjectQueryResponse = jsonFormat1(FullProjectQueryResponse)
 }
 
-trait InputsValidation extends ValidateIsoTimeFormat{
-
-  val sortingFactors = List("create", "update")
-
-  def validateFullProjectQuery (query: FullProjectQuery): Option[ResponseMessage] = {
-    if (!validateIsoTimeFormat(query.moment)) {
-      Some(ResponseMessage(StatusCodes.BadRequest.intValue, "Moment is not properly formatted - use ISO 8601"))
-    } else if (!sortingFactors.contains(query.sortingFactor)) {
-      Some(ResponseMessage(StatusCodes.BadRequest.intValue, s"sorting Factor valid arguments: ${sortingFactors.toString.drop(5).dropRight(1)}"))
-    } else {
-      None
-    }
-  }
-}
-
-object Routes extends SprayJsonSupport with JsonProtocols with InputsValidation {
+object Routes extends SprayJsonSupport with JsonProtocols with FullProjectQueryValidation {
   
   def parseAndConvertToModel(json: String, routeAndModel: String): Option[DataModel] = {
     try {

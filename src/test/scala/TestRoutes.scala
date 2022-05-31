@@ -12,7 +12,7 @@ import DefaultJsonProtocol._
 import Settings._
 import Routes._
 import Factories._
-import Strings.JwtCoder
+import Coders.JwtCoder
 import DBs.{SQLite}
 import DataModels._
 import Cmds._
@@ -101,7 +101,6 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
   val codedProjectInvalidUser = JwtCoder.encode(projectInvalidUser.toJson.toString)
   val delProjectInvalidUser = DelData(dataKey = projectInvalidUser.key, userKey = projectInvalidUser.user, userUuid = user.uuid)
   val codedDelProjectInvalidUser = JwtCoder.encode(delProjectInvalidUser.toJson.toString())
-
   val fullProjectQuery = FullProjectQuery(searchedPage = 1,
                                           listOfNames = List("1"),
                                           moment = "2000-01-01T00:01:01",
@@ -109,7 +108,6 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
                                           deleted = false,
                                           sortingFactor = "create",
                                           sortingAsc = true)
-  val codedFullProjectQuery = JwtCoder.encode(fullProjectQuery.toJson.toString())
 
   db.setup()
   db.reset()
@@ -306,11 +304,48 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
                                                 comment = ("x" * (Settings.maxTaskCommentLength - 150))).get;
                           db.addProject(project); db.addTask(task1); db.addTask(task2)}
     
+    val fullProjectQuery = FullProjectQuery(searchedPage = 1,
+                                          listOfNames = List("1"),
+                                          moment = "2000-01-01T00:01:01",
+                                          since = true,
+                                          deleted = false,
+                                          sortingFactor = "create",
+                                          sortingAsc = true)
+    val codedFullProjectQuery = JwtCoder.encode(fullProjectQuery.toJson.toString())
+    
     Get(s"http://127.0.0.1:8080/${Settings.projectsListsRoute}/${codedFullProjectQuery}") ~> projectsListGet ~> check {
       response.status shouldBe OK 
       contentType shouldBe `application/json`
       val result = Await.result(Unmarshal(response).to[FullProjectQueryResponse], Settings.dbWaitingDuration) // if smth is wrong, here should be error
       assert (result.isInstanceOf[FullProjectQueryResponse] ==  true)
+    }
+
+    val fullProjectQueryWrongDate = FullProjectQuery(searchedPage = 1,
+                                          listOfNames = List("1"),
+                                          moment = "1st January 2000",
+                                          since = true,
+                                          deleted = false,
+                                          sortingFactor = "create",
+                                          sortingAsc = true)
+    val codedFullProjectQueryWrongDate= JwtCoder.encode(fullProjectQueryWrongDate.toJson.toString())
+
+    Get(s"http://127.0.0.1:8080/${Settings.projectsListsRoute}/${codedFullProjectQueryWrongDate}") ~> projectsListGet ~> check {
+      response.status shouldBe BadRequest 
+      contentType shouldBe `application/json`
+    }
+
+    val fullProjectQueryWrongSortingFactor = FullProjectQuery(searchedPage = 1,
+                                          listOfNames = List("1"),
+                                          moment = "1st January 2000",
+                                          since = true,
+                                          deleted = false,
+                                          sortingFactor = "create",
+                                          sortingAsc = true)
+    val codedFullProjectQueryWrongSortingFactor = JwtCoder.encode(fullProjectQueryWrongDate.toJson.toString())
+
+    Get(s"http://127.0.0.1:8080/${Settings.projectsListsRoute}/${codedFullProjectQueryWrongSortingFactor}") ~> projectsListGet ~> check {
+      response.status shouldBe BadRequest 
+      contentType shouldBe `application/json`
     }
   }
 

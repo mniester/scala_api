@@ -1,4 +1,4 @@
-package Strings
+package Coders
 
 import pdi.jwt.{Jwt, JwtAlgorithm}
 import scala.util.{Failure, Success}
