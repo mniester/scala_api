@@ -23,7 +23,7 @@ trait JsonProtocols extends DefaultJsonProtocol {
   implicit val fullProjectQueryResponse = jsonFormat1(FullProjectQueryResponse)
 }
 
-object Routes extends SprayJsonSupport with JsonProtocols with FullProjectQueryValidation {
+object Routes extends SprayJsonSupport with JsonProtocols with FullProjectQueryValidation  with InputValidation{
   
   def parseAndConvertToModel(json: String, routeAndModel: String): Option[DataModel] = {
     try {
@@ -104,13 +104,16 @@ object Routes extends SprayJsonSupport with JsonProtocols with FullProjectQueryV
 
   def postData (routeAndModel: String) ={
     (post & pathPrefix(routeAndModel) & pathSuffix(Segment))
-      {token => JwtCoder.decodeInput(token).getOrElse(null) match {
+      {token => JwtCoder.decodeInput(token).getOrElse(null); JwtCoder.decodeInput(token).getOrElse(null) match {
         case null => jwtNotProperResponse
-        case json => parseAndConvertToModel(json, routeAndModel).getOrElse(null) match {
+        case json => val dataModel = parseAndConvertToModel(json, routeAndModel).getOrElse(null); dataModel match {
           case null => complete(HttpResponse(StatusCodes.Accepted, entity = HttpEntity(ContentTypes.`application/json`, json)))
-          case dataModel: DataModel => db.addData(dataModel).getOrElse(null) match {
-            case null => complete(HttpResponse(StatusCodes.Created, entity = HttpEntity(ContentTypes.`application/json`, json)))
-            case dataModel: DataModel => complete(HttpResponse(StatusCodes.Accepted, entity = HttpEntity(ContentTypes.`application/json`, convertToJsonString(dataModel).getOrElse("Data Accepted"))))
+          case input: DataModel => validateInput(dataModel).getOrElse(null) match {
+            case response: ResponseMessage => complete(HttpResponse(response.code, entity = HttpEntity(ContentTypes.`application/json`, response.toJson.toString)))
+            case null => db.addData(dataModel).getOrElse(null) match {
+              case null => complete(HttpResponse(StatusCodes.Created, entity = HttpEntity(ContentTypes.`application/json`, json)))
+              case response: DataModel => complete(HttpResponse(StatusCodes.Accepted, entity = HttpEntity(ContentTypes.`application/json`, convertToJsonString(response).getOrElse("Your Data was not accepted"))))
+            }
           }
         }
       }
@@ -185,7 +188,6 @@ object Routes extends SprayJsonSupport with JsonProtocols with FullProjectQueryV
     (get & pathPrefix(projectRoute) & pathSuffix(Segment)) {
       {token =>  JwtCoder.decodeInput(token).getOrElse(null) match {
         case null => jwtNotProperResponse
-        //case json: String => complete(HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, db.getListOfProjects(json.parseJson.convertTo[FullProjectQuery]).toJson.toString)))
         case json: String => val query = json.parseJson.convertTo[FullProjectQuery]; validateFullProjectQuery(query).getOrElse(null) match {
           case response: ResponseMessage => complete(HttpResponse(response.code, entity = HttpEntity(ContentTypes.`application/json`, response.toJson.toString)))
           case null => complete(HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, db.getListOfProjects(query).toJson.toString)))

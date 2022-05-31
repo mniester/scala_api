@@ -102,3 +102,35 @@ trait FullProjectQueryValidation extends ValidateIsoTimeFormat {
     }
   }
 }
+
+trait InputValidation extends UserValidators  with ProjectValidators {
+    
+    def validateInput(dataModel: DataModel): Option[ResponseMessage] = {
+      dataModel match {
+        case user: UserModel => validateUser(user)
+        //case project: ProjectModel => validateProject(project)
+        //case task: TaskModel => validateTask(task)
+        case _ => Some(ResponseMessage(StatusCodes.BadRequest.intValue, "Input type was not recognized"))
+      }
+    }
+
+    def validateUser(user: UserModel): Option[ResponseMessage] = {
+      validateUserNameMinLength(user.name) match {
+        case false => Some(ResponseMessage(StatusCodes.BadRequest.intValue, s"User Name is too short. Min. Length is ${Settings.minUserNameLength}."))
+        case true => validateUserNameMaxLength(user.name) match {
+          case false => Some(ResponseMessage(StatusCodes.PayloadTooLarge.intValue, s"User Name is too long. Max. Length is ${Settings.maxUserNameLength}."))
+          case true => None
+        }
+      }
+    }
+
+  //   def validateProject(project: ProjectModel): Option[ResponseMessage] = {
+  //     validateProjectNameMinLength(project.name) match {
+  //       case false => Some(ResponseMessage(StatusCodes.BadRequest.intValue, s"Project Name is too short. Min. Length is ${Settings.minProjectNameLength}."))
+  //       case true => validateProjectNameMaxLength(project.name) match {
+  //         case false => Some(ResponseMessage(StatusCodes.PayloadTooLarge.intValue, s"User Name is too long. Max. Length is ${Settings.maxProjectNameLength}."))
+  //         case true => None
+  //     } 
+  //   }
+  // }
+}

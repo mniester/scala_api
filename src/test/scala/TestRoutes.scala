@@ -167,288 +167,289 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
       }
     }
 
-  "Task Methods" should "always return a JSON and proper HTTP Code\n" in {
+  // "Task Methods" should "always return a JSON and proper HTTP Code\n" in {
     
-    Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask}") ~> taskPost ~> check { // OK
-      response.status shouldBe Created
-      contentType shouldBe `application/json`
-      Await.result(Unmarshal(response).to[TaskModel], Settings.dbWaitingDuration)  shouldBe task
-      }
+  //   Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask}") ~> taskPost ~> check { // OK
+  //     response.status shouldBe Created
+  //     contentType shouldBe `application/json`
+  //     Await.result(Unmarshal(response).to[TaskModel], Settings.dbWaitingDuration)  shouldBe task
+  //     }
     
-    Get(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTaskQuery}") ~> taskGet ~> check {
-      response.status shouldBe OK
-      contentType shouldBe `application/json`
-      Await.result(Unmarshal(response).to[TaskModel], Settings.dbWaitingDuration)  shouldBe task
-      }
+  //   Get(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTaskQuery}") ~> taskGet ~> check {
+  //     response.status shouldBe OK
+  //     contentType shouldBe `application/json`
+  //     Await.result(Unmarshal(response).to[TaskModel], Settings.dbWaitingDuration)  shouldBe task
+  //     }
     
-    Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask}") ~> taskPost ~> check { // fail - Overlapping Task
-      response.status shouldBe Accepted
-      contentType shouldBe `application/json`
-      Await.result(Unmarshal(response).to[TaskModel], Settings.dbWaitingDuration)  shouldBe task
-      }
+  //   Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask}") ~> taskPost ~> check { // fail - Overlapping Task
+  //     response.status shouldBe Accepted
+  //     contentType shouldBe `application/json`
+  //     Await.result(Unmarshal(response).to[TaskModel], Settings.dbWaitingDuration)  shouldBe task
+  //     }
 
-    Get(s"http://127.0.0.1:8080/${Settings.taskRoute}/${task.key}") ~> taskGet ~> check {
-      response.status shouldBe BadRequest 
-      contentType shouldBe `application/json`
-      }
+  //   Get(s"http://127.0.0.1:8080/${Settings.taskRoute}/${task.key}") ~> taskGet ~> check {
+  //     response.status shouldBe BadRequest 
+  //     contentType shouldBe `application/json`
+  //     }
     
-    Get(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTaskNotFound}") ~> taskGet ~> check {
-      response.status shouldBe NotFound 
-      contentType shouldBe `application/json`
-      }
+  //   Get(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTaskNotFound}") ~> taskGet ~> check {
+  //     response.status shouldBe NotFound 
+  //     contentType shouldBe `application/json`
+  //     }
     
-    Get(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTaskWrongQuery}") ~> taskGet ~> check {
-      response.status shouldBe Forbidden 
-      contentType shouldBe `application/json`
-      }
+  //   Get(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTaskWrongQuery}") ~> taskGet ~> check {
+  //     response.status shouldBe Forbidden 
+  //     contentType shouldBe `application/json`
+  //     }
     
-    db.reset; Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask}") ~> taskPost;
+  //   db.reset; Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask}") ~> taskPost;
     
-    Put(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTaskToPut}") ~> taskPut ~> check {
-      response.status shouldBe OK
-      contentType shouldBe `application/json`
-      }
+  //   Put(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTaskToPut}") ~> taskPut ~> check {
+  //     response.status shouldBe OK
+  //     contentType shouldBe `application/json`
+  //     }
     
-    Put(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask1_InvalidUser}") ~> taskPut ~> check {
-      response.status shouldBe Accepted
-      contentType shouldBe `application/json`
-    }
+  //   Put(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask1_InvalidUser}") ~> taskPut ~> check {
+  //     response.status shouldBe Accepted
+  //     contentType shouldBe `application/json`
+  //   }
 
-    Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUser}") ~> userPost;
+  //   Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUser}") ~> userPost;
 
-    Delete(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedDelTask1}") ~> taskDelete ~> check {
-      response.status shouldBe OK
-      contentType shouldBe `application/json`
-      }
+  //   Delete(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedDelTask1}") ~> taskDelete ~> check {
+  //     response.status shouldBe OK
+  //     contentType shouldBe `application/json`
+  //     }
     
-    db.reset; Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask}") ~> taskPost;  Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUser}") ~> userPost;
-    Delete(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedDelTask1_InvalidUser}") ~> taskDelete ~> check {
-      response.status shouldBe Forbidden
-      contentType shouldBe `application/json`
-      }
-    }
+  //   db.reset; Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask}") ~> taskPost;  Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUser}") ~> userPost;
+  //   Delete(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedDelTask1_InvalidUser}") ~> taskDelete ~> check {
+  //     response.status shouldBe Forbidden
+  //     contentType shouldBe `application/json`
+  //     }
+  //   }
 
-  "Project Methods" should "always return a JSON and proper HTTP Code\n" in {
+  // "Project Methods" should "always return a JSON and proper HTTP Code\n" in {
     
-    Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProject}") ~> projectPost ~> check { // OK
-      response.status shouldBe Created
-      contentType shouldBe `application/json`
-      Await.result(Unmarshal(response).to[ProjectModel], Settings.dbWaitingDuration)  shouldBe project
-      }
+  //   Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProject}") ~> projectPost ~> check { // OK
+  //     response.status shouldBe Created
+  //     contentType shouldBe `application/json`
+  //     Await.result(Unmarshal(response).to[ProjectModel], Settings.dbWaitingDuration)  shouldBe project
+  //     }
     
-    Get(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProjectQuery}") ~> projectGet ~> check {
-      response.status shouldBe OK
-      contentType shouldBe `application/json`
-      Await.result(Unmarshal(response).to[ProjectModel], Settings.dbWaitingDuration)  shouldBe project
-      }
+  //   Get(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProjectQuery}") ~> projectGet ~> check {
+  //     response.status shouldBe OK
+  //     contentType shouldBe `application/json`
+  //     Await.result(Unmarshal(response).to[ProjectModel], Settings.dbWaitingDuration)  shouldBe project
+  //     }
     
-    Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProject}") ~> projectPost ~> check { // fail - Overlapping Task
-      response.status shouldBe Accepted
-      contentType shouldBe `application/json`
-      Await.result(Unmarshal(response).to[ProjectModel], Settings.dbWaitingDuration)  shouldBe project
-      }
+  //   Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProject}") ~> projectPost ~> check { // fail - Overlapping Task
+  //     response.status shouldBe Accepted
+  //     contentType shouldBe `application/json`
+  //     Await.result(Unmarshal(response).to[ProjectModel], Settings.dbWaitingDuration)  shouldBe project
+  //     }
 
-    Get(s"http://127.0.0.1:8080/${Settings.projectRoute}/${project.key}") ~> projectGet ~> check {
-      response.status shouldBe BadRequest 
-      contentType shouldBe `application/json`
-      }
+  //   Get(s"http://127.0.0.1:8080/${Settings.projectRoute}/${project.key}") ~> projectGet ~> check {
+  //     response.status shouldBe BadRequest 
+  //     contentType shouldBe `application/json`
+  //     }
     
-    Get(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProjectNotFound}") ~> projectGet ~> check {
-      response.status shouldBe NotFound 
-      contentType shouldBe `application/json`
-      }
+  //   Get(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProjectNotFound}") ~> projectGet ~> check {
+  //     response.status shouldBe NotFound 
+  //     contentType shouldBe `application/json`
+  //     }
     
-    Get(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProjectWrongQuery}") ~> projectGet ~> check {
-      response.status shouldBe Forbidden 
-      contentType shouldBe `application/json`
-      }
+  //   Get(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProjectWrongQuery}") ~> projectGet ~> check {
+  //     response.status shouldBe Forbidden 
+  //     contentType shouldBe `application/json`
+  //     }
     
-    db.reset; Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProject}") ~> projectPost;
+  //   db.reset; Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProject}") ~> projectPost;
     
-    Put(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProjectToPut}") ~> projectPut ~> check {
-      response.status shouldBe MethodNotAllowed
-      contentType shouldBe `application/json`
-      }
+  //   Put(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProjectToPut}") ~> projectPut ~> check {
+  //     response.status shouldBe MethodNotAllowed
+  //     contentType shouldBe `application/json`
+  //     }
 
-    db.reset; Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProject}") ~> projectPost; Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUser}") ~> userPost;
+  //   db.reset; Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProject}") ~> projectPost; Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUser}") ~> userPost;
 
-    Delete(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedDelProject}") ~> projectDelete ~> check {
-      response.status shouldBe OK
-      contentType shouldBe `application/json`
-      }
+  //   Delete(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedDelProject}") ~> projectDelete ~> check {
+  //     response.status shouldBe OK
+  //     contentType shouldBe `application/json`
+  //     }
     
-    db.reset; Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProject}") ~> projectPost; Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUser}") ~> userPost;
+  //   db.reset; Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedProject}") ~> projectPost; Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUser}") ~> userPost;
     
-    Delete(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedDelProjectInvalidUser}") ~> projectDelete ~> check {
-      response.status shouldBe Forbidden
-      contentType shouldBe `application/json`
-      }
-    }
+  //   Delete(s"http://127.0.0.1:8080/${Settings.projectRoute}/${codedDelProjectInvalidUser}") ~> projectDelete ~> check {
+  //     response.status shouldBe Forbidden
+  //     contentType shouldBe `application/json`
+  //     }
+  //   }
 
-  "Get Full Project (with tasks)" should "always return a JSON and proper HTTP Code\n" in {
-    db.reset;
-    for (x <- (1 to 100)) {val project = ProjectFactory(name = x.toString, user = x, startTime = "2001-01-01T00:01:01").get;
-                          val task1 = TaskFactory(name = x.toString, 
-                                                user = x, 
-                                                startTime = "2002-01-01T00:01:01", 
-                                                endTime = "2002-02-01T00:01:01", 
-                                                project = x, 
-                                                volume = -1, 
-                                                comment = ("x" * (Settings.maxTaskCommentLength - 150))).get;
-                          val task2 = TaskFactory(name = x.toString, 
-                                                user = x, 
-                                                startTime = "2003-01-01T00:01:01", 
-                                                endTime = "2003-02-01T00:01:01", 
-                                                project = x, 
-                                                volume = -1, 
-                                                comment = ("x" * (Settings.maxTaskCommentLength - 150))).get;
-                          db.addProject(project); db.addTask(task1); db.addTask(task2)}
+  // "Get Full Project (with tasks)" should "always return a JSON and proper HTTP Code\n" in {
+  //   db.reset;
+  //   for (x <- (1 to 100)) {val project = ProjectFactory(name = x.toString, user = x, startTime = "2001-01-01T00:01:01").get;
+  //                         val task1 = TaskFactory(name = x.toString, 
+  //                                               user = x, 
+  //                                               startTime = "2002-01-01T00:01:01", 
+  //                                               endTime = "2002-02-01T00:01:01", 
+  //                                               project = x, 
+  //                                               volume = -1, 
+  //                                               comment = ("x" * (Settings.maxTaskCommentLength - 150))).get;
+  //                         val task2 = TaskFactory(name = x.toString, 
+  //                                               user = x, 
+  //                                               startTime = "2003-01-01T00:01:01", 
+  //                                               endTime = "2003-02-01T00:01:01", 
+  //                                               project = x, 
+  //                                               volume = -1, 
+  //                                               comment = ("x" * (Settings.maxTaskCommentLength - 150))).get;
+  //                         db.addProject(project); db.addTask(task1); db.addTask(task2)}
     
-    val fullProjectQuery = FullProjectQuery(searchedPage = 1,
-                                          listOfNames = List("1"),
-                                          moment = "2000-01-01T00:01:01",
-                                          since = true,
-                                          deleted = false,
-                                          sortingFactor = "create",
-                                          sortingAsc = true)
-    val codedFullProjectQuery = JwtCoder.encode(fullProjectQuery.toJson.toString())
+  //   val fullProjectQuery = FullProjectQuery(searchedPage = 1,
+  //                                         listOfNames = List("1"),
+  //                                         moment = "2000-01-01T00:01:01",
+  //                                         since = true,
+  //                                         deleted = false,
+  //                                         sortingFactor = "create",
+  //                                         sortingAsc = true)
+  //   val codedFullProjectQuery = JwtCoder.encode(fullProjectQuery.toJson.toString())
     
-    Get(s"http://127.0.0.1:8080/${Settings.projectsListsRoute}/${codedFullProjectQuery}") ~> projectsListGet ~> check {
-      response.status shouldBe OK 
-      contentType shouldBe `application/json`
-      val result = Await.result(Unmarshal(response).to[FullProjectQueryResponse], Settings.dbWaitingDuration) // if smth is wrong, here should be error
-      assert (result.isInstanceOf[FullProjectQueryResponse] ==  true)
-    }
+  //   Get(s"http://127.0.0.1:8080/${Settings.projectsListsRoute}/${codedFullProjectQuery}") ~> projectsListGet ~> check {
+  //     response.status shouldBe OK 
+  //     contentType shouldBe `application/json`
+  //     val result = Await.result(Unmarshal(response).to[FullProjectQueryResponse], Settings.dbWaitingDuration) // if smth is wrong, here should be error
+  //     assert (result.isInstanceOf[FullProjectQueryResponse] ==  true)
+  //   }
 
-    val fullProjectQueryWrongDate = FullProjectQuery(searchedPage = 1,
-                                          listOfNames = List("1"),
-                                          moment = "1st January 2000",
-                                          since = true,
-                                          deleted = false,
-                                          sortingFactor = "create",
-                                          sortingAsc = true)
-    val codedFullProjectQueryWrongDate= JwtCoder.encode(fullProjectQueryWrongDate.toJson.toString())
+  //   val fullProjectQueryWrongDate = FullProjectQuery(searchedPage = 1,
+  //                                         listOfNames = List("1"),
+  //                                         moment = "2000-01-01T00:01:01",
+  //                                         since = true,
+  //                                         deleted = false,
+  //                                         sortingFactor = "remove",
+  //                                         sortingAsc = true)
+  //   val codedFullProjectQueryWrongDate= JwtCoder.encode(fullProjectQueryWrongDate.toJson.toString())
 
-    Get(s"http://127.0.0.1:8080/${Settings.projectsListsRoute}/${codedFullProjectQueryWrongDate}") ~> projectsListGet ~> check {
-      response.status shouldBe BadRequest 
-      contentType shouldBe `application/json`
-    }
+  //   Get(s"http://127.0.0.1:8080/${Settings.projectsListsRoute}/${codedFullProjectQueryWrongDate}") ~> projectsListGet ~> check {
+  //     response.status shouldBe BadRequest 
+  //     contentType shouldBe `application/json`
+  //   }
 
-    val fullProjectQueryWrongSortingFactor = FullProjectQuery(searchedPage = 1,
-                                          listOfNames = List("1"),
-                                          moment = "1st January 2000",
-                                          since = true,
-                                          deleted = false,
-                                          sortingFactor = "create",
-                                          sortingAsc = true)
-    val codedFullProjectQueryWrongSortingFactor = JwtCoder.encode(fullProjectQueryWrongDate.toJson.toString())
+  //   val fullProjectQueryWrongSortingFactor = FullProjectQuery(searchedPage = 1,
+  //                                         listOfNames = List("1"),
+  //                                         moment = "1st January 2000",
+  //                                         since = true,
+  //                                         deleted = false,
+  //                                         sortingFactor = "create",
+  //                                         sortingAsc = true)
+  //   val codedFullProjectQueryWrongSortingFactor = JwtCoder.encode(fullProjectQueryWrongDate.toJson.toString())
 
-    Get(s"http://127.0.0.1:8080/${Settings.projectsListsRoute}/${codedFullProjectQueryWrongSortingFactor}") ~> projectsListGet ~> check {
-      response.status shouldBe BadRequest 
-      contentType shouldBe `application/json`
-    }
-  }
+  //   Get(s"http://127.0.0.1:8080/${Settings.projectsListsRoute}/${codedFullProjectQueryWrongSortingFactor}") ~> projectsListGet ~> check {
+  //     response.status shouldBe BadRequest 
+  //     contentType shouldBe `application/json`
+  //   }
+  // }
 
-"All responses" should "Json with proper string" in {
+"All responses for wrong requests" should " return Json with proper string" in {
 
   db.reset;
+
+  val userNameTooLong = UserModel(key = 1, uuid = "1", name = "Xy" * Settings.maxUserNameLength)
+  val codedUserNameTooLong = JwtCoder.encode(userNameTooLong.toJson.toString)
+
+  Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUserNameTooLong}") ~> userPost ~> check {
+      response.status shouldBe PayloadTooLarge
+      contentType shouldBe `application/json`
+    }
+
+  // val userNameTooShort = UserModel(key = 1, uuid = "1", name = "")
+
+  // Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${userNameTooShort}") ~> userPost ~> check {
+  //     response.status shouldBe BadRequest
+  //     contentType shouldBe `application/json`
+  //   }
+
+  // val projectNameTooLong = ProjectFactory(name = "Xy" * Settings.maxProjectNameLength, user = 1, startTime = "2001-01-01T00:01:01").get
+
+  // Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${projectNameTooLong}") ~> projectPost ~> check {
+  //     response.status shouldBe PayloadTooLarge
+  //     contentType shouldBe `application/json`
+  //   }
+
+  // val projectNameTooShort = ProjectFactory(name = "", user = 1, startTime = "2001-01-01T00:01:01").get
+  
+  // Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${projectNameTooShort}") ~> projectPost ~> check {
+  //     response.status shouldBe BadRequest
+  //     contentType shouldBe `application/json`
+  //   }
     
-  val taskNameTooLong = TaskFactory(key = 1, 
-                          name = "Xy" * Settings.maxTaskNameLength, 
-                          user = 1, 
-                          startTime = "2000-01-01T00:01:01", 
-                          endTime = "2000-02-01T00:01:01", 
-                          project = 1, 
-                          volume = -1, 
-                          comment = "Test").get;
+  // val taskNameTooLong = TaskFactory(key = 1, 
+  //                         name = "Xy" * Settings.maxTaskNameLength, 
+  //                         user = 1, 
+  //                         startTime = "2000-01-01T00:01:01", 
+  //                         endTime = "2000-02-01T00:01:01", 
+  //                         project = 1, 
+  //                         volume = -1, 
+  //                         comment = "Test").get;
 
-  Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${taskNameTooLong}") ~> taskPost ~> check {
-      response.status shouldBe PayloadTooLarge
-      contentType shouldBe `application/json`
-    }
+  // Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${taskNameTooLong}") ~> taskPost ~> check {
+  //     response.status shouldBe PayloadTooLarge
+  //     contentType shouldBe `application/json`
+  //   }
 
-  val taskNameTooShort = TaskFactory(key = 1, 
-                          name = "", 
-                          user = 1, 
-                          startTime = "2000-01-01T00:01:01", 
-                          endTime = "2000-02-01T00:01:01", 
-                          project = 1, 
-                          volume = -1, 
-                          comment = "Test").get;
+  // val taskNameTooShort = TaskFactory(key = 1, 
+  //                         name = "", 
+  //                         user = 1, 
+  //                         startTime = "2000-01-01T00:01:01", 
+  //                         endTime = "2000-02-01T00:01:01", 
+  //                         project = 1, 
+  //                         volume = -1, 
+  //                         comment = "Test").get;
 
-  Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${taskNameTooShort}") ~> taskPost ~> check {
-      response.status shouldBe BadRequest
-      contentType shouldBe `application/json`
-    }
+  // Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${taskNameTooShort}") ~> taskPost ~> check {
+  //     response.status shouldBe BadRequest
+  //     contentType shouldBe `application/json`
+  //   }
   
-  val taskCommentTooLong = TaskFactory(key = 1, 
-                          name = "Test", 
-                          user = 1, 
-                          startTime = "2000-01-01T00:01:01", 
-                          endTime = "2000-02-01T00:01:01", 
-                          project = 1, 
-                          volume = -1, 
-                          comment = "Xy" * Settings.maxTaskCommentLength).get;
+  // val taskCommentTooLong = TaskFactory(key = 1, 
+  //                         name = "Test", 
+  //                         user = 1, 
+  //                         startTime = "2000-01-01T00:01:01", 
+  //                         endTime = "2000-02-01T00:01:01", 
+  //                         project = 1, 
+  //                         volume = -1, 
+  //                         comment = "Xy" * Settings.maxTaskCommentLength).get;
   
-  Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${taskCommentTooLong}") ~> taskPost ~> check {
-      response.status shouldBe PayloadTooLarge
-      contentType shouldBe `application/json`
-    }
+  // Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${taskCommentTooLong}") ~> taskPost ~> check {
+  //     response.status shouldBe PayloadTooLarge
+  //     contentType shouldBe `application/json`
+  //   }
 
-  val taskNoIsoDatetime = TaskFactory(key = 1, 
-                          name = "Test", 
-                          user = 1, 
-                          startTime = "1st January 2000", 
-                          endTime = "2000-02-01T00:01:01", 
-                          project = 1, 
-                          volume = -1, 
-                          comment = "Test").get;
+  // val taskNoIsoDatetime = TaskFactory(key = 1, 
+  //                         name = "Test", 
+  //                         user = 1, 
+  //                         startTime = "1st January 2000", 
+  //                         endTime = "2000-02-01T00:01:01", 
+  //                         project = 1, 
+  //                         volume = -1, 
+  //                         comment = "Test").get;
   
-  Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${taskNoIsoDatetime}") ~> taskPost ~> check {
-      response.status shouldBe BadRequest
-      contentType shouldBe `application/json`
-    }
+  // Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${taskNoIsoDatetime}") ~> taskPost ~> check {
+  //     response.status shouldBe BadRequest
+  //     contentType shouldBe `application/json`
+  //   }
 
-  val taskDatesInWrongOrder = TaskFactory(key = 1, 
-                          name = "", 
-                          user = 1, 
-                          startTime = "2000-02-01T00:01:01", 
-                          endTime = "2000-01-01T00:01:01", 
-                          project = 1, 
-                          volume = -1, 
-                          comment = "Test").get;
+  // val taskDatesInWrongOrder = TaskFactory(key = 1, 
+  //                         name = "", 
+  //                         user = 1, 
+  //                         startTime = "2000-02-01T00:01:01", 
+  //                         endTime = "2000-01-01T00:01:01", 
+  //                         project = 1, 
+  //                         volume = -1, 
+  //                         comment = "Test").get;
 
-  Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${taskDatesInWrongOrder}") ~> taskPost ~> check {
-      response.status shouldBe BadRequest
-      contentType shouldBe `application/json`
-    }
-
-  val projectNameTooLong = ProjectFactory(name = "Xy" * Settings.maxProjectNameLength, user = 1, startTime = "2001-01-01T00:01:01").get
-
-  Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${projectNameTooLong}") ~> projectPost ~> check {
-      response.status shouldBe PayloadTooLarge
-      contentType shouldBe `application/json`
-    }
-
-  val projectNameTooShort = ProjectFactory(name = "", user = 1, startTime = "2001-01-01T00:01:01").get
-  
-  Post(s"http://127.0.0.1:8080/${Settings.projectRoute}/${projectNameTooShort}") ~> projectPost ~> check {
-      response.status shouldBe BadRequest
-      contentType shouldBe `application/json`
-    }
-
-  val userNameTooLong = UserFactory(key = 1, uuid = "1", name = "Xy" * Settings.maxUserNameLength).get
-
-  Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${userNameTooLong}") ~> userPost ~> check {
-      response.status shouldBe PayloadTooLarge
-      contentType shouldBe `application/json`
-    }
-
-  val userNameTooShort = UserFactory(key = 1, uuid = "1", name = "").get
-
-  Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${userNameTooShort}") ~> userPost ~> check {
-      response.status shouldBe BadRequest
-      contentType shouldBe `application/json`
-    }
+  // Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${taskDatesInWrongOrder}") ~> taskPost ~> check {
+  //     response.status shouldBe BadRequest
+  //     contentType shouldBe `application/json`
+  //   }
   }
 }
