@@ -27,18 +27,6 @@ trait IsStringBoolean {
   }
 }
 
-// trait ValidateIsoTimeFormat {
-//   def validateIsoTimeFormat (string: String): Boolean =
-//     try {
-//       LocalDateTime.parse(string)
-//       true
-//     }
-//     catch {
-//       case _: Throwable => false
-//     }
-// }
-
-
 trait UserValidators {
   
   def validateUserNameMaxLength(name: String): Boolean = {
@@ -154,7 +142,10 @@ trait InputValidation extends UserValidators with ProjectValidators with TaskVal
             case false => Some(ResponseMessage(StatusCodes.BadRequest.intValue, "End Time is not proper ISO Time"))
             case true => isEarlier(task.startTime, task.endTime) match {
               case false => Some(ResponseMessage(StatusCodes.BadRequest.intValue, "Start Time is later than End Time"))
-              case true => None
+              case true => validateTaskCommentMaxLength(task.comment) match {
+                case false => Some(ResponseMessage(StatusCodes.PayloadTooLarge.intValue, s"Comment is too long. Max. Length: ${Settings.maxTaskCommentLength}"))
+                case true => None
+              }
             }
           }
         }

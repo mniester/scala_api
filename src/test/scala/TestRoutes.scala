@@ -167,66 +167,66 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
       }
     }
 
-  // "Task Methods" should "always return a JSON and proper HTTP Code\n" in {
+  "Task Methods" should "always return a JSON and proper HTTP Code\n" in {
     
-  //   Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask}") ~> taskPost ~> check { // OK
-  //     response.status shouldBe Created
-  //     contentType shouldBe `application/json`
-  //     Await.result(Unmarshal(response).to[TaskModel], Settings.dbWaitingDuration)  shouldBe task
-  //     }
+    Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask}") ~> taskPost ~> check { // OK
+      response.status shouldBe Created
+      contentType shouldBe `application/json`
+      Await.result(Unmarshal(response).to[TaskModel], Settings.dbWaitingDuration)  shouldBe task
+      }
     
-  //   Get(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTaskQuery}") ~> taskGet ~> check {
-  //     response.status shouldBe OK
-  //     contentType shouldBe `application/json`
-  //     Await.result(Unmarshal(response).to[TaskModel], Settings.dbWaitingDuration)  shouldBe task
-  //     }
+    Get(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTaskQuery}") ~> taskGet ~> check {
+      response.status shouldBe OK
+      contentType shouldBe `application/json`
+      Await.result(Unmarshal(response).to[TaskModel], Settings.dbWaitingDuration)  shouldBe task
+      }
     
-  //   Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask}") ~> taskPost ~> check { // fail - Overlapping Task
-  //     response.status shouldBe Accepted
-  //     contentType shouldBe `application/json`
-  //     Await.result(Unmarshal(response).to[TaskModel], Settings.dbWaitingDuration)  shouldBe task
-  //     }
+    Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask}") ~> taskPost ~> check { // fail - Overlapping Task
+      response.status shouldBe Accepted
+      contentType shouldBe `application/json`
+      Await.result(Unmarshal(response).to[TaskModel], Settings.dbWaitingDuration)  shouldBe task
+      }
 
-  //   Get(s"http://127.0.0.1:8080/${Settings.taskRoute}/${task.key}") ~> taskGet ~> check {
-  //     response.status shouldBe BadRequest 
-  //     contentType shouldBe `application/json`
-  //     }
+    Get(s"http://127.0.0.1:8080/${Settings.taskRoute}/${task.key}") ~> taskGet ~> check {
+      response.status shouldBe BadRequest 
+      contentType shouldBe `application/json`
+      }
     
-  //   Get(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTaskNotFound}") ~> taskGet ~> check {
-  //     response.status shouldBe NotFound 
-  //     contentType shouldBe `application/json`
-  //     }
+    Get(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTaskNotFound}") ~> taskGet ~> check {
+      response.status shouldBe NotFound 
+      contentType shouldBe `application/json`
+      }
     
-  //   Get(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTaskWrongQuery}") ~> taskGet ~> check {
-  //     response.status shouldBe Forbidden 
-  //     contentType shouldBe `application/json`
-  //     }
+    Get(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTaskWrongQuery}") ~> taskGet ~> check {
+      response.status shouldBe Forbidden 
+      contentType shouldBe `application/json`
+      }
     
-  //   db.reset; Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask}") ~> taskPost;
+    db.reset; Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask}") ~> taskPost;
     
-  //   Put(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTaskToPut}") ~> taskPut ~> check {
-  //     response.status shouldBe OK
-  //     contentType shouldBe `application/json`
-  //     }
+    Put(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTaskToPut}") ~> taskPut ~> check {
+      response.status shouldBe OK
+      contentType shouldBe `application/json`
+      }
     
-  //   Put(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask1_InvalidUser}") ~> taskPut ~> check {
-  //     response.status shouldBe Accepted
-  //     contentType shouldBe `application/json`
-  //   }
+    Put(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask1_InvalidUser}") ~> taskPut ~> check {
+      response.status shouldBe Accepted
+      contentType shouldBe `application/json`
+    }
 
-  //   Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUser}") ~> userPost;
+    Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUser}") ~> userPost;
 
-  //   Delete(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedDelTask1}") ~> taskDelete ~> check {
-  //     response.status shouldBe OK
-  //     contentType shouldBe `application/json`
-  //     }
+    Delete(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedDelTask1}") ~> taskDelete ~> check {
+      response.status shouldBe OK
+      contentType shouldBe `application/json`
+      }
     
-  //   db.reset; Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask}") ~> taskPost;  Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUser}") ~> userPost;
-  //   Delete(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedDelTask1_InvalidUser}") ~> taskDelete ~> check {
-  //     response.status shouldBe Forbidden
-  //     contentType shouldBe `application/json`
-  //     }
-  //   }
+    db.reset; Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedTask}") ~> taskPost;  Post(s"http://127.0.0.1:8080/${Settings.userRoute}/${codedUser}") ~> userPost;
+    Delete(s"http://127.0.0.1:8080/${Settings.taskRoute}/${codedDelTask1_InvalidUser}") ~> taskDelete ~> check {
+      response.status shouldBe Forbidden
+      contentType shouldBe `application/json`
+      }
+    }
 
   "Project Methods" should "always return a JSON and proper HTTP Code\n" in {
     
@@ -428,9 +428,9 @@ class RoutesTests extends AsyncFlatSpec with Matchers with ScalatestRouteTest {
                           project = 1, 
                           volume = -1, 
                           comment = "Xy" * Settings.maxTaskCommentLength)
-  val encodedTaskCommentTooLongt = JwtCoder.encode(taskCommentTooLong.toJson.toString)
+  val encodedTaskCommentTooLong = JwtCoder.encode(taskCommentTooLong.toJson.toString)
   
-  Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${taskCommentTooLong}") ~> taskPost ~> check {
+  Post(s"http://127.0.0.1:8080/${Settings.taskRoute}/${encodedTaskCommentTooLong}") ~> taskPost ~> check {
       response.status shouldBe PayloadTooLarge
       contentType shouldBe `application/json`
     }
