@@ -20,7 +20,6 @@ import scala.collection.mutable.ArrayBuffer
 
 
 abstract class DBBase {
-  val configFile: Config
   val cursor: Database
   lazy val users = TableQuery[UserSchema]
   lazy val projects = TableQuery[ProjectSchema]
@@ -270,8 +269,7 @@ abstract class DBFacade extends DBBase {
 }
 
 object SQLite extends DBFacade {
-  val configFile = ConfigFactory.parseFile(new File(s"${os.pwd}/src/resources/application.conf"))
-  val cursor = Database.forConfig(path = "", config = configFile.getConfig("db.sqlite3"))
+  val cursor = Settings.sqlite
   def resetSequences: Unit = {
     val resetSequences = sqlu"""UPDATE sqlite_sequence SET seq = 0; VACUUM;"""
     Await.result(cursor.run(resetSequences), Settings.dbWaitingDuration)

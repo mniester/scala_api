@@ -2,10 +2,14 @@ package object Settings {
   import scala.concurrent.duration.Duration
   import java.io.File
   import com.typesafe.config.{Config, ConfigFactory}
+  import slick.basic.BasicBackend
+  import slick.jdbc.SQLiteProfile.api._
 
   import os._
   
   val source: Config = ConfigFactory.parseFile(new File(s"${os.pwd}/src/resources/application.conf"))
+
+  val sqlite = Database.forConfig(path = "", config = source.getConfig("db.sqlite3"))
   
   val minUserNameLength = source.getConfig("length").getInt("minUserNameLength")
   val maxUserNameLength = source.getConfig("length").getInt("maxUserNameLength")
