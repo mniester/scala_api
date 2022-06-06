@@ -11,10 +11,9 @@ import DataModels._
 import DBs.SQLite
 import Validators._
 import Responses._
-import ApiMessages.ResponseMessage
+import MessageModels._
 
-trait JsonProtocols extends DefaultJsonProtocol {
-  implicit val responseMessageFormat = jsonFormat2(ResponseMessage)
+trait JsonProtocols extends DefaultJsonProtocol with ApiMessagesJsonProtocol {
   implicit val userFormat = jsonFormat3(UserModel)
   implicit val projectFormat = jsonFormat5(ProjectModel)
   implicit val taskFormat = jsonFormat9(TaskModel)

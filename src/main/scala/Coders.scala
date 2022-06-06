@@ -4,7 +4,7 @@ import pdi.jwt.{Jwt, JwtAlgorithm}
 import scala.util.{Failure, Success}
 
 import Settings._
-import ApiMessages.ResponseMessage
+import MessageModels.ResponseMessage
 
 
 object JwtCoder {
