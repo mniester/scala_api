@@ -5,7 +5,7 @@
 [z] - failures
 
 1) [x] Move waiting duration to Settings 
-2) [ ] prepare TypeScript test page
+2) [-] prepare TypeScript test page
 3) [>] Add checking to DB data methods
 4) [v] Add routes
     - [x] GET user
@@ -56,12 +56,12 @@
     - [x] get full Project
     - [-] Duration => Period
     - [x] When there can be only one answer (project, User) List => Option
-    - [ ] remove project key from task, when it is a part of Project List
+    - [-] remove project key from task, when it is a part of Project List
     - [x] UUID as user ID
     - [>] only user can delete data
     - [>] only user can modify data
     - [x] checking data author (Task, Project)
-    - [ ] project stats
+    - [-] project stats
     - [x] project filters
     - [x] project sorting
     - [x] task replacing
@@ -75,30 +75,29 @@
         - [x] Add Task
         - [x] Add Project
         - [-] Get Project with Tasks
-    - [ ] Responses
-        - [ ] Users
-            - [ ] ok
-            - [ ] Errors
-                - [ ] GET not in DB
-                - [ ] POST has already used name
-                - [ ] POST Name too long
-                - [ ] POST Name too short
-        - [ ] Tasks
-            - [ ] Ok
-            - [ ] Errors
-                - [ ] tasks are overlapping
-                - [ ] Datetimes are not properly formatted
-                - [ ] start datetime is earlier than end datetime
-                - [ ] Too long Coders
-        - [ ] Projects
-            - [ ] ok
-            - [ ] Errors
-                - [ ] POST has already used name
-                - [ ] POST do not have properly formatted datetime
-                - [ ] POST Name too long
-                - [ ] POST Name too short
-        - [ ] Project with tasks
-            - [ ] ok
+    - [x] Responses
+        - [x] Users
+            - [x] ok
+            - [x] Errors
+                - [x] GET not in DB
+                - [x] POST has already used name
+                - [x] POST Name too long
+                - [x] POST Name too short
+        - [x] Tasks
+            - [x] Ok
+            - [x] Errors
+                - [x] tasks are overlapping
+                - [x] Datetimes are not properly formatted
+                - [x] start datetime is earlier than end datetime
+        - [x] Projects
+            - [x] ok
+            - [x] Errors
+                - [x] POST has already used name
+                - [x] POST do not have properly formatted datetime
+                - [x] POST Name too long
+                - [x] POST Name too short
+        - [x] Project with tasks
+            - [x] GET ok
 7) [x] Choose datetime data type
 8) [z, >] Bug in test("DB - add, get and remove task")
 9) [z] Generalize gets in DB
@@ -109,5 +108,5 @@
 14) [z] replace if/else constructions in DBFacade.getListOfProjects by case/match (data types and methods)
 15) [z] replace if/else constructions in DBFacade.filterProjects by case/match (pattern matching results data flow resembling tree graph,
 which do not resemble actual flow)
-16) [ ] remove race condition in tests
+16) [z] remove race condition in tests
 17) [x] check why reset do not remove projects
