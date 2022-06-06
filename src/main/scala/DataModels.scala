@@ -5,8 +5,6 @@ import java.time.Duration
 
 import DBs.DBFacade
 
-case class ResponseMessage(code: Int, message: String)
-
 abstract class DataModel
 
 abstract class AbstractProjectModel (key: Int, name: String, user: Int, startTime: String, deleteTime: String = "") extends DataModel
